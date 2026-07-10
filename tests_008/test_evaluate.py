@@ -164,9 +164,9 @@ def visualize_and_save(image, boxes, masks, labels, id_to_fdi, save_path):
         for c in range(3):
             colored_mask[:, :, c] = color[c]
         
-        # Overlay mask with alpha 0.4
+        # Overlay mask with alpha 0.2 (80% transparency)
         mask_bool = mask > 0.5
-        img_np[mask_bool] = img_np[mask_bool] * 0.6 + colored_mask[mask_bool] * 0.4
+        img_np[mask_bool] = img_np[mask_bool] * 0.8 + colored_mask[mask_bool] * 0.2
 
     plt.imshow(img_np)
     plt.axis('off')
@@ -184,9 +184,9 @@ def test_evaluate():
     model = get_instance_segmentation_model(num_classes)
     
     # Load weights
-    weight_path = "E:/Github/Dental_008/weights/mask_rcnn_dentex_epoch_30.pth"
+    weight_path = "C:/Users/chema/Github/Dental_008/weights/pretrained/weights/mask_rcnn_dentex_epoch_30.pth"
     if not os.path.exists(weight_path):
-        weight_path = "E:/Github/Dental_008/weights/pretrained/mask_rcnn_dentex_epoch_30.pth"
+        weight_path = "C:/Users/chema/Github/Dental_008/weights/pretrained/weights/mask_rcnn_dentex_epoch_5.pth"
     
     model.load_state_dict(torch.load(weight_path, map_location=device))
     model.to(device)
@@ -201,7 +201,7 @@ def test_evaluate():
     found_mixed = False
     found_deciduous = False
     
-    os.makedirs('E:/Github/Dental_008/reports_archive/images', exist_ok=True)
+    os.makedirs('C:/Users/chema/Github/Dental_Panoramic_Reader/reports_archive/images', exist_ok=True)
 
     with torch.no_grad():
         # Evaluate all images to calculate robust metrics and find cases
@@ -246,13 +246,13 @@ def test_evaluate():
             dent_type = determine_dentition_type(gt_labels, dataset_val.id_to_fdi)
             
             if dent_type == "permanent" and not found_permanent:
-                visualize_and_save(img, pred_boxes, pred_masks, pred_labels, dataset_val.id_to_fdi, "E:/Github/Dental_008/reports_archive/images/eval_permanent.jpg")
+                visualize_and_save(img, pred_boxes, pred_masks, pred_labels, dataset_val.id_to_fdi, "C:/Users/chema/Github/Dental_Panoramic_Reader/reports_archive/images/eval_permanent.jpg")
                 found_permanent = True
             elif dent_type == "mixed" and not found_mixed:
-                visualize_and_save(img, pred_boxes, pred_masks, pred_labels, dataset_val.id_to_fdi, "E:/Github/Dental_008/reports_archive/images/eval_mixed.jpg")
+                visualize_and_save(img, pred_boxes, pred_masks, pred_labels, dataset_val.id_to_fdi, "C:/Users/chema/Github/Dental_Panoramic_Reader/reports_archive/images/eval_mixed.jpg")
                 found_mixed = True
             elif dent_type == "deciduous" and not found_deciduous:
-                visualize_and_save(img, pred_boxes, pred_masks, pred_labels, dataset_val.id_to_fdi, "E:/Github/Dental_008/reports_archive/images/eval_deciduous.jpg")
+                visualize_and_save(img, pred_boxes, pred_masks, pred_labels, dataset_val.id_to_fdi, "C:/Users/chema/Github/Dental_Panoramic_Reader/reports_archive/images/eval_deciduous.jpg")
                 found_deciduous = True
 
     avg_time = total_time / num_eval

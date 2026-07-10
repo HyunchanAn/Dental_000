@@ -15,6 +15,7 @@ def test_pipeline_initialization():
         pipeline = PanoramicPipeline(use_004=False)
         assert pipeline is not None
         assert "008" in pipeline.manager.models
+        assert "008_classifier" in pipeline.manager.models
         assert "002" in pipeline.manager.models
     except Exception as e:
         assert False, f"파이프라인 초기화 중 에러 발생: {e}"
@@ -47,3 +48,40 @@ def test_fdi_mapping_logic():
     # 두 번째 병소는 겹치는 치아가 없으므로 Unknown이어야 함
     assert mapped[1]['lesion_type'] == 'Impacted'
     assert mapped[1]['fdi'] == 'Unknown'
+
+def test_pipeline_deciduous_bypass():
+    """유치 판별 시 003 모듈이 바이패스되는지 검증합니다."""
+    # Dummy mock for testing
+    pipeline = PanoramicPipeline(use_004=False)
+    
+    # We will simulate the run method logic manually for testing
+    dummy_img = np.zeros((800, 800, 3), dtype=np.uint8)
+    
+    # Override the deciduous classifier result for testing
+    import core.interfaces.dental_008 as d008
+    original_func = d008.run_deciduous_classification
+    
+    try:
+        d008.run_deciduous_classification = lambda img, model, device: True
+        
+        # Override other models to return dummy data to avoid long inference
+        original_seg = d008.run_tooth_segmentation
+        d008.run_tooth_segmentation = lambda img, model, device: {'boxes': [], 'masks': [], 'fdi_labels': [], 'scores': []}
+        
+        import core.interfaces.dental_002 as d002
+        original_caries = d002.run_caries_detection
+        d002.run_caries_detection = lambda img, model: {'boxes': [], 'labels': [], 'scores': []}
+        
+        result = pipeline.run(dummy_img)
+        
+        # 검증: has_deciduous가 True이고, 003_bone_loss는 None이어야 함
+        assert result['has_deciduous'] is True
+        assert result['003_bone_loss'] is None
+        assert '008_tooth_data' in result
+        assert '002_lesions' in result
+        
+    finally:
+        # Restore functions
+        d008.run_deciduous_classification = original_func
+        d008.run_tooth_segmentation = original_seg
+        d002.run_caries_detection = original_caries
