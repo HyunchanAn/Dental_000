@@ -1,9 +1,90 @@
-﻿import torch
+import torch
 import cv2
 import numpy as np
 import time
 import os
 import sys
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../../Dental_008/src')))
+import matplotlib.pyplot as plt
+from matplotlib.patches import Rectangle
+from dentex_seg.dataset import DENTEXDataset
+from dentex_seg.model import get_instance_segmentation_model
+
+def compute_iou(box1, box2):
+    # box: [xmin, ymin, xmax, ymax]
+    x1 = max(box1[0], box2[0])
+    y1 = max(box1[1], box2[1])
+    x2 = min(box1[2], box2[2])
+    y2 = min(box1[3], box2[3])
+
+    inter_area = max(0, x2 - x1) * max(0, y2 - y1)
+    box1_area = (box1[2] - box1[0]) * (box1[3] - box1[1])
+    box2_area = (box2[2] - box2[0]) * (box2[3] - box2[1])
+
+    iou = inter_area / float(box1_area + box2_area - inter_area + 1e-6)
+    return iou
+
+def compute_mask_iou(mask1, mask2):
+    inter = np.logical_and(mask1, mask2).sum()
+    union = np.logical_or(mask1, mask2).sum()
+    return inter / float(union + 1e-6)
+
+def determine_dentition_type(labels, id_to_fdi):
+    has_permanent = False
+    has_deciduous = False
+    for lbl in labels:
+        fdi = id_to_fdi.get(lbl.item(), -1)
+        if 11 <= fdi <= 48:
+            has_permanent = True
+        elif 51 <= fdi <= 85:
+            has_deciduous = True
+            
+    if has_permanent and has_deciduous:
+        return "mixed"
+    elif has_permanent and not has_deciduous:
+        return "permanent"
+    elif has_deciduous and not has_permanent:
+        return "deciduous"
+    return "unknown"
+
+def visualize_and_save(image, boxes, masks, labels, id_to_fdi, save_path):
+    # image: [C, H, W] tensor
+    img_np = image.permute(1, 2, 0).cpu().numpy().copy()
+    
+    plt.figure(figsize=(12, 6))
+    plt.imshow(img_np)
+    ax = plt.gca()
+    
+    for i in range(len(boxes)):
+        box = boxes[i].cpu().numpy()
+        mask = masks[i].cpu().numpy()
+        label = labels[i].item()
+        fdi = id_to_fdi.get(label, -1)
+        
+        if fdi == -1:
+            continue
+            
+        # Color: Permanent (11~48) -> Blue, Deciduous (51~85) -> Cyan
+        if 11 <= fdi <= 48:
+            color = np.array([0.0, 0.0, 1.0]) # Blue
+            hex_color = 'blue'
+        elif 51 <= fdi <= 85:
+            color = np.array([0.0, 1.0, 1.0]) # Cyan (泥?줉??
+            hex_color = 'cyan'
+        else:
+            color = np.array([1.0, 0.0, 0.0]) # Red for unknown
+            hex_color = 'red'
+        
+        # Draw Label (centered roughly at the top of the box)
+        ax.text(box[0] + (box[2]-box[0])/2, box[1]-5, str(fdi), color='white', fontsize=10, weight='bold', ha='center', bbox=dict(facecolor=hex_color, alpha=0.5, edgecolor='none', pad=1))
+        
+        # Draw Mask only
+        colored_mask = np.zeros_like(img_np)
+        for c in range(3):
+            colored_mask[:, :, c] = color[c]
+        
+        # Overlay mask with alpha 0.4
+        mask_bool = mask > 0.5
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../../Dental_008/src')))
 import matplotlib.pyplot as plt
 from matplotlib.patches import Rectangle
@@ -93,7 +174,7 @@ def visualize_and_save(image, boxes, masks, labels, id_to_fdi, save_path):
     plt.savefig(save_path, bbox_inches='tight', dpi=150)
     plt.close()
 
-def test_test_evaluate():
+def test_evaluate():
     print("DENTEX E2E ?깅뒫 ?됯? 諛??쒓컖??由ы룷???앹꽦 ?쒖옉...")
     
     device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
@@ -189,4 +270,3 @@ def test_test_evaluate():
 
 if __name__ == "__main__":
     test_evaluate()
-
