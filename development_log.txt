@@ -33,3 +33,17 @@
    - 한계: 부분적인 패치 이미지만으로는 턱뼈의 해부학적 맥락을 학습하지 못해 FP 감소에 실패함(FP: 1180).
 4. **Model v4-HardNegative (진행 예정)**:
    - 경위: 사용자가 직접 수집한 75장의 실제 무치악/임플란트 픽스처 엑스레이를 배경 데이터(빈 라벨)로 병합하여 '처음부터 다시 학습(Train from scratch)' 진행. 기존 가중치의 편향을 초기화하고 강건한 네거티브 특징을 학습할 예정.
+
+- [ĳ   ű  ]
+  - Dental_012(ġٴ  YOLO)  Dental_013( EfficientNet-B0) ű  (git submodule) Panoramic Reader   (pipeline.py)  Ϸ.
+  - Dental_001(ȷθƮ)  UI(tools/app.py) и  帶ũ м(CephalometricAnalyzer)  Ϸ.
+  -  15 丮 README  ȸϸ ʼ  5   н ȯ(RTX 5080 ) ϰ  ũƮ(update_global_readmes.py) . , ġ   ž(000)   (007), ĳ   3 丮 ȯ  ؽƮ  ġ Ϸ.
+  -  CI/CD üũ ũƮ(auto_cicd_check.py)  E2E ׽Ʈ(run_e2e_tests.py) Ͽ Dental_001 (Ruff)  ĳ  OOM Ŵ(model_manager.py)   ߰  .   ȭ(Green) Ȯ.
+  -  ũ̼ǿ Dental_013  Ʒ  .  Ϸ ġ(best.pt)    E2E  .
+
+- [파노라마 리더기 및 신규 모듈 연동]
+  - Dental_012(치근단 병소 YOLO) 및 Dental_013(수복물 EfficientNet-B0) 신규 모듈을 서브모듈(git submodule)로 Panoramic Reader에 편입 및 파이프라인(pipeline.py)에 통합 완료.
+  - Dental_001(세팔로메트릭) 독립 UI(tools/app.py) 분리 및 랜드마크 분석기(CephalometricAnalyzer) 통합 완료.
+  - 모든 15개 레포지토리의 README 문서를 순회하며 필수 뱃지 5종 및 모델 학습 환경(RTX 5080 등) 일괄 갱신 스크립트(update_global_readmes.py) 적용. 단, 가중치 모델이 없는 관제탑(000) 및 데이터 파이프라인(007), 파노라마 리더기 등 3개 레포지토리는 환경 사양 텍스트 제거 조치 완료.
+  - 전역 CI/CD 체크 스크립트(auto_cicd_check.py) 및 E2E 테스트(run_e2e_tests.py) 가동하여 Dental_001 린팅(Ruff) 및 파노라마 리더기 OOM 매니저(model_manager.py) 오류 등 발견 즉시 수정. 전역 파이프라인 안정화(Green) 확인.
+  - 현재 워크스테이션에서 Dental_013 모델 훈련 진행 중. 내일 완료된 가중치(best.pt) 적용 후 최종 E2E 검증 예정.
