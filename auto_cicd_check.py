@@ -10,7 +10,7 @@ repos = [
 base_dir = r'C:\Users\chema\Github'
 
 def run_cmd(cmd, cwd=None):
-    result = subprocess.run(cmd, shell=True, cwd=cwd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+    result = subprocess.run(cmd, shell=True, cwd=cwd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, encoding='utf-8', errors='replace')
     return result.returncode, result.stdout, result.stderr
 
 for repo in repos:
@@ -22,11 +22,11 @@ for repo in repos:
     
     # Check git status
     rc, out, err = run_cmd('git status -s', cwd=repo_path)
-    if out.strip():
+    if out and out.strip():
         print('Changes detected. Committing and pushing...')
         run_cmd('git add .', cwd=repo_path)
         run_cmd('git commit -m "docs: Update README and training environments"', cwd=repo_path)
-        rc, out, err = run_cmd('git push origin main', cwd=repo_path)
+        rc, out, err = run_cmd('git push origin HEAD', cwd=repo_path)
         if rc != 0:
             print(f'Failed to push: {err}')
         else:
@@ -46,10 +46,11 @@ for repo in repos:
                 print(f'gh command failed: {err}')
             break
             
-        lines = out.strip().split('\n')
-        if not lines or 'no runs found' in out.lower() or 'could not find' in out.lower():
+        if not out or not out.strip() or 'no runs found' in out.lower() or 'could not find' in out.lower():
             print('No CI/CD runs found.')
             break
+            
+        lines = out.strip().split('\n')
             
         status_line = lines[0].lower()
         if 'in_progress' in status_line or 'queued' in status_line:
