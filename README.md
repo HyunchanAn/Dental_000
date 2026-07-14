@@ -1,8 +1,10 @@
-﻿![Status](https://img.shields.io/badge/Status-Active-brightgreen) ![Python](https://img.shields.io/badge/Python-3.11%2B-blue) ![Framework](https://img.shields.io/badge/Framework-Pytest-red) ![CI/CD Pipeline](https://img.shields.io/badge/CI%2FCD%20Pipeline-passing-brightgreen?logo=github)
+![Status](https://img.shields.io/badge/Status-v1.0%20Release-brightgreen) ![Python](https://img.shields.io/badge/Python-3.12%2B-blue) ![Backend](https://img.shields.io/badge/Backend-YOLOv8-red) ![UI](https://img.shields.io/badge/UI-Streamlit-orange) ![CI/CD Pipeline](https://img.shields.io/badge/CI%2FCD%20Pipeline-passing-brightgreen?logo=github)
 
 # Dental_000: Centralized Test Repository
 
 ## 개요
+> **[학습 환경 사양]** 실질적 모델 학습은 **RTX 5080 + 라이젠9-6 9900x** 환경에서 진행되었습니다.
+
 **Dental_000** 모듈은 전체 Dental 프로젝트(001 ~ 008)의 품질 보증(QA)과 안정성을 담당하는 중앙 집중형 테스트 코드 저장소입니다. 각 모듈에 분산되어 있던 테스트 코드들을 한 곳에 모아, 통합적인 파이프라인 관리와 E2E 검증을 효율적으로 수행하기 위해 구축되었습니다.
 
 현재 각 프로젝트 모듈에 대한 유닛 테스트(Unit Test) 및 종단간 성능 평가(E2E Evaluation) 스크립트가 모듈별 디렉터리(tests_00X/) 하위에 체계적으로 구성되어 있습니다.

@@ -5,7 +5,7 @@ import time
 repos = [
     'Dental_000', 'Dental_001', 'Dental_002', 'Dental_003', 'Dental_004',
     'Dental_005', 'Dental_006', 'Dental_007', 'Dental_008', 'Dental_009',
-    'Dental_010', 'Dental_Panoramic_Reader'
+    'Dental_010', 'Dental_011', 'Dental_012', 'Dental_013', 'Dental_Panoramic_Reader'
 ]
 base_dir = r'C:\Users\chema\Github'
 
@@ -25,7 +25,7 @@ for repo in repos:
     if out.strip():
         print('Changes detected. Committing and pushing...')
         run_cmd('git add .', cwd=repo_path)
-        run_cmd('git commit -m "Update integration for 008, 009, 010"', cwd=repo_path)
+        run_cmd('git commit -m "docs: Update README and training environments"', cwd=repo_path)
         rc, out, err = run_cmd('git push origin main', cwd=repo_path)
         if rc != 0:
             print(f'Failed to push: {err}')
