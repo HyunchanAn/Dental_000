@@ -49,6 +49,8 @@ def test_fdi_mapping_logic():
     assert mapped[1]['lesion_type'] == 'Impacted'
     assert mapped[1]['fdi'] == 'Unknown'
 
+from unittest.mock import patch
+
 def test_pipeline_deciduous_bypass():
     """유치 판별 시 003 모듈이 바이패스되는지 검증합니다."""
     # Dummy mock for testing
@@ -57,20 +59,17 @@ def test_pipeline_deciduous_bypass():
     # We will simulate the run method logic manually for testing
     dummy_img = np.zeros((800, 800, 3), dtype=np.uint8)
     
-    # Override the deciduous classifier result for testing
-    import core.interfaces.dental_008 as d008
-    original_func = d008.run_deciduous_classification
-    
-    try:
-        d008.run_deciduous_classification = lambda img, model, device: True
+    with patch('core.pipeline.run_deciduous_classification') as mock_deciduous, \
+         patch('core.pipeline.run_tooth_segmentation') as mock_seg, \
+         patch('core.pipeline.run_caries_detection') as mock_caries, \
+         patch('modules.periapical_predictor.PeriapicalPredictorWrapper.predict') as mock_012, \
+         patch('modules.restoration_predictor.RestorationPredictorWrapper.predict') as mock_013:
         
-        # Override other models to return dummy data to avoid long inference
-        original_seg = d008.run_tooth_segmentation
-        d008.run_tooth_segmentation = lambda img, model, device: {'boxes': [], 'masks': [], 'fdi_labels': [], 'scores': []}
-        
-        import core.interfaces.dental_002 as d002
-        original_caries = d002.run_caries_detection
-        d002.run_caries_detection = lambda img, model: {'boxes': [], 'labels': [], 'scores': []}
+        mock_deciduous.return_value = True
+        mock_seg.return_value = {'boxes': [], 'masks': [], 'fdi_labels': [], 'scores': [], 'contours': []}
+        mock_caries.return_value = {'boxes': [], 'labels': [], 'scores': []}
+        mock_012.return_value = {'module_name': 'Dental_012_periapical', 'lesions': []}
+        mock_013.return_value = {'module_name': 'Dental_013_restoration', 'lesions': []}
         
         result = pipeline.run(dummy_img)
         
@@ -79,9 +78,3 @@ def test_pipeline_deciduous_bypass():
         assert result['003_bone_loss'] is None
         assert '008_tooth_data' in result
         assert '002_lesions' in result
-        
-    finally:
-        # Restore functions
-        d008.run_deciduous_classification = original_func
-        d008.run_tooth_segmentation = original_seg
-        d002.run_caries_detection = original_caries
