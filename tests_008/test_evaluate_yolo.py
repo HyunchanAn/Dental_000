@@ -62,7 +62,7 @@ def evaluate_yolo():
     dataset_val = DENTEXDataset(split='val')
     
     # YOLO Model Load
-    weight_path = r"\\rtx4060laptop-hc\Users\chema\Github\Dental_000\runs\segment\runs\segment\hitl_finetune4\weights\best.pt"
+    weight_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../Dental_008/yolov8m-seg.pt'))
     if not os.path.exists(weight_path):
         print(f"Error: {weight_path} not found. Training might not be completed.")
         return

@@ -1,0 +1,9 @@
+Set,Class_ID,Class_Name,Count,Percentage
+train,0,Impacted,623,16.274817136886103
+train,1,Caries,2395,62.565308254963426
+train,2,Periapical Lesion,184,4.806687565308255
+train,3,Deep Caries,626,16.353187042842215
+val,0,Impacted,40,21.978021978021978
+val,1,Caries,101,55.494505494505496
+val,2,Periapical Lesion,9,4.945054945054945
+val,3,Deep Caries,32,17.582417582417584

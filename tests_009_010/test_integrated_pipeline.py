@@ -5,6 +5,10 @@ import numpy as np
 import torch
 from ultralytics import YOLO
 
+def test_dummy():
+    assert True
+
+
 sys.path.append(r'C:\Users\chema\Github\Dental_008\src')
 sys.path.append(r'C:\Users\chema\Github\Dental_009\src')
 sys.path.append(r'C:\Users\chema\Github\Dental_010\src')

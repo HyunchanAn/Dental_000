@@ -1,0 +1,13 @@
+{
+    "timestamp": "2026-05-15 16:26:37",
+    "model_path": "models/best.pt",
+    "data_config": "data.yaml",
+    "split": "val",
+    "metrics": {
+        "mAP50": 0.5495805903092017,
+        "mAP50-95": 0.37281990256758,
+        "precision": 0.5884429491353231,
+        "recall": 0.5304180418041804,
+        "fitness": 0.37281990256758
+    }
+}
