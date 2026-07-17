@@ -1,0 +1,5 @@
+path: //rtx4060laptop-hc/Users/chema/Github/Dental_000/data/yolo_fdi
+train: images/train
+val: images/val
+names:
+  0: tooth
