@@ -31,4 +31,4 @@ jobs:
     - name: Run Global Tests (Pytest)
       run: |
         # Only run unit tests, ignore E2E tests if they require downloading huge weights
-        pytest tests_*/ -v --ignore-glob="*e2e*.py"
+        pytest tests/ -v --ignore-glob="*e2e*.py"
