@@ -1,4 +1,5 @@
-import subprocess, os
+import subprocess
+import os
 repos = ['Dental_000', 'Dental_006', 'Dental_007', 'Dental_011', 'Dental_Panoramic_Reader']
 for r in repos:
     p = os.path.join(r'C:\Users\chema\Github', r)

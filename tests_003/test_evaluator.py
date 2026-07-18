@@ -1,4 +1,3 @@
-import pytest
 from evaluator import Evaluator
 
 def test_evaluator_metrics():

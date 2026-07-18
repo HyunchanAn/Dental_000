@@ -1,6 +1,4 @@
-import pytest
 import numpy as np
-import cv2
 import os
 from dentex_caries import CariesDetector, apply_clahe, assign_quadrant, map_detections_to_quadrants
 

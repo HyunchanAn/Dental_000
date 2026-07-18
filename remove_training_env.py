@@ -1,5 +1,4 @@
 import os
-import re
 
 repos_to_fix = [
     'Dental_000', 'Dental_006', 'Dental_007', 'Dental_011', 'Dental_Panoramic_Reader'

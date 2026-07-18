@@ -73,7 +73,7 @@ with col3:
 img_path = case['image_path']
 try:
     img = Image.open(img_path).convert("RGB")
-except Exception as e:
+except Exception:
     st.error(f"이미지를 불러올 수 없습니다: {img_path}")
     st.stop()
 
@@ -84,7 +84,6 @@ ax.imshow(img)
 current_annotations = st.session_state.corrected_labels.get(img_id_str, case['annotations'])
 
 import numpy as np
-import sys
 # Dental_008 모델을 통한 정밀 마스킹을 위해 YOLO 로드
 try:
     from ultralytics import YOLO

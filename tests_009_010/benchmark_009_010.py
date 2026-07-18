@@ -2,10 +2,7 @@ import sys
 import os
 import cv2
 import time
-import numpy as np
-import torch
 from tqdm import tqdm
-from ultralytics import YOLO
 
 # Add module paths
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))

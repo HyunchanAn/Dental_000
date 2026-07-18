@@ -1,5 +1,4 @@
-import numpy as np
-from typing import List, Dict, Tuple
+from typing import Dict, Tuple
 from sklearn.metrics import mean_absolute_error, r2_score
 
 class Evaluator:

@@ -1,12 +1,10 @@
 import torch
-import cv2
 import numpy as np
 import time
 import os
 import sys
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../../Dental_008/src')))
 import matplotlib.pyplot as plt
-from matplotlib.patches import Rectangle
 from dentex_seg.dataset import DENTEXDataset
 from dentex_seg.model import get_instance_segmentation_model
 import sys
@@ -264,11 +262,11 @@ def test_evaluate():
     print(f"Average Bounding Box IoU (True Positives): {avg_box_iou:.4f}")
     print(f"Average Mask IoU (True Positives): {avg_mask_iou:.4f}")
     print("----------------------------------------")
-    print(f"[Class-Agnostic] (Tooth Detection Only):")
+    print("[Class-Agnostic] (Tooth Detection Only):")
     print(f"  TP: {TP_agnostic}, FP: {FP_agnostic}, FN: {FN_agnostic}")
     print(f"  Precision: {precision_agn:.4f}, Recall: {recall_agn:.4f}, F1: {f1_score_agn:.4f}")
     print("----------------------------------------")
-    print(f"[Class-Aware] (Detection + FDI Classification):")
+    print("[Class-Aware] (Detection + FDI Classification):")
     print(f"  TP: {TP}, FP: {FP}, FN: {FN}")
     print(f"  Precision: {precision:.4f}, Recall: {recall:.4f}, F1: {f1_score:.4f}")
     print("========================================")

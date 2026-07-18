@@ -1,5 +1,4 @@
 import os
-import re
 
 repos = [
     'Dental_000', 'Dental_001', 'Dental_002', 'Dental_003', 'Dental_004',

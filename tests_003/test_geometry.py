@@ -3,7 +3,7 @@ Test Module for Geometry Utilities.
 """
 
 import math
-from utils.geometry import calculate_distance, calculate_rbl, pixel_to_mm
+from utils.geometry import calculate_distance, calculate_rbl
 
 def test_calculate_distance():
     assert math.isclose(calculate_distance((0, 0), (3, 4)), 5.0)
