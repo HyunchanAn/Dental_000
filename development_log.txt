@@ -45,3 +45,11 @@
 - [최종 모델 가중치 업데이트]
   - Dental_013의 100 에포크 목표 학습이 Early Stopping(에포크 26)으로 자동 종료되었음을 확인. 
   - 검증 정확도(Val Acc) 85.76%, 검증 손실(Val Loss) 0.4041 달성된 최종 가중치(best_restoration_model.pth)로 교체 후 E2E 파이프라인 무결성 검증 재완료.
+
+## 2026-07-19
+- [보안 및 아키텍처 대대적 개편]
+- Dental_003: 노출된 .env 파일을 git filter-repo를 이용해 깃 히스토리 근원부터 완전히 삭제 후 강제 푸시 완료.
+- Dental_003, 007, 009, 010, Panoramic_Reader: .gitignore에 data/, *.zip, *.pt, .env 추가하여 의료 데이터 및 가중치 유출 원천 차단.
+- Dental_Panoramic_Reader: setup_env.py에서 허깅페이스 다운로드 실패 시 가짜 파일(dummy)을 생성하던 로직을 제거하고 명시적인 RuntimeError를 발생시키도록 패치하여 런타임 오류 방어망 구축.
+- Dental_008 및 Panoramic_Reader: 중복 가중치(*.pt, *.pth)를 물리적 삭제 후 git filter-repo로 깃 형상 관리 히스토리에서 완벽히 도려내어 대용량 스토리지 다이어트 완료.
+- Dental_002, 005, 012, 014: 방치된 대용량 압축 데이터 파일 중 압축 해제본이 존재하는 원본 압축 파일은 완전 삭제하고, 해제본이 없는 원시 데이터는 Git LFS로 마이그레이션 적용.
