@@ -8,6 +8,23 @@
 
 현재 각 프로젝트 모듈에 대한 유닛 테스트(Unit Test) 및 종단간 성능 평가(E2E Evaluation) 스크립트가 모듈별 디렉터리(tests_00X/) 하위에 체계적으로 구성되어 있습니다.
 
+## 📊 진단 모듈별 성능 지표 (Diagnostic Performance Metrics)
+
+각 진단 보조 AI 모듈별 최신 벤치마크 평가 결과입니다. (본 수치는 원본 리포지토리의 E2E 테스트를 거쳐 도출된 신뢰 가능한 최신 성적입니다.)
+
+| 모듈 | 질환명 (Task) | 민감도(Sensitivity / Recall) | 특이도(Specificity) / 정밀도(Precision) | 기타 지표 |
+| :--- | :--- | :---: | :---: | :--- |
+| **Dental_002** | 치아 우식증 (Caries Detection) | **90.0%** | (정밀도) 36.3% | F1 Score: 0.517 (SAHI 앙상블 적용) |
+| **Dental_003** | 치조골 소실 (Bone Loss) | **87.1%** | (정밀도) 85.0% | 임상 스크리닝용 적합 |
+| **Dental_008** | 치아 인스턴스 분할 (Dentex) | **95.1%** | (정밀도) 12.9% | Box IoU: 0.82 (탐지 민감도 극대화) |
+| **Dental_012** | 치근단 병변 (Periapical Lesion) | **64.3%** | (정밀도) 69.2% | YOLOv11s 적용 (특이도 안정화) |
+| **Dental_013** | 치성 낭종/종양 (Cyst & Tumor) | **90.1%** | (정밀도) 12.3% | EfficientNet 기반 민감도 최적화 세팅 |
+| **Dental_014** | 골다공증 (Osteoporosis) | **73.1%** (C3 기준)<br>**91.5%** (비정상 전체) | **17.6%** (특이도) | Accuracy: 36.0% (모드 붕괴 완치) |
+
+> 💡 **참고 (Metrics Guide)**
+> 객체 탐지(Object Detection) 및 분할(Segmentation)을 수행하는 모듈(002, 003, 008, 012, 013)은 해부학적 특성상 진음성(True Negative)의 면적 정의가 불분명하여 특이도 계산이 무의미합니다. 따라서 임상적 효용성을 대변하는 **정밀도(Precision)**로 대체 기재하였습니다. 
+> 영상 전체를 분류(Classification)하는 014 모듈은 진양성/진음성 판단이 명확하므로 **특이도(Specificity)**를 직접 산출하여 기재했습니다.
+
 ## 폴더 구조
 - tests_001/: Dental_001 (Aariz Cephalometric Dataset) 관련 API 및 모델 평가 테스트
 - tests_002/: Dental_002 (Caries Detection) 관련 모델/파이프라인 평가 테스트
