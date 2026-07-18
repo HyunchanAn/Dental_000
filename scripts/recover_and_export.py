@@ -96,8 +96,8 @@ def master_export():
             print(f"[{module}] Export failed: {e}")
             continue
             
-        # 3. Upload to HyunchanAn HF org and delete local
-        target_repo_id = f"HyunchanAn/{module}"
+        # 3. Upload to chemahc94 HF org and delete local
+        target_repo_id = f"chemahc94/{module}"
         if onnx_path and os.path.exists(onnx_path):
             print(f"[{module}] Uploading {onnx_path} to {target_repo_id}...")
             try:
