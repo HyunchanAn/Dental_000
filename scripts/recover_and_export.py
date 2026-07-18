@@ -96,22 +96,42 @@ def master_export():
             print(f"[{module}] Export failed: {e}")
             continue
             
-        # 3. Upload to chemahc94 HF org and delete local
+        # 3. Upload BOTH .pt and .onnx to chemahc94 HF org, then delete local
         target_repo_id = f"chemahc94/{module}"
-        if onnx_path and os.path.exists(onnx_path):
-            print(f"[{module}] Uploading {onnx_path} to {target_repo_id}...")
+        print(f"[{module}] Migrating to {target_repo_id}...")
+        try:
+            # Create repo if it doesn't exist (assuming user has rights)
+            from huggingface_hub import create_repo
             try:
+                create_repo(repo_id=target_repo_id, exist_ok=True)
+            except Exception as e:
+                pass # Repo might exist or user might not have rights to create, let upload handle it
+
+            # Upload the original .pt backup to our own account
+            if os.path.exists(pt_path):
+                print(f"[{module}] Uploading original {info['filename']} to {target_repo_id}...")
+                api.upload_file(
+                    path_or_fileobj=pt_path,
+                    path_in_repo=f"weights/{os.path.basename(info['filename'])}",
+                    repo_id=target_repo_id,
+                    repo_type="model"
+                )
+
+            # Upload the new .onnx file
+            if onnx_path and os.path.exists(onnx_path):
+                print(f"[{module}] Uploading {onnx_path} to {target_repo_id}...")
                 api.upload_file(
                     path_or_fileobj=onnx_path,
                     path_in_repo="weights/best.onnx",
                     repo_id=target_repo_id,
                     repo_type="model"
                 )
-                print(f"[{module}] Upload successful. Deleting local .pt to save space.")
-                os.remove(pt_path)
-                os.remove(onnx_path)
-            except Exception as e:
-                print(f"[{module}] Upload failed (Make sure repo exists and token is valid): {e}")
+                
+            print(f"[{module}] Migration and upload successful. Deleting local files to save space.")
+            if os.path.exists(pt_path): os.remove(pt_path)
+            if onnx_path and os.path.exists(onnx_path): os.remove(onnx_path)
+        except Exception as e:
+            print(f"[{module}] Upload failed (Make sure repo exists and token is valid): {e}")
 
 if __name__ == "__main__":
     master_export()
