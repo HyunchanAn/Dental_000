@@ -1,4 +1,3 @@
-import os
 from huggingface_hub import HfApi
 
 # The old repos under the live-track organization that we want to delete

@@ -1,6 +1,4 @@
 import os
-import torch
-import urllib.request
 from huggingface_hub import hf_hub_download, HfApi
 
 # Map modules to their original HF backup repos (from setup_env.py) and their architecture types.
@@ -42,7 +40,7 @@ def master_export():
     # Add Dental_Core to path so we can use our ONNX exporters
     sys.path.append(os.path.join(base_dir, "Dental_Core"))
     try:
-        from core.onnx_exporter import export_yolov8_to_onnx, export_classifier_to_onnx
+        from core.onnx_exporter import export_yolov8_to_onnx
     except ImportError:
         print("Please ensure Dental_Core is available.")
         return

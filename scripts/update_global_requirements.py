@@ -1,5 +1,4 @@
 import os
-import glob
 
 def update_requirements():
     base_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
