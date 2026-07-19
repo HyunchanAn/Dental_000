@@ -1,0 +1,45 @@
+[submodule "modules/Dental_001"]
+	path = modules/Dental_001
+	url = https://github.com/HyunchanAn/Dental_001.git
+[submodule "modules/Dental_002"]
+	path = modules/Dental_002
+	url = https://github.com/HyunchanAn/Dental_002.git
+[submodule "modules/Dental_003"]
+	path = modules/Dental_003
+	url = https://github.com/HyunchanAn/Dental_003.git
+[submodule "modules/Dental_004"]
+	path = modules/Dental_004
+	url = https://github.com/HyunchanAn/Dental_004.git
+[submodule "modules/Dental_005"]
+	path = modules/Dental_005
+	url = https://github.com/HyunchanAn/Dental_005.git
+[submodule "modules/Dental_006"]
+	path = modules/Dental_006
+	url = https://github.com/HyunchanAn/Dental_006.git
+[submodule "modules/Dental_007"]
+	path = modules/Dental_007
+	url = https://github.com/HyunchanAn/Dental_007.git
+[submodule "modules/Dental_008"]
+	path = modules/Dental_008
+	url = https://github.com/HyunchanAn/Dental_008.git
+[submodule "modules/Dental_009"]
+	path = modules/Dental_009
+	url = https://github.com/HyunchanAn/Dental_009.git
+[submodule "modules/Dental_010"]
+	path = modules/Dental_010
+	url = https://github.com/HyunchanAn/Dental_010.git
+[submodule "modules/Dental_011"]
+	path = modules/Dental_011
+	url = https://github.com/HyunchanAn/Dental_011.git
+[submodule "modules/Dental_012"]
+	path = modules/Dental_012
+	url = https://github.com/HyunchanAn/Dental_012.git
+[submodule "modules/Dental_013"]
+	path = modules/Dental_013
+	url = https://github.com/HyunchanAn/Dental_013.git
+[submodule "modules/Dental_014"]
+	path = modules/Dental_014
+	url = https://github.com/HyunchanAn/Dental_014.git
+[submodule "modules/Dental_Panoramic_Reader"]
+	path = modules/Dental_Panoramic_Reader
+	url = https://github.com/HyunchanAn/Dental_Panoramic_Reader.git

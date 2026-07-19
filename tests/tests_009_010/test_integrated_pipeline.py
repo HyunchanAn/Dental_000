@@ -7,9 +7,11 @@ def test_dummy():
     assert True
 
 
-sys.path.append(r'C:\Users\chema\Github\Dental_008\src')
-sys.path.append(r'C:\Users\chema\Github\Dental_009\src')
-sys.path.append(r'C:\Users\chema\Github\Dental_010\src')
+import os
+ROOT_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+sys.path.append(os.path.join(ROOT_DIR, 'modules', 'Dental_008', 'src'))
+sys.path.append(os.path.join(ROOT_DIR, 'modules', 'Dental_009', 'src'))
+sys.path.append(os.path.join(ROOT_DIR, 'modules', 'Dental_010', 'src'))
 
 from dentex_seg.dataset import DENTEXDataset
 from numbering.fdi_corrector import correct_fdi_numbers
@@ -48,7 +50,7 @@ def main():
     img_vis = img_bgr.copy()
     
     print('Loading YOLO model...')
-    model = YOLO(r'C:\Users\chema\Github\Dental_000\yolov8m_seg_scratch\weights\best.pt')
+    model = YOLO(os.path.join(ROOT_DIR, 'yolov8m_seg_scratch', 'weights', 'best.pt'))
     
     print('Running YOLO inference...')
     results = model(img_bgr, verbose=False)

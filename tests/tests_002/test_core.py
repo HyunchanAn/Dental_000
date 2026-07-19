@@ -1,3 +1,10 @@
+import sys
+import os
+_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
+_module_path = os.path.join(_root, 'modules', 'Dental_002')
+if _module_path not in sys.path:
+    sys.path.insert(0, _module_path)
+    
 import numpy as np
 import os
 from dentex_caries import CariesDetector, apply_clahe, assign_quadrant, map_detections_to_quadrants

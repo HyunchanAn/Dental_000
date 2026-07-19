@@ -1,3 +1,10 @@
+import sys
+import os
+_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
+_module_path = os.path.join(_root, 'modules', 'Dental_001')
+if _module_path not in sys.path:
+    sys.path.insert(0, _module_path)
+    
 import torch
 from src.landmark.model import UNetHeatmapModel, HeatmapModel
 from src.config import NUM_LANDMARKS

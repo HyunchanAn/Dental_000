@@ -3,7 +3,7 @@ import sys
 import numpy as np
 
 # 파노라마 리더 경로 등록
-reader_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../Dental_Panoramic_Reader"))
+reader_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "modules", "Dental_Panoramic_Reader"))
 if reader_path not in sys.path:
     sys.path.append(reader_path)
 
