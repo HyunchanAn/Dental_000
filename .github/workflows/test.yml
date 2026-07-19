@@ -33,4 +33,10 @@ jobs:
     - name: Run Global Tests (Pytest)
       run: |
         # Only run unit tests, ignore E2E tests if they require downloading huge weights
-        pytest tests/ -v --ignore-glob="*e2e*.py"
+        # Run pytest per-directory to avoid module namespace collisions (e.g., multiple 'src' modules)
+        for dir in tests/tests_*/; do
+          if [ -d "$dir" ]; then
+            echo "Running pytest in $dir"
+            pytest "$dir" -v --ignore-glob="*e2e*.py" || exit 1
+          fi
+        done
