@@ -6,68 +6,63 @@ import argparse
 import numpy as np
 import cv2
 
-# Set up module paths relative to this script
-current_dir = os.path.dirname(os.path.abspath(__file__))
-modules_dir = os.path.abspath(os.path.join(current_dir, '../modules'))
+try:
+    import onnxruntime as ort
+except ImportError:
+    print("Error: onnxruntime is not installed. Please install onnxruntime-gpu.")
+    sys.exit(1)
 
-# Helper function to add submodule paths
-def add_module_path(module_name):
-    path = os.path.join(modules_dir, module_name)
+current_dir = os.path.dirname(os.path.abspath(__file__))
+root_dir = os.path.dirname(current_dir)
+modules_dir = os.path.join(root_dir, 'modules')
+
+# Fix sys.path for Polyrepo environment
+# Add root_dir, modules_dir, and each submodule directory to sys.path
+for path in [root_dir, modules_dir] + [os.path.join(modules_dir, d) for d in os.listdir(modules_dir) if os.path.isdir(os.path.join(modules_dir, d))]:
     if path not in sys.path:
         sys.path.insert(0, path)
 
-add_module_path('Dental_008')
-add_module_path('Dental_002')
-add_module_path('Dental_012')
-add_module_path('Dental_013')
-
 def run_evaluation(data_dir=None):
-    print("Initializing models...")
+    print("Initializing ONNX Runtime engines...")
+    providers = ['CUDAExecutionProvider', 'CPUExecutionProvider']
     
-    # 1. Tooth Segmentation (008)
+    # 1. Tooth Segmentation (008) - ONNX
+    path_008 = os.path.join(modules_dir, 'Dental_008', 'weights', 'yolov8m-seg.onnx')
     try:
-        from Dental_008.src.predict import YOLO as YOLO_008
-        model_008 = YOLO_008(os.path.join(modules_dir, 'Dental_008/weights/yolov8m-seg.pt'))
-        print("Successfully loaded Dental_008 model.")
+        sess_008 = ort.InferenceSession(path_008, providers=providers)
+        print(f"Successfully loaded Dental_008 ONNX model from {path_008}.")
     except Exception as e:
-        print(f"Warning: Failed to load 008 model: {e}")
-        model_008 = None
+        print(f"Warning: Failed to load 008 ONNX model: {e}")
         
-    # 2. Caries Detection (002)
+    # 2. Caries Detection (002) - ONNX
+    path_002 = os.path.join(modules_dir, 'Dental_002', 'models', 'best.onnx')
     try:
-        from Dental_002.src.predict import YOLO as YOLO_002
-        model_002 = YOLO_002(os.path.join(modules_dir, 'Dental_002/models/best.pt'))
-        print("Successfully loaded Dental_002 model.")
+        sess_002 = ort.InferenceSession(path_002, providers=providers)
+        print(f"Successfully loaded Dental_002 ONNX model from {path_002}.")
     except Exception as e:
-        print(f"Warning: Failed to load 002 model: {e}")
-        model_002 = None
+        print(f"Warning: Failed to load 002 ONNX model: {e}")
         
-    # 3. Periapical Detection (012)
+    # 3. Periapical Detection (012) - ONNX
+    path_012 = os.path.join(modules_dir, 'Dental_012', 'models', 'best.onnx')
     try:
-        from Dental_012.src.train import YOLO as YOLO_012
-        model_012 = YOLO_012(os.path.join(modules_dir, 'Dental_012/models/best.pt'))
-        print("Successfully loaded Dental_012 model.")
+        sess_012 = ort.InferenceSession(path_012, providers=providers)
+        print(f"Successfully loaded Dental_012 ONNX model from {path_012}.")
     except Exception as e:
-        print(f"Warning: Failed to load 012 model: {e}")
-        model_012 = None
+        print(f"Warning: Failed to load 012 ONNX model: {e}")
         
-    # 4. Restoration Detection (013)
+    # 4. Restoration Detection (013) - ONNX (Replaces PyTorch .pth)
+    path_013 = os.path.join(modules_dir, 'Dental_013', 'models', 'best_restoration_model.onnx')
     try:
-        import torch
-        # Just checking torch/loading path for 013
-        path_013 = os.path.join(modules_dir, 'Dental_013/models/best_restoration_model.pth')
-        if os.path.exists(path_013):
-            print("Found Dental_013 model.")
-        else:
-            print("Warning: Dental_013 model not found at", path_013)
+        sess_013 = ort.InferenceSession(path_013, providers=providers)
+        print(f"Successfully loaded Dental_013 ONNX model from {path_013}.")
     except Exception as e:
-        print(f"Warning: Failed to load 013 model: {e}")
+        print(f"Warning: Failed to load 013 ONNX model: {e}")
         
-    print(f"\nStarting benchmark on data directory: {data_dir if data_dir else 'Dummy Data'}")
+    print(f"\nStarting ONNX-based benchmark on data directory: {data_dir if data_dir else 'Dummy Data'}")
     time.sleep(1) # Simulate processing time
     
     # Calculate Sensitivity and Specificity (Mocked for testing pipeline)
-    # TODO: Replace with actual dataset evaluation logic using Ground Truths
+    # TODO: Implement actual inference loop using sess_XXX.run(None, {input_name: img_tensor})
     results = {
         "Dental_002": {
             "Module": "Caries Detection",
@@ -101,7 +96,7 @@ def run_evaluation(data_dir=None):
     print(f"Evaluation complete. Results saved to {output_path}")
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description='Run Clinical Evaluation Benchmark')
+    parser = argparse.ArgumentParser(description='Run Clinical Evaluation Benchmark (ONNX Runtime)')
     parser.add_argument('--data_dir', type=str, help='Path to test dataset', default='')
     args = parser.parse_args()
     
