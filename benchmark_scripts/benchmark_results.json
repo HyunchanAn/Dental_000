@@ -1,0 +1,25 @@
+{
+    "Dental_002": {
+        "Module": "Caries Detection",
+        "Sensitivity": 0.89,
+        "Specificity": 0.92,
+        "F1-Score": 0.9
+    },
+    "Dental_012": {
+        "Module": "Periapical Lesion Detection",
+        "Sensitivity": 0.85,
+        "Specificity": 0.88,
+        "F1-Score": 0.86
+    },
+    "Dental_013": {
+        "Module": "Restoration Detection",
+        "Sensitivity": 0.94,
+        "Specificity": 0.96,
+        "F1-Score": 0.95
+    },
+    "Dental_008": {
+        "Module": "Tooth Segmentation",
+        "mAP50": 0.98,
+        "mAP50-95": 0.85
+    }
+}
