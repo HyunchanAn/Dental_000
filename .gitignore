@@ -1,3 +1,8 @@
 
 data/*.json
 data/*.db
+
+# Ignore local weight backups and all weights globally
+*.pt
+*.pth
+*.onnx

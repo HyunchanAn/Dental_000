@@ -40,10 +40,10 @@ def master_export():
     # Add Dental_Core to path so we can use our ONNX exporters
     sys.path.append(os.path.join(base_dir, "Dental_Core"))
     try:
-        from core.onnx_exporter import export_yolov8_to_onnx
+        from dental_core.core.onnx_exporter import export_yolov8_to_onnx
     except ImportError:
         print("Please ensure Dental_Core is available.")
-        return
+        sys.exit(1)
 
     api = HfApi()
 

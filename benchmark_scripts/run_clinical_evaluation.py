@@ -5,7 +5,7 @@ import time
 import argparse
 import numpy as np
 import cv2
-
+from huggingface_hub import hf_hub_download
 try:
     import onnxruntime as ort
 except ImportError:
@@ -26,37 +26,25 @@ def run_evaluation(data_dir=None):
     print("Initializing ONNX Runtime engines...")
     providers = ['CUDAExecutionProvider', 'CPUExecutionProvider']
     
-    # 1. Tooth Segmentation (008) - ONNX
-    path_008 = os.path.join(modules_dir, 'Dental_008', 'weights', 'yolov8m-seg.onnx')
-    try:
-        sess_008 = ort.InferenceSession(path_008, providers=providers)
-        print(f"Successfully loaded Dental_008 ONNX model from {path_008}.")
-    except Exception as e:
-        print(f"Warning: Failed to load 008 ONNX model: {e}")
-        
-    # 2. Caries Detection (002) - ONNX
-    path_002 = os.path.join(modules_dir, 'Dental_002', 'models', 'best.onnx')
-    try:
-        sess_002 = ort.InferenceSession(path_002, providers=providers)
-        print(f"Successfully loaded Dental_002 ONNX model from {path_002}.")
-    except Exception as e:
-        print(f"Warning: Failed to load 002 ONNX model: {e}")
-        
-    # 3. Periapical Detection (012) - ONNX
-    path_012 = os.path.join(modules_dir, 'Dental_012', 'models', 'best.onnx')
-    try:
-        sess_012 = ort.InferenceSession(path_012, providers=providers)
-        print(f"Successfully loaded Dental_012 ONNX model from {path_012}.")
-    except Exception as e:
-        print(f"Warning: Failed to load 012 ONNX model: {e}")
-        
-    # 4. Restoration Detection (013) - ONNX (Replaces PyTorch .pth)
-    path_013 = os.path.join(modules_dir, 'Dental_013', 'models', 'best_restoration_model.onnx')
-    try:
-        sess_013 = ort.InferenceSession(path_013, providers=providers)
-        print(f"Successfully loaded Dental_013 ONNX model from {path_013}.")
-    except Exception as e:
-        print(f"Warning: Failed to load 013 ONNX model: {e}")
+    models_to_load = [
+        ('008', 'chemahc94/Dental-AI-Models', 'Dental_008/yolov8m_best.onnx'),
+        ('002', 'chemahc94/Dental-AI-Models', 'Dental_002/best_refined.onnx'),
+        ('012', 'chemahc94/Dental_012', 'best.onnx'),
+        ('013', 'chemahc94/Dental_013', 'best_restoration_model.onnx')
+    ]
+    
+    sessions = {}
+    for mod_id, repo, filename in models_to_load:
+        try:
+            print(f"Downloading/caching ONNX model for {mod_id} from {repo}...")
+            cached_path = hf_hub_download(repo_id=repo, filename=filename)
+            session = ort.InferenceSession(cached_path, providers=providers)
+            print(f"Successfully loaded Dental_{mod_id} ONNX model from cache.")
+            # [MEMORY REFACTOR] Free the ONNX session immediately after use to prevent OOM
+            del session
+        except Exception as e:
+            print(f"Warning: Failed to load {mod_id} ONNX model: {e}")
+
         
     print(f"\nStarting ONNX-based benchmark on data directory: {data_dir if data_dir else 'Dummy Data'}")
     time.sleep(1) # Simulate processing time
