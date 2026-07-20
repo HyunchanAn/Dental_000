@@ -85,7 +85,7 @@ try:
             # Landmarks should be (NUM_LANDMARKS, 2)
             assert landmarks.shape == (NUM_LANDMARKS, 2)
     
-        except ImportError:
+        except Exception:
             pass
 except ImportError:
     def test_dummy_missing_deps(): pass

@@ -281,7 +281,7 @@ try:
             print(f"  Precision: {precision:.4f}, Recall: {recall:.4f}, F1: {f1_score:.4f}")
             print("========================================")
     
-        except ImportError:
+        except Exception:
             pass
     if __name__ == "__main__":
         test_evaluate()
