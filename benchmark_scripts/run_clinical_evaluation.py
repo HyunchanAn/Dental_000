@@ -3,8 +3,6 @@ import sys
 import json
 import time
 import argparse
-import numpy as np
-import cv2
 from huggingface_hub import hf_hub_download
 try:
     import onnxruntime as ort

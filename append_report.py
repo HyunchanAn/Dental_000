@@ -1,4 +1,3 @@
-import os
 
 filepath = 'onnx_migration_issue_report_20260720.md'
 

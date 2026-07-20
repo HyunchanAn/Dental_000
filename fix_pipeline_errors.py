@@ -1,4 +1,3 @@
-import re
 
 # 1. Fix app.py paths for 012 and 013
 with open('modules/Dental_Panoramic_Reader/app.py', 'r', encoding='utf-8') as f:
