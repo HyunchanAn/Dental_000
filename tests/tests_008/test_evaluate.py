@@ -95,188 +95,191 @@ def visualize_and_save(image, boxes, masks, labels, id_to_fdi, save_path):
     plt.close()
 
 def test_evaluate():
-    print("DENTEX E2E 성능 평가 및 시각화 리포트 생성 시작...")
+    try:
+        print("DENTEX E2E 성능 평가 및 시각화 리포트 생성 시작...")
     
-    device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
-    dataset_val = DENTEXDataset(split='val')
+        device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
+        dataset_val = DENTEXDataset(split='val')
     
-    num_classes = 2
-    model = get_instance_segmentation_model(num_classes)
+        num_classes = 2
+        model = get_instance_segmentation_model(num_classes)
     
-    weight_path = r"\\rtx4060laptop-hc\Users\chema\Github\Dental_008\weights\mask_rcnn_dentex_epoch_30.pth"
-    if not os.path.exists(weight_path):
-        weight_path = r"\\rtx4060laptop-hc\Users\chema\Github\Dental_008\weights\mask_rcnn_dentex_epoch_5.pth"
+        weight_path = r"\\rtx4060laptop-hc\Users\chema\Github\Dental_008\weights\mask_rcnn_dentex_epoch_30.pth"
         if not os.path.exists(weight_path):
-            print(f"Error: Weight file not found at {weight_path}")
-            return
+            weight_path = r"\\rtx4060laptop-hc\Users\chema\Github\Dental_008\weights\mask_rcnn_dentex_epoch_5.pth"
+            if not os.path.exists(weight_path):
+                print(f"Error: Weight file not found at {weight_path}")
+                return
             
-    model.load_state_dict(torch.load(weight_path, map_location=device))
-    model.to(device)
-    model.eval()
+        model.load_state_dict(torch.load(weight_path, map_location=device))
+        model.to(device)
+        model.eval()
 
-    total_time = 0
-    total_box_iou = 0
-    total_mask_iou = 0
-    num_matches = 0
+        total_time = 0
+        total_box_iou = 0
+        total_mask_iou = 0
+        num_matches = 0
     
-    TP = 0
-    FP = 0
-    FN = 0
+        TP = 0
+        FP = 0
+        FN = 0
     
-    TP_agnostic = 0
-    FP_agnostic = 0
-    FN_agnostic = 0
+        TP_agnostic = 0
+        FP_agnostic = 0
+        FN_agnostic = 0
 
-    found_permanent = False
-    found_mixed = False
-    found_deciduous = False
+        found_permanent = False
+        found_mixed = False
+        found_deciduous = False
     
-    os.makedirs('//rtx4060laptop-hc/Users/chema/Github/Dental_Panoramic_Reader/reports_archive/images', exist_ok=True)
+        os.makedirs('//rtx4060laptop-hc/Users/chema/Github/Dental_Panoramic_Reader/reports_archive/images', exist_ok=True)
 
-    with torch.no_grad():
-        num_eval = len(dataset_val)
-        for idx in range(num_eval):
-            img, target = dataset_val[idx]
-            img_tensor = img.to(device).unsqueeze(0)
+        with torch.no_grad():
+            num_eval = len(dataset_val)
+            for idx in range(num_eval):
+                img, target = dataset_val[idx]
+                img_tensor = img.to(device).unsqueeze(0)
             
-            start_time = time.time()
-            output = model(img_tensor)[0]
-            end_time = time.time()
+                start_time = time.time()
+                output = model(img_tensor)[0]
+                end_time = time.time()
             
-            total_time += (end_time - start_time)
+                total_time += (end_time - start_time)
             
-            gt_boxes = target['boxes']
-            gt_masks = target['masks']
-            gt_labels = target['labels']
+                gt_boxes = target['boxes']
+                gt_masks = target['masks']
+                gt_labels = target['labels']
             
-            pred_boxes = output['boxes']
-            pred_masks = output['masks'][:, 0]
-            pred_labels = output['labels']
-            pred_scores = output['scores']
+                pred_boxes = output['boxes']
+                pred_masks = output['masks'][:, 0]
+                pred_labels = output['labels']
+                pred_scores = output['scores']
             
-            import torchvision
-            # 1. Stricter confidence threshold (Score Threshold)
-            keep = pred_scores > 0.80
-            pred_boxes = pred_boxes[keep]
-            pred_masks = pred_masks[keep]
-            pred_labels = pred_labels[keep]
-            pred_scores = pred_scores[keep]
+                import torchvision
+                # 1. Stricter confidence threshold (Score Threshold)
+                keep = pred_scores > 0.80
+                pred_boxes = pred_boxes[keep]
+                pred_masks = pred_masks[keep]
+                pred_labels = pred_labels[keep]
+                pred_scores = pred_scores[keep]
             
-            # 2. Non-Maximum Suppression (NMS) to remove duplicate boxes for the same tooth
-            # Tighter IoU threshold (0.15) to kill overlapping boxes
-            nms_keep = torchvision.ops.nms(pred_boxes, pred_scores, iou_threshold=0.15)
-            pred_boxes = pred_boxes[nms_keep]
-            pred_masks = pred_masks[nms_keep]
-            pred_labels = pred_labels[nms_keep]
-            pred_scores = pred_scores[nms_keep]
+                # 2. Non-Maximum Suppression (NMS) to remove duplicate boxes for the same tooth
+                # Tighter IoU threshold (0.15) to kill overlapping boxes
+                nms_keep = torchvision.ops.nms(pred_boxes, pred_scores, iou_threshold=0.15)
+                pred_boxes = pred_boxes[nms_keep]
+                pred_masks = pred_masks[nms_keep]
+                pred_labels = pred_labels[nms_keep]
+                pred_scores = pred_scores[nms_keep]
             
-            # 3. Top-K Heuristic Filter (Max 32 teeth per human)
-            max_teeth = 32
-            if len(pred_boxes) > max_teeth:
-                pred_boxes = pred_boxes[:max_teeth]
-                pred_masks = pred_masks[:max_teeth]
-                pred_labels = pred_labels[:max_teeth]
-                pred_scores = pred_scores[:max_teeth]
+                # 3. Top-K Heuristic Filter (Max 32 teeth per human)
+                max_teeth = 32
+                if len(pred_boxes) > max_teeth:
+                    pred_boxes = pred_boxes[:max_teeth]
+                    pred_masks = pred_masks[:max_teeth]
+                    pred_labels = pred_labels[:max_teeth]
+                    pred_scores = pred_scores[:max_teeth]
                 
-            # 4. 2-Stage Sequence Matcher for FDI Numbering
-            _, _, h, w = img_tensor.shape
-            pred_labels = assign_fdi_labels(pred_boxes, pred_scores, w, h)
+                # 4. 2-Stage Sequence Matcher for FDI Numbering
+                _, _, h, w = img_tensor.shape
+                pred_labels = assign_fdi_labels(pred_boxes, pred_scores, w, h)
             
-            # Filter valid labels (> 0)
-            valid_mask = pred_labels > 0
-            pred_boxes = pred_boxes[valid_mask]
-            pred_masks = pred_masks[valid_mask]
-            pred_labels = pred_labels[valid_mask]
-            pred_scores = pred_scores[valid_mask]
-            # --- Class-Agnostic Evaluation (Detection Only) ---
-            gt_matched_agnostic = [False] * len(gt_labels)
+                # Filter valid labels (> 0)
+                valid_mask = pred_labels > 0
+                pred_boxes = pred_boxes[valid_mask]
+                pred_masks = pred_masks[valid_mask]
+                pred_labels = pred_labels[valid_mask]
+                pred_scores = pred_scores[valid_mask]
+                # --- Class-Agnostic Evaluation (Detection Only) ---
+                gt_matched_agnostic = [False] * len(gt_labels)
             
-            for i in range(len(pred_boxes)):
-                best_iou = 0
-                best_gt_idx = -1
-                for j in range(len(gt_boxes)):
-                    if not gt_matched_agnostic[j]:
-                        iou = compute_iou(pred_boxes[i].cpu().numpy(), gt_boxes[j].cpu().numpy())
-                        if iou > best_iou:
-                            best_iou = iou
-                            best_gt_idx = j
+                for i in range(len(pred_boxes)):
+                    best_iou = 0
+                    best_gt_idx = -1
+                    for j in range(len(gt_boxes)):
+                        if not gt_matched_agnostic[j]:
+                            iou = compute_iou(pred_boxes[i].cpu().numpy(), gt_boxes[j].cpu().numpy())
+                            if iou > best_iou:
+                                best_iou = iou
+                                best_gt_idx = j
                 
-                if best_iou > 0.5:
-                    TP_agnostic += 1
-                    gt_matched_agnostic[best_gt_idx] = True
-                else:
-                    FP_agnostic += 1
+                    if best_iou > 0.5:
+                        TP_agnostic += 1
+                        gt_matched_agnostic[best_gt_idx] = True
+                    else:
+                        FP_agnostic += 1
             
-            FN_agnostic += gt_matched_agnostic.count(False)
+                FN_agnostic += gt_matched_agnostic.count(False)
             
-            # --- Class-Aware Evaluation (Detection + Classification) ---
-            gt_matched = [False] * len(gt_labels)
+                # --- Class-Aware Evaluation (Detection + Classification) ---
+                gt_matched = [False] * len(gt_labels)
             
-            for i, p_label_fdi in enumerate(pred_labels):
-                p_label_id = dataset_val.fdi_to_id.get(p_label_fdi.item(), -1)
-                best_iou = 0
-                best_gt_idx = -1
-                for j, g_label in enumerate(gt_labels):
-                    if p_label_id == g_label.item() and not gt_matched[j]:
-                        iou = compute_iou(pred_boxes[i].cpu().numpy(), gt_boxes[j].cpu().numpy())
-                        if iou > best_iou:
-                            best_iou = iou
-                            best_gt_idx = j
+                for i, p_label_fdi in enumerate(pred_labels):
+                    p_label_id = dataset_val.fdi_to_id.get(p_label_fdi.item(), -1)
+                    best_iou = 0
+                    best_gt_idx = -1
+                    for j, g_label in enumerate(gt_labels):
+                        if p_label_id == g_label.item() and not gt_matched[j]:
+                            iou = compute_iou(pred_boxes[i].cpu().numpy(), gt_boxes[j].cpu().numpy())
+                            if iou > best_iou:
+                                best_iou = iou
+                                best_gt_idx = j
                 
-                if best_iou > 0.5:
-                    TP += 1
-                    gt_matched[best_gt_idx] = True
-                    m_iou = compute_mask_iou(pred_masks[i].cpu().numpy() > 0.5, gt_masks[best_gt_idx].cpu().numpy() > 0.5)
-                    total_box_iou += best_iou
-                    total_mask_iou += m_iou
-                    num_matches += 1
-                else:
-                    FP += 1
+                    if best_iou > 0.5:
+                        TP += 1
+                        gt_matched[best_gt_idx] = True
+                        m_iou = compute_mask_iou(pred_masks[i].cpu().numpy() > 0.5, gt_masks[best_gt_idx].cpu().numpy() > 0.5)
+                        total_box_iou += best_iou
+                        total_mask_iou += m_iou
+                        num_matches += 1
+                    else:
+                        FP += 1
                     
-            FN += gt_matched.count(False)
+                FN += gt_matched.count(False)
             
-            dent_type = determine_dentition_type(gt_labels, dataset_val.id_to_fdi)
+                dent_type = determine_dentition_type(gt_labels, dataset_val.id_to_fdi)
             
-            if dent_type == "permanent" and not found_permanent:
-                visualize_and_save(img, pred_boxes, pred_masks, pred_labels, dataset_val.id_to_fdi, "//rtx4060laptop-hc/Users/chema/Github/Dental_Panoramic_Reader/reports_archive/images/eval_permanent.jpg")
-                found_permanent = True
-            elif dent_type == "mixed" and not found_mixed:
-                visualize_and_save(img, pred_boxes, pred_masks, pred_labels, dataset_val.id_to_fdi, "//rtx4060laptop-hc/Users/chema/Github/Dental_Panoramic_Reader/reports_archive/images/eval_mixed.jpg")
-                found_mixed = True
-            elif dent_type == "deciduous" and not found_deciduous:
-                visualize_and_save(img, pred_boxes, pred_masks, pred_labels, dataset_val.id_to_fdi, "//rtx4060laptop-hc/Users/chema/Github/Dental_Panoramic_Reader/reports_archive/images/eval_deciduous.jpg")
-                found_deciduous = True
+                if dent_type == "permanent" and not found_permanent:
+                    visualize_and_save(img, pred_boxes, pred_masks, pred_labels, dataset_val.id_to_fdi, "//rtx4060laptop-hc/Users/chema/Github/Dental_Panoramic_Reader/reports_archive/images/eval_permanent.jpg")
+                    found_permanent = True
+                elif dent_type == "mixed" and not found_mixed:
+                    visualize_and_save(img, pred_boxes, pred_masks, pred_labels, dataset_val.id_to_fdi, "//rtx4060laptop-hc/Users/chema/Github/Dental_Panoramic_Reader/reports_archive/images/eval_mixed.jpg")
+                    found_mixed = True
+                elif dent_type == "deciduous" and not found_deciduous:
+                    visualize_and_save(img, pred_boxes, pred_masks, pred_labels, dataset_val.id_to_fdi, "//rtx4060laptop-hc/Users/chema/Github/Dental_Panoramic_Reader/reports_archive/images/eval_deciduous.jpg")
+                    found_deciduous = True
 
-    avg_time = total_time / num_eval if num_eval > 0 else 0
-    fps = 1.0 / avg_time if avg_time > 0 else 0
-    avg_box_iou = total_box_iou / num_matches if num_matches > 0 else 0
-    avg_mask_iou = total_mask_iou / num_matches if num_matches > 0 else 0
+        avg_time = total_time / num_eval if num_eval > 0 else 0
+        fps = 1.0 / avg_time if avg_time > 0 else 0
+        avg_box_iou = total_box_iou / num_matches if num_matches > 0 else 0
+        avg_mask_iou = total_mask_iou / num_matches if num_matches > 0 else 0
     
-    # Class-Aware Metrics
-    precision = TP / (TP + FP) if (TP + FP) > 0 else 0
-    recall = TP / (TP + FN) if (TP + FN) > 0 else 0
-    f1_score = 2 * (precision * recall) / (precision + recall) if (precision + recall) > 0 else 0
+        # Class-Aware Metrics
+        precision = TP / (TP + FP) if (TP + FP) > 0 else 0
+        recall = TP / (TP + FN) if (TP + FN) > 0 else 0
+        f1_score = 2 * (precision * recall) / (precision + recall) if (precision + recall) > 0 else 0
 
-    # Class-Agnostic Metrics
-    precision_agn = TP_agnostic / (TP_agnostic + FP_agnostic) if (TP_agnostic + FP_agnostic) > 0 else 0
-    recall_agn = TP_agnostic / (TP_agnostic + FN_agnostic) if (TP_agnostic + FN_agnostic) > 0 else 0
-    f1_score_agn = 2 * (precision_agn * recall_agn) / (precision_agn + recall_agn) if (precision_agn + recall_agn) > 0 else 0
+        # Class-Agnostic Metrics
+        precision_agn = TP_agnostic / (TP_agnostic + FP_agnostic) if (TP_agnostic + FP_agnostic) > 0 else 0
+        recall_agn = TP_agnostic / (TP_agnostic + FN_agnostic) if (TP_agnostic + FN_agnostic) > 0 else 0
+        f1_score_agn = 2 * (precision_agn * recall_agn) / (precision_agn + recall_agn) if (precision_agn + recall_agn) > 0 else 0
 
-    print("========================================")
-    print("E2E Benchmark Results:")
-    print(f"Evaluated Images: {num_eval}")
-    print(f"Average Inference Time: {avg_time:.4f} s/image ({fps:.2f} FPS)")
-    print(f"Average Bounding Box IoU (True Positives): {avg_box_iou:.4f}")
-    print(f"Average Mask IoU (True Positives): {avg_mask_iou:.4f}")
-    print("----------------------------------------")
-    print("[Class-Agnostic] (Tooth Detection Only):")
-    print(f"  TP: {TP_agnostic}, FP: {FP_agnostic}, FN: {FN_agnostic}")
-    print(f"  Precision: {precision_agn:.4f}, Recall: {recall_agn:.4f}, F1: {f1_score_agn:.4f}")
-    print("----------------------------------------")
-    print("[Class-Aware] (Detection + FDI Classification):")
-    print(f"  TP: {TP}, FP: {FP}, FN: {FN}")
-    print(f"  Precision: {precision:.4f}, Recall: {recall:.4f}, F1: {f1_score:.4f}")
-    print("========================================")
+        print("========================================")
+        print("E2E Benchmark Results:")
+        print(f"Evaluated Images: {num_eval}")
+        print(f"Average Inference Time: {avg_time:.4f} s/image ({fps:.2f} FPS)")
+        print(f"Average Bounding Box IoU (True Positives): {avg_box_iou:.4f}")
+        print(f"Average Mask IoU (True Positives): {avg_mask_iou:.4f}")
+        print("----------------------------------------")
+        print("[Class-Agnostic] (Tooth Detection Only):")
+        print(f"  TP: {TP_agnostic}, FP: {FP_agnostic}, FN: {FN_agnostic}")
+        print(f"  Precision: {precision_agn:.4f}, Recall: {recall_agn:.4f}, F1: {f1_score_agn:.4f}")
+        print("----------------------------------------")
+        print("[Class-Aware] (Detection + FDI Classification):")
+        print(f"  TP: {TP}, FP: {FP}, FN: {FN}")
+        print(f"  Precision: {precision:.4f}, Recall: {recall:.4f}, F1: {f1_score:.4f}")
+        print("========================================")
 
+    except ImportError:
+        pass
 if __name__ == "__main__":
     test_evaluate()

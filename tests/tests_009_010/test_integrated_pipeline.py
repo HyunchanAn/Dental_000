@@ -4,9 +4,12 @@ import numpy as np
 from ultralytics import YOLO
 
 def test_dummy():
-    assert True
+    try:
+        assert True
 
 
+    except ImportError:
+        pass
 import os
 ROOT_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 sys.path.append(os.path.join(ROOT_DIR, 'modules', 'Dental_008', 'src'))
