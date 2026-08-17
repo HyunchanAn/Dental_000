@@ -70,3 +70,10 @@ python -m pytest C:\경로\Dental_000\tests_001
 ```bash
 PYTHONPATH=/경로/Dental_001 pytest /경로/Dental_000/tests_001/ -v
 ```
+
+## 연구용 실행 주의사항
+- 기본 실행 주소: 127.0.0.1 (로컬 전용)
+- 외부 공개/상용 배포 금지
+- API 키·토큰은 환경변수로만 관리
+- 오픈 데이터셋 외 민감 의료데이터 사용 금지
+- 외부 접근이 필요하면 ALLOW_EXTERNAL_ACCESS=true 로만 명시적 허용

@@ -6,3 +6,11 @@ data/*.db
 *.pt
 *.pth
 *.onnx
+
+# Security & Hygiene
+.env
+*.pt
+*.pth
+*.onnx
+__pycache__/
+.venv/
