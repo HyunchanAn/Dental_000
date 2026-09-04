@@ -14,3 +14,7 @@ data/*.db
 *.onnx
 __pycache__/
 .venv/
+
+runs/
+data/caries_patches/
+data/caries_patches_split/
