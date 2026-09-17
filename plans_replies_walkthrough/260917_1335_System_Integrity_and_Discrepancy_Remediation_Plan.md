@@ -718,3 +718,59 @@ Ultralytics `YOLO.predict(source=patch, imgsz=512)` 엔진은 원본 이미지(�
 | 독립 전문 서브 제품군 | Dental_001, 005, 006, 007 | `origin/main` | 없음 (완전 삭제) |
 
 이제 GitHub 웹 인터페이스에서 어떤 저장소를 접근하더라도 최신 코드와 문서가 즉각 노출됩니다.
+
+
+---
+
+# [ 랩탑 개발팀 260917 1630 잔여 브랜치 완전 삭제 및 18개 전 리포지토리 main 단일화 종결 보고 ]
+
+수신: 프로젝트 오너 (안현찬)
+발신: 랩탑 개발팀 (HyunchanAn Workstation Dev Engine)
+일자: 2026-09-17 16:30:00 KST
+문서 상태: 오너 승인에 따른 잔여 non-main 브랜치 전면 영구 삭제 및 CI/CD 워크플로우 정돈 완결
+
+---
+
+## 1. 잔여 브랜치 영구 삭제 및 프룬 집행 결과
+
+오너의 "그렇게 하자." 승인에 따라, 사전 정밀 실측을 거친 3개 저장소의 비활성 레거시 브랜치들을 영구 삭제 및 프룬 처리 완료하였습니다:
+
+1. [Dental_002]:
+   - 로컬 `feature/preprocessing-standardization` 영구 삭제 완료 (코드 diff 0줄 확인).
+   - 원격 `origin/feature/pediatric-data-integration` 영구 삭제 완료 (2026-05-15 main에 이미 완전 머지된 브랜치).
+2. [Dental_003]:
+   - 로컬 및 원격 `feature/ui-revamp-interactive` 영구 삭제 완료 (소스 코드 diff 0줄, 3개월 전 README 텍스트 변경분 잔재).
+3. [Dental_006]:
+   - 원격 `origin/dependabot/github_actions/actions/cache-6` 및 `checkout-7` 프룬 완료 (미머지 방치 Dependabot 잔재 완전 제거).
+4. [Dental_000]:
+   - `.github/workflows/test.yml`의 트리거 브랜치에서 삭제된 `master` 참조를 제거하고 `branches: [ "main" ]`으로 정합성 정돈 완료.
+
+---
+
+## 2. 전체 18개 저장소 형상 무결성 최종 실측 검증 표
+
+`Dental_000` ~ `Dental_015` (16개), `Dental_Core` (1개), `Dental_Panoramic_Reader` (1개) 총 18개 전 리포지토리 전수 스캔 실측 결과:
+
+| 번호 | 저장소 이름 | Local Branch | Remote HEAD & Tracking | Non-main 잔여 여부 |
+| :---: | :--- | :---: | :---: | :---: |
+| 1 | Dental_000 | `main` | `origin/HEAD -> origin/main` | 없음 (100% main ONLY) |
+| 2 | Dental_001 | `main` | `origin/HEAD -> origin/main` | 없음 (100% main ONLY) |
+| 3 | Dental_002 | `main` | `origin/HEAD -> origin/main` | 없음 (100% main ONLY) |
+| 4 | Dental_003 | `main` | `origin/HEAD -> origin/main` | 없음 (100% main ONLY) |
+| 5 | Dental_004 | `main` | `origin/HEAD -> origin/main` | 없음 (100% main ONLY) |
+| 6 | Dental_005 | `main` | `origin/HEAD -> origin/main` | 없음 (100% main ONLY) |
+| 7 | Dental_006 | `main` | `origin/HEAD -> origin/main` | 없음 (100% main ONLY) |
+| 8 | Dental_007 | `main` | `origin/HEAD -> origin/main` | 없음 (100% main ONLY) |
+| 9 | Dental_008 | `main` | `origin/HEAD -> origin/main` | 없음 (100% main ONLY) |
+| 10 | Dental_009 | `main` | `origin/HEAD -> origin/main` | 없음 (100% main ONLY) |
+| 11 | Dental_010 | `main` | `origin/HEAD -> origin/main` | 없음 (100% main ONLY) |
+| 12 | Dental_011 | `main` | `origin/HEAD -> origin/main` | 없음 (100% main ONLY) |
+| 13 | Dental_012 | `main` | `origin/HEAD -> origin/main` | 없음 (100% main ONLY) |
+| 14 | Dental_013 | `main` | `origin/HEAD -> origin/main` | 없음 (100% main ONLY) |
+| 15 | Dental_014 | `main` | `origin/HEAD -> origin/main` | 없음 (100% main ONLY) |
+| 16 | Dental_015 | `main` | `origin/HEAD -> origin/main` | 없음 (100% main ONLY) |
+| 17 | Dental_Core | `main` | `origin/HEAD -> origin/main` | 없음 (100% main ONLY) |
+| 18 | Dental_Panoramic_Reader | `main` | `origin/HEAD -> origin/main` | 없음 (100% main ONLY) |
+
+[판정 결과]:
+전체 18개 저장소 모두 non-main 브랜치 잔여가 정확히 0건이며, 전역 생태계가 `origin/main` 단일 브랜치 체계로 100% 일원화 완료되었습니다.
