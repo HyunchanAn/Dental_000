@@ -229,3 +229,7 @@
 - 000~015(16개), Core(1개), Reader(1개) 총 18개 전 리포지토리의 브랜치 전수 실측 완료: 잔여 non-main 브랜치 0건, 100% origin/main 단일 브랜치 체계 구축 완결
 - 외부 리뷰어의 캔버스 2:1 강제 스트레치 왜곡, 목업 데이터 오버레이 혼선, 치아 바운딩 박스 클램핑 정밀도 지적 전면 수용
 - 신규 개선 계획서(260917_1635_Canvas_Letterbox_and_Coordinate_Pipeline_Remediation_Plan.md) 작성 완료 (4대 실행 트랙: 캔버스 Letterbox 종횡비 보존 렌더링, API 실패 시 Mock 오버레이 차단, Dental_002 치아 경계 타이트 클램핑 및 ONNX 가드, 대시보드 014 MOCK 뱃지 명시)
+- 오너 조건부 승인 지시서(260917 1640) 수용 및 자동 스케일 보정 배제 조치 완료
+- Dental_015(커밋 fde87af): PanoramaCanvasViewer 캔버스 Letterbox 원본 종횡비 보존 렌더링 구현 및 비트맵-메타데이터 해상도 불일치 방어망 구축, App.tsx 파일 업로드 시 Mock 즉시 리셋 및 API 실패 시 Mock 오버레이 영구 차단, 데모 샘플 버튼 분리, 골다공증 카드 MOCK 동적 뱃지 반영 완료
+- Dental_Panoramic_Reader(커밋 e8d5aba): dental_002.py 치아 BBox 기준 5% 안전 마진 타이트 클램핑 및 ONNX 패치 크기 초과 시 자동 보정 없이 즉시 skip하는 런타임 가드 구축 완료
+- 260917_1635 계획서 하단에 [랩탑 개발팀 260917 1705 레터박스·mock 격리 증빙 보고] 기술적 실측 보고서 결합 완료
