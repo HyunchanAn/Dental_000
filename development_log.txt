@@ -1,4 +1,4 @@
-﻿## 2026-07-14
+## 2026-07-14
 - Dental_008 모듈(Instance Segmentation) RTX 5080 환경에서 재학습 완료
 - 배치 사이즈 8, num_workers 8, AMP 적용으로 속도 대폭 개선 (10.9GB 데이터 약 1시간 소요)
 - 학습 완료 후 Epoch 30 가중치(Loss: 0.3136)로 검증 수행
@@ -233,3 +233,7 @@
 - Dental_015(커밋 fde87af): PanoramaCanvasViewer 캔버스 Letterbox 원본 종횡비 보존 렌더링 구현 및 비트맵-메타데이터 해상도 불일치 방어망 구축, App.tsx 파일 업로드 시 Mock 즉시 리셋 및 API 실패 시 Mock 오버레이 영구 차단, 데모 샘플 버튼 분리, 골다공증 카드 MOCK 동적 뱃지 반영 완료
 - Dental_Panoramic_Reader(커밋 e8d5aba): dental_002.py 치아 BBox 기준 5% 안전 마진 타이트 클램핑 및 ONNX 패치 크기 초과 시 자동 보정 없이 즉시 skip하는 런타임 가드 구축 완료
 - 260917_1635 계획서 하단에 [랩탑 개발팀 260917 1705 레터박스·mock 격리 증빙 보고] 기술적 실측 보고서 결합 완료
+- 메인 워크스테이션 캔버스 레터박스 및 모의 데이터 격리 개선(260917_1635) 실측 기술 감사 완결: 커밋 fde87af(Dental_015) 캔버스 Letterbox 종횡비 유지(drawWidth 1200, drawHeight 553.85, offsetY 23.08) 및 오버레이 동기화, API 에러 시 mock 격리 및 에러 배너 표출, Dental_014 동적 MOCK 뱃지 바인딩 무결성 확인
+- 커밋 e8d5aba(Dental_Panoramic_Reader) 치아 BBox 기준 5% 안전 마진 타이트 클램핑 및 ONNX 비정상 좌표 skip 가드 검증 완료
+- 전역 파이프라인 최종 판정: [CONDITIONAL HOLD] 유지 (오너 지침에 따라 전역 PASS 선언 배제, 기술 감사 판정 [TECH AUDIT VERIFIED] 확정 및 오너 체어사이드 최종 임상 UAT 대기 통보)
+- 260917_1635 계획서 하단에 [메인 워크스테이션 260917 1720 캔버스 레터박스 및 모의 데이터 격리 실측 감사 회신서] 결합 완료
