@@ -363,3 +363,9 @@
   - Dental_Panoramic_Reader(커밋 92e74b4): api_server.py use_004 파라미터 상태에 따라 preprocessing_id(PRE-VISTA-AUTO-LETTERBOX-SWINIR004-v1 / PRE-VISTA-AUTO-LETTERBOX-v1) 동적 바인딩 구현
   - Dental_015(커밋 428b37f): .github/workflows/ci.yml 신규 구축하여 프론트엔드 GitHub Actions CI 자동화 구축, PanoramaCanvasViewer.tsx 캔버스 메타데이터 바에 SHA-256 해시 및 전처리 ID 뱃지 시각화 바인딩
   - 260928_0036 보고서 하단에 [260928 0210 랩탑 개발팀 기술 조치 완결 보고서] 결합 완료
+- Codex 0211 재검수 지적 전면 수용 및 캔버스 실시간 SHA-256 해시 대조 오버레이 차단 가드 완결:
+  - Dental_015(커밋 7a6a5bc): PanoramaCanvasViewer.tsx에 Web Crypto API(crypto.subtle.digest) 기반 실시간 SHA-256 계산 및 리포트 메타데이터 해시 대조 런타임 가드 구현 완료. 이미지 해시 불일치 시 바운딩 박스/폴리곤/라벨 오버레이 즉시 차단 및 적색 보안 경고 배너 표출, 프로덕션 빌드(npm run build) 무결성 통과 및 원격 origin/main 푸시 완료
+  - Dental_Panoramic_Reader 하위 서브모듈(modules/Dental_002~014) dirty 상태 전수 점검 및 git submodule 원복 처리를 통해 100% clean 상태 복구 완료
+  - 18개 전 저장소 로컬 작업 트리 100% clean 상태 및 원격 동기화 무결성 확보
+  - 임상 관점 팩트 정립: YOLO Prior 결합 및 결손치 저검출 가드(< 8)는 1차 기술적 안전 가드이며, 원본 영상 기반 전문의 블라인드 시각 UAT 전까지 '완전 해결' 과장을 배제하고 [기술적 안전 가드 구축 완료 및 임상 UAT 대기] 상태로 규정
+  - 260928_0036 보고서 하단에 [260928 0220 랩탑 개발팀 Codex 0211 재검수 수용 및 캔버스 SHA-256 오버레이 차단 가드 완결 보고] 결합 완료
