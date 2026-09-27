@@ -348,3 +348,9 @@
   - Dental_008/src/numbering/fdi_corrector.py 기하학적 강제 덮어쓰기로 인한 도미노 번호 밀림 결함 인정 및 모델 신뢰도 기반 하이브리드 보정/충돌 시 uncertain 처리 설계 수립
   - Dental_Panoramic_Reader/modules/dental_010_heuristic.py 치아 미검출 시 32개 전체 결손 확정 버그 및 고정 비율(0.65) 취약점 확인, 최소 치아 수 가드 탑재 계획 수립
   - Dental_015 모의 데이터(Mock) DEMO 고정 배너 부각 및 백엔드 SSOT SHA-256 해시 바인딩 보안 가드 추진
+- Codex 260928_0036 조사 보고서 지적 결함 4건 실코드 구현 및 전 저장소 배포 완결:
+  - Dental_Panoramic_Reader(커밋 49616c3): dental_010_heuristic.py 치아 0개 검출 시 32개 전체 결손 확정 버그 시정(빈 배열 반환) 및 최소 치아수 가드(< 8) 구현, 단위 테스트 100% 통과
+  - Dental_008(커밋 a705239): fdi_corrector.py 기하 DP 정렬에 YOLO 예측 라벨 Prior 보너스(-4.0) 및 사분악 구속 결합하여 도미노 번호 밀림 방어 완결, 양악 검증 완료
+  - Dental_015(커밋 21cc304): App.tsx 캔버스 상단 상시 고정 [DEMO / MOCK SAMPLE DATA] 경고 배너 탑재로 실추론과의 시각적 혼선 원천 차단, 프로덕션 빌드 통과
+  - Dental_001(커밋 5af8916): .env.example 보안 베이스라인 템플릿 신규 생성 및 README 내 키 요청 문구를 안전한 환경변수 관리 가이드로 개정
+- 260928_0036 보고서 하단에 [260928 0120 랩탑 개발팀 기술 개선 조치 완결 보고서] 결합 완료
