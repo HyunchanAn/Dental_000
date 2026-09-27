@@ -354,3 +354,7 @@
   - Dental_015(커밋 21cc304): App.tsx 캔버스 상단 상시 고정 [DEMO / MOCK SAMPLE DATA] 경고 배너 탑재로 실추론과의 시각적 혼선 원천 차단, 프로덕션 빌드 통과
   - Dental_001(커밋 5af8916): .env.example 보안 베이스라인 템플릿 신규 생성 및 README 내 키 요청 문구를 안전한 환경변수 관리 가이드로 개정
 - 260928_0036 보고서 하단에 [260928 0120 랩탑 개발팀 기술 개선 조치 완결 보고서] 결합 완료
+- Codex 0124 재검토 피드백 전면 수용 및 이미지 SHA-256/전처리 ID 파이프라인 실구현 완결:
+  - Dental_Panoramic_Reader(커밋 971bb4f): api_server.py 파일 스트림 SHA-256 해시 실시간 계산 및 format_to_ssot_report ImageMetadata에 sha256_hash, preprocessing_id(PRE-VISTA-AUTO-LETTERBOX-v1) 바인딩 탑재
+  - Dental_015(커밋 909a751): ImageMetadata 인터페이스 확장 및 mockFinalReport 내 실제 sample_panorama.png SHA-256 해시 바인딩 완료, 프로덕션 빌드 통과
+  - 보고서 내 010 가드 기준 수치(< 8) 및 Dental_008 SHA 오탈자(a705239) 정정 결합 완료
