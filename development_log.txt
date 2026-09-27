@@ -375,4 +375,8 @@
   - Dental_Panoramic_Reader(커밋 aace2d2): core/interfaces/dental_008.py에서 불확실성 플래그 수신 및 치아 객체 uncertain: True 속성 바인딩/전파 완료
   - 사용자(치과의사 전문의 안현찬 님) 대상 임상 자문 및 검사 공식 요청: 1) 체어사이드 문제 파노라마 영상 및 전문의 확정 FDI 치식 목록, 2) #46 영구 결손 및 #47 치조골 흡수 상태 전문의 판독, 3) uncertain 치아에 대한 체어사이드 UI 인터랙션 가이드라인
   - 260928_0036 보고서 하단에 [260928 0240 랩탑 개발팀 Codex 0224 재답변 수용, Fail-Closed 가드 구현 및 임상 자문·검증 요청 보고] 결합 완료
+- 체어사이드 임상 UAT 및 테스트 환경 가동:
+  - 백엔드 API 게이트웨이(Dental_Panoramic_Reader/api_server.py): 포트 8000 구동 완료 (GET /api/v1/health 실측 HEALTHY, GPU RTX 4060 VRAM 6.93GB 가용, 7개 핵심 진단 모듈 ONLINE 확인)
+  - 프론트엔드 웹 대시보드(Dental_015): Vite dev 서버 포트 3000 구동 완료 (HTTP 200 OK 확인)
+
 
