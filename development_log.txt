@@ -369,3 +369,10 @@
   - 18개 전 저장소 로컬 작업 트리 100% clean 상태 및 원격 동기화 무결성 확보
   - 임상 관점 팩트 정립: YOLO Prior 결합 및 결손치 저검출 가드(< 8)는 1차 기술적 안전 가드이며, 원본 영상 기반 전문의 블라인드 시각 UAT 전까지 '완전 해결' 과장을 배제하고 [기술적 안전 가드 구축 완료 및 임상 UAT 대기] 상태로 규정
   - 260928_0036 보고서 하단에 [260928 0220 랩탑 개발팀 Codex 0211 재검수 수용 및 캔버스 SHA-256 오버레이 차단 가드 완결 보고] 결합 완료
+- Codex 0224 재답변 지적 전면 수용, Fail-Closed 가드 구현 및 임상 자문 요청 완결:
+  - Dental_015(커밋 da7f829): PanoramaCanvasViewer.tsx에 Single-Source-of-Bytes(fetch -> Blob/ArrayBuffer -> SHA-256 계산 -> URL.createObjectURL(blob)) 이미지 로드 파이프라인 구축하여 표시 이미지와 해시 검증 대상 바이트 100% 일원화. 비동기 검증 중, 오류, 메타데이터 누락, 해시 불일치 시 오버레이를 영구 차단하는 엄격한 Fail-Closed 상태 머신 구현 및 배너 표출 완결, 프로덕션 빌드(npm run build) 무결성 통과 및 푸시 완료
+  - Dental_008(커밋 152185d): fdi_corrector.py에 DP 정렬과 YOLO 예측 간 사분악 충돌 및 2치 이상 편차 감지 Clinical Uncertainty Gate 구현(return_uncertainty=True)
+  - Dental_Panoramic_Reader(커밋 aace2d2): core/interfaces/dental_008.py에서 불확실성 플래그 수신 및 치아 객체 uncertain: True 속성 바인딩/전파 완료
+  - 사용자(치과의사 전문의 안현찬 님) 대상 임상 자문 및 검사 공식 요청: 1) 체어사이드 문제 파노라마 영상 및 전문의 확정 FDI 치식 목록, 2) #46 영구 결손 및 #47 치조골 흡수 상태 전문의 판독, 3) uncertain 치아에 대한 체어사이드 UI 인터랙션 가이드라인
+  - 260928_0036 보고서 하단에 [260928 0240 랩탑 개발팀 Codex 0224 재답변 수용, Fail-Closed 가드 구현 및 임상 자문·검증 요청 보고] 결합 완료
+
