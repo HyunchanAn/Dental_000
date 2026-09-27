@@ -378,5 +378,13 @@
 - 체어사이드 임상 UAT 및 테스트 환경 가동:
   - 백엔드 API 게이트웨이(Dental_Panoramic_Reader/api_server.py): 포트 8000 구동 완료 (GET /api/v1/health 실측 HEALTHY, GPU RTX 4060 VRAM 6.93GB 가용, 7개 핵심 진단 모듈 ONLINE 확인)
   - 프론트엔드 웹 대시보드(Dental_015): Vite dev 서버 포트 3000 구동 완료 (HTTP 200 OK 확인)
+- 체어사이드 3차 UAT 피드백 수용 및 캔버스 3대 신규 오버레이(치아/매복/수복) 구축 완결:
+  - 사용자 지적 사항 분석: 캔버스 상에 치아 BBox, 매복치(#18, 28, 48), 수복물(#16, 26, 36, 46) 및 과잉치 표기 누락 현상 색출
+  - 원인 규명 1 (Dental_002): dental_002.py 내 tbox 오타로 인한 NameError 발생 및 2-Stage 패치 탐지 누락 버그 수정
+  - 원인 규명 2 (Dental_009): pipeline.py 내 Dental_009(ImpactedToothAnalyzer) 미호출 상태 확인 -> 파이프라인 정식 편입하여 제3대구치 Winter's 분류 및 맹출도 기하 분석 가동
+  - 원인 규명 3 (SSOT 스키마 및 UI): format_to_ssot_report 및 PanoramaCanvasViewer.tsx에 치아(teeth), 매복치(impactedTeeth), 수복물(restorations) 파싱 및 캔버스 오버레이 렌더링 레이어 신규 구현
+  - Dental_Panoramic_Reader(커밋 7142253): tbox 핫픽스, 009 매복치 연동, 012/013/008 SSOT 바인딩 완결 및 푸시
+  - Dental_015(커밋 a07e9b8): 캔버스 3대 신규 오버레이(에메랄드 치아, 핑크 매복치, 청록 수복물) 탑재, 0x0 해상도 가드 정돈, 프로덕션 빌드 통과 및 푸시
+
 
 
