@@ -2,7 +2,7 @@ import os
 
 def update_requirements():
     base_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-    dental_core_req = "git+https://github.com/HyunchanAn/Dental_Core.git@master\n"
+    dental_core_req = "git+https://github.com/HyunchanAn/Dental_Core.git@main\n"
     
     # Search for all requirements.txt in Dental_001 ~ Dental_014
     for i in range(1, 15):

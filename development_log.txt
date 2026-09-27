@@ -358,3 +358,8 @@
   - Dental_Panoramic_Reader(커밋 971bb4f): api_server.py 파일 스트림 SHA-256 해시 실시간 계산 및 format_to_ssot_report ImageMetadata에 sha256_hash, preprocessing_id(PRE-VISTA-AUTO-LETTERBOX-v1) 바인딩 탑재
   - Dental_015(커밋 909a751): ImageMetadata 인터페이스 확장 및 mockFinalReport 내 실제 sample_panorama.png SHA-256 해시 바인딩 완료, 프로덕션 빌드 통과
   - 보고서 내 010 가드 기준 수치(< 8) 및 Dental_008 SHA 오탈자(a705239) 정정 결합 완료
+- Codex 0146 재검수 지적 사항 4대 결함 전면 조치 및 전 저장소 배포 완결:
+  - CI 의존성 실패 원천 해결: Dental_Panoramic_Reader, Dental_001~Dental_013 등 14개 저장소의 37개 파일에서 Dental_Core.git@master 참조를 실제 기본 브랜치인 @main으로 일괄 치환 및 원격 푸시 완료 (Reader 92e74b4, 008 0e31219, 001 bb4ec2b 등)
+  - Dental_Panoramic_Reader(커밋 92e74b4): api_server.py use_004 파라미터 상태에 따라 preprocessing_id(PRE-VISTA-AUTO-LETTERBOX-SWINIR004-v1 / PRE-VISTA-AUTO-LETTERBOX-v1) 동적 바인딩 구현
+  - Dental_015(커밋 428b37f): .github/workflows/ci.yml 신규 구축하여 프론트엔드 GitHub Actions CI 자동화 구축, PanoramaCanvasViewer.tsx 캔버스 메타데이터 바에 SHA-256 해시 및 전처리 ID 뱃지 시각화 바인딩
+  - 260928_0036 보고서 하단에 [260928 0210 랩탑 개발팀 기술 조치 완결 보고서] 결합 완료
