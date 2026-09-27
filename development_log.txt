@@ -385,6 +385,19 @@
   - 원인 규명 3 (SSOT 스키마 및 UI): format_to_ssot_report 및 PanoramaCanvasViewer.tsx에 치아(teeth), 매복치(impactedTeeth), 수복물(restorations) 파싱 및 캔버스 오버레이 렌더링 레이어 신규 구현
   - Dental_Panoramic_Reader(커밋 7142253): tbox 핫픽스, 009 매복치 연동, 012/013/008 SSOT 바인딩 완결 및 푸시
   - Dental_015(커밋 a07e9b8): 캔버스 3대 신규 오버레이(에메랄드 치아, 핑크 매복치, 청록 수복물) 탑재, 0x0 해상도 가드 정돈, 프로덕션 빌드 통과 및 푸시
-
-
-
+- 사용자 프론트 테스트 중단 지시 수용 및 백엔드/프론트엔드 테스트 프로세스(포트 3000, 8000) 즉시 전면 종료
+- Codex 260928_0312 Dental 모듈 가중치 전수조사 및 단계별 재학습 계획 정밀 검토 및 전면 수용:
+  - 과거 벤치마크 미동결 및 배포 가중치 출처 불일치(008 F1 0.941, 002 Precision 83%, 012 mAP 73.7% 등) 팩트 인정 및 비교 기준 재현되지 않은 과거 수치로 무효화
+  - 단계별 로드맵 [단계 1: 통합 결함 우선 제거 -> 단계 0/2: 해시 고정 매니페스트 및 독립 재평가 -> 단계 3: 선별 재학습] 수용
+- 단계 1 [학습 성능을 가리는 통합 결함 우선 제거] 즉각 코드 조치 완료 및 배포:
+  - Dental_Panoramic_Reader (커밋 2316371):
+    - dental_002.py 런타임 NameError 버그(tbox -> tooth_box) 수정 및 pipeline.py _map_lesions_to_fdi에서 실제 점수(c_scores) 보존 전파로 0.85 하드코딩 왜곡 원천 제거, api_server.py 기본 결측 점수 0.0 정정
+    - dental_009.py pipeline.py에 정상 맹출(Fully Erupted 및 Vertical) 치아를 매복치에서 배제하는 임상 가드 적용으로 허위 매복 과잉 진단 차단
+    - dental_004.py 체크포인트 부재 시 무작위 가중치(Random weights) 모델 생성 거부(None 반환) 및 원본 영상 보존 Fail-closed 방어 코드 적용
+    - dental_008.py 133바이트 Git LFS 포인터 파일 감지(is_lfs_pointer) 및 Hugging Face 자동 다운로드 안전 fallback 구현 (invalid load key 'v' 크래시 방지)
+    - dental_003.py 가짜 0.0 RBL 플레이스홀더 출력 차단, 빈 윤곽선 및 UNIMPLEMENTED_MODEL 명시 반환, api_server.py 헬스체크 STANDBY (Unimplemented Model) 정정
+  - Dental_015 (커밋 4a51bb6): PanoramaCanvasViewer.tsx에 fail-closed 해시 검증 통과 시 치아/매복/수복 3대 레이어가 안정적으로 표출되도록 SSOT 계약 정합성 검증 및 빌드 완결
+- 260928_0312 보고서 하단에 [260928 0330 랩탑 개발팀 Codex Dental 모듈 가중치 전수조사 및 재학습 계획 검토·코드 조치 회신] 결합 완료
+- 단계 0 및 단계 2 실행 계획 확립:
+  - 운영 가중치 SHA-256 고정 매니페스트 수립
+  - Dental_008(치아 분할/FDI) 및 Dental_012(치근단) 재학습 최우선 후보 선정 및 안현찬 치과의사 임상 operating point 확정 대기
