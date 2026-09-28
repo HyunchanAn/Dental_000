@@ -1,0 +1,23 @@
+{
+  "image_name": "case_012_periapical_3_00131.jpg",
+  "image_sha256": "d4d34b2d4fa5152e90585c40e1bd145ac449754b7a381255c01d7359f405dcf0",
+  "image_width": 2473,
+  "image_height": 1252,
+  "confirmed_by": "안현찬 치과의사",
+  "boxes": [
+    {
+      "id": "box_p12_3_0",
+      "label": "치근단 병소 (Periapical GT)",
+      "fdi": "Apex",
+      "quadrant": "Q3/Q4 (하악)",
+      "category": "periapical",
+      "x1": 1602.0,
+      "y1": 953.0,
+      "x2": 1666.0,
+      "y2": 1006.0,
+      "confidence": 1.0,
+      "verified": true,
+      "notes": "Dental_012 검증셋 정답 레이블"
+    }
+  ]
+}

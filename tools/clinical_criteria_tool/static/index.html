@@ -739,6 +739,14 @@
       // Draw background panorama
       ctx.drawImage(imgObj, offsetX, offsetY, currentCase.width * scale, currentCase.height * scale);
 
+      // Relative scale factor based on TheGem (reference height 540px)
+      const relScale = Math.max(1.0, (currentCase.height / 540.0));
+      const fontPx = Math.round(13 * relScale);
+      const labelH = Math.round(20 * relScale);
+      const padX = Math.round(6 * relScale);
+      const padY = Math.round(5 * relScale);
+      const handleSize = Math.round(10 * relScale);
+
       // Draw boxes
       boxes.forEach(b => {
         if (!layers[b.category]) return;
@@ -755,44 +763,46 @@
 
         ctx.save();
         ctx.strokeStyle = isSelected ? '#38bdf8' : color;
-        ctx.lineWidth = isSelected ? 3.5 : (b.verified ? 2.5 : 1.8);
+        ctx.lineWidth = Math.max(2, Math.round((isSelected ? 4 : (b.verified ? 2.5 : 2.0)) * relScale));
 
         if (!b.verified && !isSelected) {
-          ctx.setLineDash([5, 3]);
+          ctx.setLineDash([Math.round(6 * relScale), Math.round(4 * relScale)]);
         }
 
         ctx.strokeRect(sx1, sy1, sw, sh);
 
-        // Header label
-        const statusTag = b.verified ? '[검수완료]' : '[예시/미검증]';
+        // Header label (Dynamic scaled font and background)
         const displayLabel = `${b.label} ${b.fdi ? '('+b.fdi+')' : ''}`;
 
         ctx.fillStyle = isSelected ? '#0284c7' : color;
-        ctx.font = 'bold 11px sans-serif';
-        const textWidth = ctx.measureText(displayLabel).width;
-        ctx.fillRect(sx1, Math.max(0, sy1 - 18), textWidth + 8, 18);
+        ctx.font = `bold ${fontPx}px sans-serif`;
+        const textMetrics = ctx.measureText(displayLabel);
+        const textWidth = textMetrics.width;
+        
+        ctx.fillRect(sx1, Math.max(0, sy1 - labelH), textWidth + (padX * 2), labelH);
 
         ctx.fillStyle = '#ffffff';
-        ctx.fillText(displayLabel, sx1 + 4, Math.max(13, sy1 - 5));
+        ctx.fillText(displayLabel, sx1 + padX, Math.max(fontPx, sy1 - padY));
 
         // Draw handles if selected
         if (isSelected) {
-          drawHandle(sx1, sy1);
-          drawHandle(sx2, sy1);
-          drawHandle(sx1, sy2);
-          drawHandle(sx2, sy2);
+          drawHandle(sx1, sy1, handleSize);
+          drawHandle(sx2, sy1, handleSize);
+          drawHandle(sx1, sy2, handleSize);
+          drawHandle(sx2, sy2, handleSize);
         }
 
         ctx.restore();
       });
     }
 
-    function drawHandle(x, y) {
+    function drawHandle(x, y, size = 10) {
+      const half = size / 2;
       ctx.fillStyle = '#38bdf8';
       ctx.strokeStyle = '#ffffff';
-      ctx.lineWidth = 1.5;
-      ctx.fillRect(x - 5, y - 5, 10, 10);
-      ctx.strokeRect(x - 5, y - 5, 10, 10);
+      ctx.lineWidth = Math.max(1.5, size * 0.15);
+      ctx.fillRect(x - half, y - half, size, size);
+      ctx.strokeRect(x - half, y - half, size, size);
     }
 
     // Canvas Mouse Events
@@ -801,10 +811,12 @@
       dragStartX = p.x;
       dragStartY = p.y;
 
+      const relScale = currentCase ? Math.max(1.0, currentCase.height / 540.0) : 1.0;
+      const tol = Math.round(14 * relScale);
+
       if (selectedBoxId) {
         const b = boxes.find(x => x.id === selectedBoxId);
         if (b) {
-          const tol = 12;
           if (Math.hypot(p.x - b.x1, p.y - b.y1) < tol) { isResizing = true; resizeHandle = 'tl'; return; }
           if (Math.hypot(p.x - b.x2, p.y - b.y1) < tol) { isResizing = true; resizeHandle = 'tr'; return; }
           if (Math.hypot(p.x - b.x1, p.y - b.y2) < tol) { isResizing = true; resizeHandle = 'bl'; return; }
