@@ -1,11 +1,11 @@
 {
   "supernumerary_policy": "SEPARATE_ENTITY",
-  "supernumerary_naming": "FDI Quadrant + 9 (예: #19, #29) 또는 SN-1",
-  "supernumerary_notes": "상악 제3대구치 후방 과잉치는 별도 바운딩 박스로 분리 라벨링함.",
+  "supernumerary_naming": "FDI Quadrant Code + 9 (예: #19, #29) 또는 SN-1",
+  "supernumerary_notes": "상악 제3대구치 후방/치관에 인접한 제4대구치 및 정중이개 과잉치는 독립된 바운딩 박스로 분리 라벨링하며, 정상 32개 영구치열 치식 정렬 시퀀스에서 제외함.",
   "periapical_threshold_definite": 0.5,
   "periapical_threshold_review": 0.25,
   "periapical_anatomical_guard": true,
-  "periapical_notes": "치근단 병소는 Root Apex 반경 내 인접할 때만 귀속.",
+  "periapical_notes": "치근단 병소는 반드시 치아 Root Apex 반경 내에 인접할 때만 해당 FDI 번호로 귀속하며(TheGem 병소는 하악 좌측 #36/#37 apex), 단독 투과상은 턱뼈 내 낭종 또는 정상 음영으로 격리함.",
   "restoration_classes": [
     "Inlay/Onlay",
     "Crown/Bridge",
@@ -18,6 +18,6 @@
     "Implant Fixture / Abutment": "Implant",
     "Root Canal Filling / Post": "Endodontic (RCT)"
   },
-  "restoration_notes": "4대 핵심 범주로 축약 매핑.",
+  "restoration_notes": "치아 BBox 내 수복물 마스크가 감지되면 상기 4대 범주 중 가장 일치도가 높은 단일 클래스로 단순화하여 캔버스 및 SSOT에 표기함.",
   "confirmed_by": "안현찬 치과의사"
 }

@@ -7,36 +7,31 @@ from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 from typing import Dict, Any, List, Optional
 
-app = FastAPI(title="Dental Clinical Criteria & Annotation Review Tool")
+app = FastAPI(title="Dental Clinical Criteria & Multi-Case Review Tool")
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 STATIC_DIR = os.path.join(BASE_DIR, "static")
 OUTPUT_DIR = os.path.abspath(os.path.join(BASE_DIR, "../../plans_replies_walkthrough"))
-
-THEGEM_IMG_PATH = "D:/Github/Dental_015/example_panorama/panoramic-x-ray-thegem-blog-default.jpg"
-THEGEM_SHA256 = "80585d1c86b95b39bb73ffb0d201057f72adb345b6bb15c885aa87f53c505e1b"
-THEGEM_WIDTH = 1170
-THEGEM_HEIGHT = 540
-
-ANNOTATIONS_FILE = os.path.join(OUTPUT_DIR, "thegem_verified_annotations.json")
+PANORAMA_DIR = "D:/Github/Dental_015/example_panorama"
+MANIFEST_FILE = os.path.join(PANORAMA_DIR, "cases_manifest.json")
 
 class AnnotationBox(BaseModel):
     id: str
     label: str
     fdi: Optional[str] = None
-    quadrant: str # Q1, Q2, Q3, Q4, or General
-    category: str # supernumerary, impaction, periapical, normal_anatomy, restoration
+    quadrant: str
+    category: str
     x1: float
     y1: float
     x2: float
     y2: float
-    confidence: Optional[float] = None
-    verified: bool = False
+    confidence: Optional[float] = 1.0
+    verified: bool = True
     notes: Optional[str] = ""
 
 class AnnotationSavePayload(BaseModel):
     image_name: str
-    image_sha256: str
+    image_sha256: Optional[str] = ""
     image_width: int
     image_height: int
     confirmed_by: str = "안현찬 치과의사"
@@ -55,187 +50,100 @@ class CriteriaModel(BaseModel):
     restoration_notes: str
     confirmed_by: str = "안현찬 치과의사"
 
-# Default raw model prediction and candidate cases for TheGem
-def get_initial_boxes() -> List[Dict[str, Any]]:
-    return [
-        # Upper Right / Q1 (Patient Right = Screen Left)
-        {
-            "id": "box_sn1",
-            "label": "과잉치 후보 (#18 인접)",
-            "fdi": "SN-1 (Q1)",
-            "quadrant": "Q1 (상악 우측)",
-            "category": "supernumerary",
-            "x1": 80, "y1": 205, "x2": 130, "y2": 265,
-            "confidence": 0.45,
-            "verified": False,
-            "notes": "상악 우측 제3대구치 후방/치관 인접 과잉치 의심"
-        },
-        {
-            "id": "box_m18",
-            "label": "#18 매복 대구치",
-            "fdi": "18",
-            "quadrant": "Q1 (상악 우측)",
-            "category": "impaction",
-            "x1": 120, "y1": 210, "x2": 190, "y2": 280,
-            "confidence": 0.85,
-            "verified": False,
-            "notes": "상악 우측 제3대구치 매복 (안현찬 치과의사 정답)"
-        },
-        {
-            "id": "box_r16",
-            "label": "#16 수복물 (Crown)",
-            "fdi": "16",
-            "quadrant": "Q1 (상악 우측)",
-            "category": "restoration",
-            "x1": 260, "y1": 235, "x2": 325, "y2": 285,
-            "confidence": 0.90,
-            "verified": False,
-            "notes": "상악 우측 제1대구치 보철물"
-        },
-        {
-            "id": "box_sinus",
-            "label": "상악동 저 음영 (정상 구조)",
-            "fdi": None,
-            "quadrant": "Q1 (상악 우측)",
-            "category": "normal_anatomy",
-            "x1": 350, "y1": 240, "x2": 430, "y2": 285,
-            "confidence": 0.28,
-            "verified": False,
-            "notes": "상악동 방사선 투과상 (치근단 병소 오탐 주의)"
-        },
+def load_manifest():
+    if os.path.exists(MANIFEST_FILE):
+        with open(MANIFEST_FILE, "r", encoding="utf-8") as f:
+            return json.load(f)
+    return {}
 
-        # Lower Right / Q4 (Patient Right = Screen Left)
-        {
-            "id": "box_m48",
-            "label": "#48 수평 매복",
-            "fdi": "48",
-            "quadrant": "Q4 (하악 우측)",
-            "category": "impaction",
-            "x1": 130, "y1": 320, "x2": 215, "y2": 395,
-            "confidence": 0.92,
-            "verified": False,
-            "notes": "하악 우측 제3대구치 수평/심부 매복 (안현찬 치과의사 정답)"
-        },
-        {
-            "id": "box_r46",
-            "label": "#46 결손 인접 수복 (#47)",
-            "fdi": "46 or 47",
-            "quadrant": "Q4 (하악 우측)",
-            "category": "restoration",
-            "x1": 270, "y1": 320, "x2": 335, "y2": 375,
-            "confidence": 0.78,
-            "verified": False,
-            "notes": "#46 결손 및 #47 잔존 치아 보철 소견"
-        },
-        {
-            "id": "box_mental",
-            "label": "하악 이공 (Mental Foramen - 정상 구조)",
-            "fdi": None,
-            "quadrant": "Q4 (하악 우측)",
-            "category": "normal_anatomy",
-            "x1": 340, "y1": 380, "x2": 385, "y2": 425,
-            "confidence": 0.32,
-            "verified": False,
-            "notes": "소구치 하방 정상 이공 투과상 (오탐 주의)"
-        },
+@app.get("/api/cases")
+def get_cases():
+    manifest = load_manifest()
+    case_list = []
+    
+    # Put TheGem first
+    if "panoramic-x-ray-thegem-blog-default.jpg" in manifest:
+        case_list.append({
+            "filename": "panoramic-x-ray-thegem-blog-default.jpg",
+            "desc": manifest["panoramic-x-ray-thegem-blog-default.jpg"]["desc"],
+            "module": manifest["panoramic-x-ray-thegem-blog-default.jpg"]["module"]
+        })
+        
+    for fn, info in manifest.items():
+        if fn != "panoramic-x-ray-thegem-blog-default.jpg":
+            case_list.append({
+                "filename": fn,
+                "desc": info["desc"],
+                "module": info["module"]
+            })
+    return case_list
 
-        # Upper Left / Q2 (Patient Left = Screen Right)
-        {
-            "id": "box_sn2",
-            "label": "과잉치 후보 (#28 인접)",
-            "fdi": "SN-2 (Q2)",
-            "quadrant": "Q2 (상악 좌측)",
-            "category": "supernumerary",
-            "x1": 1025, "y1": 210, "x2": 1080, "y2": 270,
-            "confidence": 0.42,
-            "verified": False,
-            "notes": "상악 좌측 제3대구치 후방 과잉치 의심"
-        },
-        {
-            "id": "box_m28",
-            "label": "#28 매복 대구치",
-            "fdi": "28",
-            "quadrant": "Q2 (상악 좌측)",
-            "category": "impaction",
-            "x1": 970, "y1": 215, "x2": 1040, "y2": 290,
-            "confidence": 0.88,
-            "verified": False,
-            "notes": "상악 좌측 제3대구치 매복 소견"
-        },
-        {
-            "id": "box_r26",
-            "label": "#26 수복물 (Inlay/Crown)",
-            "fdi": "26",
-            "quadrant": "Q2 (상악 좌측)",
-            "category": "restoration",
-            "x1": 840, "y1": 235, "x2": 905, "y2": 285,
-            "confidence": 0.85,
-            "verified": False,
-            "notes": "상악 좌측 제1대구치 수복 소견"
-        },
-
-        # Lower Left / Q3 (Patient Left = Screen Right)
-        {
-            "id": "box_pa1",
-            "label": "치근단 병소 (Dental_012 실측 모델 원시 출력)",
-            "fdi": "36 or 37 Apex",
-            "quadrant": "Q3 (하악 좌측)",
-            "category": "periapical",
-            "x1": 912, "y1": 417, "x2": 942, "y2": 448, # Exact model detection raw coords
-            "confidence": 0.541,
-            "verified": False,
-            "notes": "Dental_012 원시 YOLO11s 출력 좌표 [912, 417, 942, 448]. 화면 우측 하단이므로 환자 좌측 하악(Q3) #36 or #37 Apex임!"
-        },
-        {
-            "id": "box_r36",
-            "label": "#36 수복물 (Crown)",
-            "fdi": "36",
-            "quadrant": "Q3 (하악 좌측)",
-            "category": "restoration",
-            "x1": 830, "y1": 320, "x2": 895, "y2": 375,
-            "confidence": 0.88,
-            "verified": False,
-            "notes": "하악 좌측 제1대구치 보철 소견"
-        }
-    ]
-
-@app.get("/api/images/thegem")
-def get_thegem_image():
-    if os.path.exists(THEGEM_IMG_PATH):
-        return FileResponse(THEGEM_IMG_PATH, media_type="image/jpeg")
-    raise HTTPException(status_code=404, detail="TheGem Image not found")
-
-@app.get("/api/metadata")
-def get_metadata():
-    boxes = get_initial_boxes()
-    if os.path.exists(ANNOTATIONS_FILE):
+@app.get("/api/case/{filename}")
+def get_case_detail(filename: str):
+    manifest = load_manifest()
+    if filename not in manifest:
+        raise HTTPException(status_code=404, detail="Case not found in manifest")
+        
+    img_path = os.path.join(PANORAMA_DIR, filename)
+    if not os.path.exists(img_path):
+        raise HTTPException(status_code=404, detail="Image file missing")
+        
+    with open(img_path, "rb") as f:
+        sha = hashlib.sha256(f.read()).hexdigest()
+        
+    info = manifest[filename]
+    
+    # Check if there is a saved verified annotation
+    verified_file = os.path.join(OUTPUT_DIR, f"verified_{filename}.json")
+    boxes = info.get("boxes", [])
+    
+    # Handle TheGem initial boxes if not in manifest boxes
+    if filename == "panoramic-x-ray-thegem-blog-default.jpg" and not boxes:
+        from app_legacy import get_thegem_boxes # fallback
+        boxes = get_thegem_boxes()
+        
+    if os.path.exists(verified_file):
         try:
-            with open(ANNOTATIONS_FILE, "r", encoding="utf-8") as f:
+            with open(verified_file, "r", encoding="utf-8") as f:
                 saved = json.load(f)
                 boxes = saved.get("boxes", boxes)
         except Exception:
             pass
 
     return {
-        "image_id": "panoramic-x-ray-thegem-blog-default.jpg",
-        "sha256": THEGEM_SHA256,
-        "width": THEGEM_WIDTH,
-        "height": THEGEM_HEIGHT,
-        "coordinate_system": "pixel_xyxy",
-        "patient_orientation": {
-            "screen_left": "Patient Right (Q1 / Q4)",
-            "screen_right": "Patient Left (Q2 / Q3)"
-        },
+        "filename": filename,
+        "image_url": f"/api/images/{filename}",
+        "sha256": sha,
+        "width": info["width"],
+        "height": info["height"],
+        "desc": info["desc"],
+        "module": info["module"],
         "boxes": boxes
     }
+
+@app.get("/api/images/{filename}")
+def get_image_file(filename: str):
+    img_path = os.path.join(PANORAMA_DIR, filename)
+    if os.path.exists(img_path):
+        media = "image/png" if filename.lower().endswith(".png") else "image/jpeg"
+        return FileResponse(img_path, media_type=media)
+    raise HTTPException(status_code=404, detail="Image not found")
 
 @app.post("/api/save_annotations")
 def save_annotations(payload: AnnotationSavePayload):
     os.makedirs(OUTPUT_DIR, exist_ok=True)
-    with open(ANNOTATIONS_FILE, "w", encoding="utf-8") as f:
+    out_file = os.path.join(OUTPUT_DIR, f"verified_{payload.image_name}.json")
+    with open(out_file, "w", encoding="utf-8") as f:
         json.dump(payload.dict(), f, indent=2, ensure_ascii=False)
         
-    return {"status": "SUCCESS", "path": ANNOTATIONS_FILE, "count": len(payload.boxes)}
+    # Also update cases_manifest.json with modified boxes
+    manifest = load_manifest()
+    if payload.image_name in manifest:
+        manifest[payload.image_name]["boxes"] = [b.dict() for b in payload.boxes]
+        with open(MANIFEST_FILE, "w", encoding="utf-8") as f:
+            json.dump(manifest, f, indent=2, ensure_ascii=False)
+            
+    return {"status": "SUCCESS", "path": out_file, "count": len(payload.boxes)}
 
 @app.post("/api/save_criteria")
 def save_criteria(data: CriteriaModel):
@@ -287,6 +195,30 @@ def save_criteria(data: CriteriaModel):
         
     return {"status": "SUCCESS", "json_path": json_path, "md_path": md_path}
 
+# TheGem fallback boxes
+def get_thegem_boxes():
+    return [
+        {"id": "box_sn1", "label": "과잉치 후보 (#18 인접)", "fdi": "SN-1", "quadrant": "Q1 (상악 우측)", "category": "supernumerary", "x1": 80, "y1": 205, "x2": 130, "y2": 265, "confidence": 0.45, "verified": False},
+        {"id": "box_m18", "label": "#18 매복 대구치", "fdi": "18", "quadrant": "Q1 (상악 우측)", "category": "impaction", "x1": 120, "y1": 210, "x2": 190, "y2": 280, "confidence": 0.85, "verified": False},
+        {"id": "box_m48", "label": "#48 수평 매복", "fdi": "48", "quadrant": "Q4 (하악 우측)", "category": "impaction", "x1": 130, "y1": 320, "x2": 215, "y2": 395, "confidence": 0.92, "verified": False},
+        {"id": "box_r16", "label": "#16 수복물 (Crown)", "fdi": "16", "quadrant": "Q1 (상악 우측)", "category": "restoration", "x1": 260, "y1": 235, "x2": 325, "y2": 285, "confidence": 0.90, "verified": False},
+        {"id": "box_sinus", "label": "상악동 저 음영 (정상)", "fdi": None, "quadrant": "Q1 (상악 우측)", "category": "normal_anatomy", "x1": 350, "y1": 240, "x2": 430, "y2": 285, "confidence": 0.28, "verified": False},
+        {"id": "box_mental", "label": "하악 이공 (Mental Foramen)", "fdi": None, "quadrant": "Q4 (하악 우측)", "category": "normal_anatomy", "x1": 340, "y1": 380, "x2": 385, "y2": 425, "confidence": 0.32, "verified": False},
+        {"id": "box_sn2", "label": "과잉치 후보 (#28 인접)", "fdi": "SN-2", "quadrant": "Q2 (상악 좌측)", "category": "supernumerary", "x1": 1025, "y1": 210, "x2": 1080, "y2": 270, "confidence": 0.42, "verified": False},
+        {"id": "box_m28", "label": "#28 매복 대구치", "fdi": "28", "quadrant": "Q2 (상악 좌측)", "category": "impaction", "x1": 970, "y1": 215, "x2": 1040, "y2": 290, "confidence": 0.88, "verified": False},
+        {"id": "box_r26", "label": "#26 수복물 (Inlay)", "fdi": "26", "quadrant": "Q2 (상악 좌측)", "category": "restoration", "x1": 840, "y1": 235, "x2": 905, "y2": 285, "confidence": 0.85, "verified": False},
+        {"id": "box_pa1", "label": "치근단 병소 (012 원시 출력)", "fdi": "36 or 37 Apex", "quadrant": "Q3 (하악 좌측)", "category": "periapical", "x1": 912, "y1": 417, "x2": 942, "y2": 448, "confidence": 0.541, "verified": False},
+        {"id": "box_r36", "label": "#36 수복물 (Crown)", "fdi": "36", "quadrant": "Q3 (하악 좌측)", "category": "restoration", "x1": 830, "y1": 320, "x2": 895, "y2": 375, "confidence": 0.88, "verified": False}
+    ]
+
+# Populate TheGem boxes in manifest if missing
+manifest_init = load_manifest()
+if "panoramic-x-ray-thegem-blog-default.jpg" in manifest_init:
+    if "boxes" not in manifest_init["panoramic-x-ray-thegem-blog-default.jpg"] or not manifest_init["panoramic-x-ray-thegem-blog-default.jpg"]["boxes"]:
+        manifest_init["panoramic-x-ray-thegem-blog-default.jpg"]["boxes"] = get_thegem_boxes()
+        with open(MANIFEST_FILE, "w", encoding="utf-8") as f:
+            json.dump(manifest_init, f, indent=2, ensure_ascii=False)
+
 if os.path.exists(STATIC_DIR):
     app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
 
@@ -296,7 +228,7 @@ def index():
     if os.path.exists(html_file):
         with open(html_file, "r", encoding="utf-8") as f:
             return f.read()
-    return "<h1>Clinical Criteria Review Tool</h1><p>Static index.html not found.</p>"
+    return "<h1>Clinical Criteria Review Tool</h1>"
 
 if __name__ == "__main__":
     import uvicorn

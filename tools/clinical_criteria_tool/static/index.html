@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Dental 2단계 임상 라벨 및 판정 기준 확정 도구</title>
+  <title>Dental 2단계 다중 케이스 임상 라벨 및 판정 기준 확정 도구</title>
   <style>
     :root {
       --bg: #0b1120;
@@ -75,14 +75,24 @@
       align-items: center;
       flex-wrap: wrap;
     }
+    .case-selector {
+      background: #0f172a;
+      border: 1px solid #38bdf8;
+      color: #38bdf8;
+      font-weight: 700;
+      padding: 5px 10px;
+      border-radius: 6px;
+      font-size: 0.8rem;
+      cursor: pointer;
+    }
     .btn-toggle {
       background: #1e293b;
       color: var(--text);
       border: 1px solid #475569;
-      padding: 5px 10px;
+      padding: 5px 9px;
       border-radius: 6px;
       cursor: pointer;
-      font-size: 0.75rem;
+      font-size: 0.74rem;
       transition: all 0.15s;
     }
     .btn-toggle.active { background: var(--primary); border-color: var(--primary-hover); }
@@ -90,10 +100,10 @@
       background: #334155;
       color: #fff;
       border: 1px solid #64748b;
-      padding: 5px 10px;
+      padding: 5px 9px;
       border-radius: 6px;
       cursor: pointer;
-      font-size: 0.75rem;
+      font-size: 0.74rem;
       font-weight: 600;
     }
     .btn-action-sm:hover { background: #475569; }
@@ -253,10 +263,10 @@
 
   <header>
     <div>
-      <h1>치과 AI 2단계 임상 라벨 및 판정 기준 확정 도구 <span class="badge">검수 전용 에디터</span></h1>
+      <h1>치과 AI 2단계 다중 케이스 임상 라벨 및 판정 기준 확정 <span class="badge">모듈당 3케이스 완비</span></h1>
     </div>
     <div class="header-info">
-      확정자: <strong>안현찬 치과의사</strong> | 대상: TheGem 파노라마 (1170x540)
+      확정자: <strong>안현찬 치과의사</strong> | 저장소: Dental_015/example_panorama/ (총 10케이스)
     </div>
   </header>
 
@@ -269,16 +279,25 @@
 
   <div class="main-container">
     
-    <!-- Left: Canvas Viewer -->
+    <!-- Left: Viewer -->
     <div class="viewer-panel">
       <div class="viewer-toolbar">
-        <button class="btn-toggle active" id="btnToggleSN" onclick="toggleLayer('supernumerary')">과잉치 (#18/#28 인접)</button>
-        <button class="btn-toggle active" id="btnToggleImp" onclick="toggleLayer('impaction')">매복치 (#18/#28/#48)</button>
-        <button class="btn-toggle active" id="btnTogglePA" onclick="toggleLayer('periapical')">치근단 병소 (#36/37)</button>
-        <button class="btn-toggle active" id="btnToggleAnat" onclick="toggleLayer('normal_anatomy')">정상 해부학적 음영</button>
-        <button class="btn-toggle active" id="btnToggleRest" onclick="toggleLayer('restoration')">수복물 (#16, 26, 36, 46)</button>
+        <label style="font-size:0.78rem; font-weight:700; color:#38bdf8; margin-right:4px;">케이스 선택:</label>
+        <select id="caseSelect" class="case-selector" onchange="onCaseChange(this.value)">
+          <!-- Populated dynamically -->
+        </select>
+        
+        <span style="border-left:1px solid #334155; height:20px; margin:0 4px;"></span>
+
+        <button class="btn-toggle active" id="btnToggleSN" onclick="toggleLayer('supernumerary')">과잉치</button>
+        <button class="btn-toggle active" id="btnToggleImp" onclick="toggleLayer('impaction')">매복치</button>
+        <button class="btn-toggle active" id="btnTogglePA" onclick="toggleLayer('periapical')">치근단 병소</button>
+        <button class="btn-toggle active" id="btnToggleAnat" onclick="toggleLayer('normal_anatomy')">정상음영</button>
+        <button class="btn-toggle active" id="btnToggleRest" onclick="toggleLayer('restoration')">수복물</button>
+        <button class="btn-toggle active" id="btnToggleTooth" onclick="toggleLayer('normal_tooth')">일반 치아</button>
+        
         <span style="flex:1;"></span>
-        <button class="btn-action-sm" onclick="addNewBox()">+ 새 박스 추가</button>
+        <button class="btn-action-sm" onclick="addNewBox()">+ 박스 추가</button>
         <button class="btn-action-sm" style="background:#dc2626;" onclick="deleteSelectedBox()">삭제</button>
       </div>
 
@@ -289,12 +308,12 @@
       <div class="meta-bar">
         <div class="legend">
           <div class="legend-item"><div class="legend-dot" style="background:#a855f7;"></div> 보라: 과잉치</div>
-          <div class="legend-item"><div class="legend-dot" style="background:#ec4899;"></div> 핑크: 매복 대구치</div>
-          <div class="legend-item"><div class="legend-dot" style="background:#ef4444;"></div> 빨강: 치근단 병소 (012 원시)</div>
-          <div class="legend-item"><div class="legend-dot" style="background:#eab308;"></div> 노랑: 정상 해부음영</div>
+          <div class="legend-item"><div class="legend-dot" style="background:#ec4899;"></div> 핑크: 매복치</div>
+          <div class="legend-item"><div class="legend-dot" style="background:#ef4444;"></div> 빨강: 치근단 병소</div>
           <div class="legend-item"><div class="legend-dot" style="background:#06b6d4;"></div> 청록: 수복물</div>
+          <div class="legend-item"><div class="legend-dot" style="background:#10b981;"></div> 초록: 일반 치아 (008)</div>
         </div>
-        <div id="imageHashLabel" style="font-family:monospace;">SHA: 80585d1c... (1170x540)</div>
+        <div id="imageHashLabel" style="font-family:monospace;">SHA: -</div>
       </div>
     </div>
 
@@ -304,7 +323,7 @@
       <!-- Selected Box Inspector Card -->
       <div class="card highlight" id="inspectorCard">
         <div class="card-title">
-          <span>선택된 박스 인스펙터 (직접 클릭/드래그 수정)</span>
+          <span>선택된 박스 인스펙터 (기존 박스 드래그 수정)</span>
           <span id="selectedBoxBadge" style="font-size:0.75rem; color:#f59e0b;">[박스 미선택]</span>
         </div>
         <div style="display:flex; gap:10px; margin-bottom:8px;">
@@ -336,6 +355,7 @@
               <option value="periapical">치근단 병소</option>
               <option value="normal_anatomy">정상 해부음영</option>
               <option value="restoration">수복물</option>
+              <option value="normal_tooth">일반 치아</option>
             </select>
           </div>
         </div>
@@ -352,8 +372,8 @@
           <label>임상 비고 (메모):</label>
           <input type="text" id="boxNotes" oninput="updateCurrentBoxProp('notes', this.value)">
         </div>
-        <button class="btn-submit green" style="padding:6px; font-size:0.8rem;" onclick="saveAnnotationsToServer()">
-          이 파노라마 검수 박스 저장 (thegem_verified_annotations.json)
+        <button class="btn-submit green" style="padding:7px; font-size:0.82rem;" onclick="saveAnnotationsToServer()">
+          현재 파노라마 검수 박스 저장 (verified_[filename].json)
         </button>
       </div>
 
@@ -478,7 +498,7 @@
       <div class="action-panel">
         <button class="btn-submit" onclick="submitCriteria()">
           <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"></path></svg>
-          임상 기준표 저장 및 확정 (Save Clinical Criteria SSOT)
+          전역 임상 기준표 저장 및 확정 (Save Clinical Criteria SSOT)
         </button>
       </div>
 
@@ -488,53 +508,71 @@
   <div id="toast">저장 완료되었습니다.</div>
 
   <script>
-    let metadata = null;
+    let cases = [];
+    let currentCase = null;
     let boxes = [];
     let selectedBoxId = null;
     let imgObj = new Image();
-    let layers = { supernumerary: true, impaction: true, periapical: true, normal_anatomy: true, restoration: true };
+    let layers = { supernumerary: true, impaction: true, periapical: true, normal_anatomy: true, restoration: true, normal_tooth: true };
     
     const canvas = document.getElementById('panoCanvas');
     const ctx = canvas.getContext('2d');
-    const container = document.getElementById('canvasContainer');
+    const caseSelect = document.getElementById('caseSelect');
 
     // Drag / Interaction State
     let isDragging = false;
     let isResizing = false;
-    let resizeHandle = null; // 'tl', 'tr', 'bl', 'br'
+    let resizeHandle = null;
     let dragStartX = 0;
     let dragStartY = 0;
     let boxStartCoords = null;
 
-    // Load Image and Metadata
-    fetch('/api/metadata')
+    // Load Cases list
+    fetch('/api/cases')
       .then(res => res.json())
       .then(data => {
-        metadata = data;
-        boxes = data.boxes;
-        imgObj.src = '/api/images/thegem';
-        imgObj.onload = () => {
-          resizeCanvas();
-          draw();
-        };
+        cases = data;
+        caseSelect.innerHTML = '';
+        cases.forEach(c => {
+          const opt = document.createElement('option');
+          opt.value = c.filename;
+          opt.innerText = `[${c.module}] ${c.desc}`;
+          caseSelect.appendChild(opt);
+        });
+        if (cases.length > 0) {
+          loadCase(cases[0].filename);
+        }
       });
 
-    window.addEventListener('resize', () => {
-      resizeCanvas();
-      draw();
-    });
+    function onCaseChange(fn) {
+      loadCase(fn);
+    }
 
-    function resizeCanvas() {
-      // Keep backing store at native 1170x540 for 1:1 pixel exactness
-      canvas.width = 1170;
-      canvas.height = 540;
+    function loadCase(fn) {
+      selectedBoxId = null;
+      updateInspector();
+      fetch(`/api/case/${encodeURIComponent(fn)}`)
+        .then(res => res.json())
+        .then(data => {
+          currentCase = data;
+          boxes = data.boxes || [];
+          document.getElementById('imageHashLabel').innerText = `SHA: ${data.sha256.substring(0, 12)}... (${data.width}x${data.height})`;
+          
+          imgObj.src = data.image_url;
+          imgObj.onload = () => {
+            canvas.width = data.width;
+            canvas.height = data.height;
+            draw();
+          };
+        });
     }
 
     function getCanvasTransform() {
+      if (!currentCase) return { scale: 1, offsetX: 0, offsetY: 0 };
       const cw = canvas.width;
       const ch = canvas.height;
-      const iw = 1170;
-      const ih = 540;
+      const iw = currentCase.width;
+      const ih = currentCase.height;
       const scale = Math.min(cw / iw, ch / ih);
       const offsetX = (cw - iw * scale) / 2;
       const offsetY = (ch - ih * scale) / 2;
@@ -546,7 +584,6 @@
       const cssX = clientX - rect.left;
       const cssY = clientY - rect.top;
       const { scale, offsetX, offsetY } = getCanvasTransform();
-      // Adjust CSS to canvas internal resolution
       const internalX = cssX * (canvas.width / rect.width);
       const internalY = cssY * (canvas.height / rect.height);
       const px = (internalX - offsetX) / scale;
@@ -561,11 +598,14 @@
         impaction: 'btnToggleImp',
         periapical: 'btnTogglePA',
         normal_anatomy: 'btnToggleAnat',
-        restoration: 'btnToggleRest'
+        restoration: 'btnToggleRest',
+        normal_tooth: 'btnToggleTooth'
       };
       const btn = document.getElementById(btnMap[cat]);
-      if (layers[cat]) btn.classList.add('active');
-      else btn.classList.remove('active');
+      if (btn) {
+        if (layers[cat]) btn.classList.add('active');
+        else btn.classList.remove('active');
+      }
       draw();
     }
 
@@ -581,12 +621,13 @@
         case 'periapical': return '#ef4444'; // Red
         case 'normal_anatomy': return '#eab308'; // Yellow
         case 'restoration': return '#06b6d4'; // Cyan
+        case 'normal_tooth': return '#10b981'; // Emerald
         default: return '#3b82f6';
       }
     }
 
     function draw() {
-      if (!imgObj.complete) return;
+      if (!currentCase || !imgObj.complete) return;
       const cw = canvas.width;
       const ch = canvas.height;
       ctx.clearRect(0, 0, cw, ch);
@@ -594,7 +635,7 @@
       const { scale, offsetX, offsetY } = getCanvasTransform();
 
       // Draw background panorama
-      ctx.drawImage(imgObj, offsetX, offsetY, 1170 * scale, 540 * scale);
+      ctx.drawImage(imgObj, offsetX, offsetY, currentCase.width * scale, currentCase.height * scale);
 
       // Draw boxes
       boxes.forEach(b => {
@@ -612,17 +653,17 @@
 
         ctx.save();
         ctx.strokeStyle = isSelected ? '#38bdf8' : color;
-        ctx.lineWidth = isSelected ? 3.5 : (b.verified ? 2.5 : 2.0);
+        ctx.lineWidth = isSelected ? 3.5 : (b.verified ? 2.5 : 1.8);
 
         if (!b.verified && !isSelected) {
-          ctx.setLineDash([5, 3]); // Dashed for unverified
+          ctx.setLineDash([5, 3]);
         }
 
         ctx.strokeRect(sx1, sy1, sw, sh);
 
         // Header label
         const statusTag = b.verified ? '[검수완료]' : '[예시/미검증]';
-        const displayLabel = `${b.label} ${b.fdi ? '('+b.fdi+')' : ''} ${statusTag}`;
+        const displayLabel = `${b.label} ${b.fdi ? '('+b.fdi+')' : ''}`;
 
         ctx.fillStyle = isSelected ? '#0284c7' : color;
         ctx.font = 'bold 11px sans-serif';
@@ -658,11 +699,10 @@
       dragStartX = p.x;
       dragStartY = p.y;
 
-      // 1. Check if clicking handle of currently selected box
       if (selectedBoxId) {
         const b = boxes.find(x => x.id === selectedBoxId);
         if (b) {
-          const tol = 12; // Pixel tolerance
+          const tol = 12;
           if (Math.hypot(p.x - b.x1, p.y - b.y1) < tol) { isResizing = true; resizeHandle = 'tl'; return; }
           if (Math.hypot(p.x - b.x2, p.y - b.y1) < tol) { isResizing = true; resizeHandle = 'tr'; return; }
           if (Math.hypot(p.x - b.x1, p.y - b.y2) < tol) { isResizing = true; resizeHandle = 'bl'; return; }
@@ -670,7 +710,6 @@
         }
       }
 
-      // 2. Check if clicking inside any visible box
       let clickedBox = null;
       for (let i = boxes.length - 1; i >= 0; i--) {
         const b = boxes[i];
@@ -698,7 +737,7 @@
       if (!isDragging && !isResizing) return;
       const p = screenToPixel(e.clientX, e.clientY);
       const b = boxes.find(x => x.id === selectedBoxId);
-      if (!b) return;
+      if (!b || !currentCase) return;
 
       const dx = p.x - dragStartX;
       const dy = p.y - dragStartY;
@@ -706,8 +745,8 @@
       if (isDragging && boxStartCoords) {
         const width = boxStartCoords.x2 - boxStartCoords.x1;
         const height = boxStartCoords.y2 - boxStartCoords.y1;
-        b.x1 = Math.max(0, Math.min(1170 - width, Math.round(boxStartCoords.x1 + dx)));
-        b.y1 = Math.max(0, Math.min(540 - height, Math.round(boxStartCoords.y1 + dy)));
+        b.x1 = Math.max(0, Math.min(currentCase.width - width, Math.round(boxStartCoords.x1 + dx)));
+        b.y1 = Math.max(0, Math.min(currentCase.height - height, Math.round(boxStartCoords.y1 + dy)));
         b.x2 = b.x1 + width;
         b.y2 = b.y1 + height;
       } else if (isResizing) {
@@ -715,7 +754,6 @@
         if (resizeHandle === 'tr') { b.x2 = Math.round(p.x); b.y1 = Math.round(p.y); }
         if (resizeHandle === 'bl') { b.x1 = Math.round(p.x); b.y2 = Math.round(p.y); }
         if (resizeHandle === 'br') { b.x2 = Math.round(p.x); b.y2 = Math.round(p.y); }
-        // Ensure x1 < x2 and y1 < y2
         if (b.x1 > b.x2) { const t = b.x1; b.x1 = b.x2; b.x2 = t; }
         if (b.y1 > b.y2) { const t = b.y1; b.y1 = b.y2; b.y2 = t; }
       }
@@ -731,7 +769,6 @@
     });
 
     function updateInspector() {
-      const card = document.getElementById('inspectorCard');
       const badge = document.getElementById('selectedBoxBadge');
       const b = boxes.find(x => x.id === selectedBoxId);
 
@@ -772,6 +809,7 @@
     }
 
     function addNewBox() {
+      if (!currentCase) return;
       const newId = 'box_user_' + Date.now();
       const newBox = {
         id: newId,
@@ -779,7 +817,10 @@
         fdi: '',
         quadrant: 'Q1 (상악 우측)',
         category: 'supernumerary',
-        x1: 500, y1: 220, x2: 600, y2: 300,
+        x1: Math.round(currentCase.width * 0.4),
+        y1: Math.round(currentCase.height * 0.4),
+        x2: Math.round(currentCase.width * 0.5),
+        y2: Math.round(currentCase.height * 0.5),
         confidence: 1.0,
         verified: true,
         notes: '치과의사 수동 추가 박스'
@@ -799,11 +840,12 @@
     }
 
     function saveAnnotationsToServer() {
+      if (!currentCase) return;
       const payload = {
-        image_name: "panoramic-x-ray-thegem-blog-default.jpg",
-        image_sha256: "80585d1c86b95b39bb73ffb0d201057f72adb345b6bb15c885aa87f53c505e1b",
-        image_width: 1170,
-        image_height: 540,
+        image_name: currentCase.filename,
+        image_sha256: currentCase.sha256,
+        image_width: currentCase.width,
+        image_height: currentCase.height,
         confirmed_by: "안현찬 치과의사",
         boxes: boxes
       };
@@ -815,7 +857,7 @@
       })
       .then(res => res.json())
       .then(data => {
-        showToast("어노테이션 박스 저장 완료: thegem_verified_annotations.json");
+        showToast(`검수 박스 저장 완료: verified_${currentCase.filename}.json`);
       })
       .catch(err => alert("어노테이션 저장 실패: " + err));
     }
