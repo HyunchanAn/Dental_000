@@ -417,6 +417,13 @@
   - Dental_008: yolo_fdi 검증셋 38장 전수의 Train(371장) 완전 누수(38/38 Overlap) 및 원천 DENTEX 634장 전수 학습 포함 사실 확인. 직전 98~99% 지표 전면 철회 및 [재학습 필요] 판정 최종 확정. DENTEX 634장 기반 결정론적 80:20 무누수 분할 매니페스트(reports/dental_008_dentex_manifest.csv, Train 507장 / Val 127장, Overlap 0건) 정식 발행 완료
   - Dental_012: 4,264장 전체 데이터셋에 대한 환자 ID 및 하드 네거티브 매핑 매니페스트(reports/dental_012_patient_manifest.csv, Train 3,439장 / Val 825장, Overlap 0건) 정식 발행 및 수학적 분리 증명 완료. 저장소 내 누락되었던 50 Epochs 학습 아티팩트 8종(reports/dental_012_periapical_augmented_v1_artifacts) 정식 보존 및 mAP50 73.8% [조건부 재학습] 확정
   - 260928_0312 문서 하단에 [260928 0515 메인 워크스테이션 1단계 평가 근거 및 무결성 전수 시정 보고서] 결합 완료 및 안현찬 총괄 2단계 임상 기준 확정, 랩탑팀 3단계 통합 결함 수정 즉시 착수 요청
-
-
-
+- 안현찬 총괄 2단계 [임상 라벨·판정 기준 확정] 지원을 위한 인터랙티브 검토 도구(Clinical Criteria Review Tool) 개발 및 가동 완결:
+  - 도구 구축 위치: Dental_000/tools/clinical_criteria_tool/ (5단계 완료 후 완전 제거 예정인 임시 독립 폴더)
+  - 아키텍처: FastAPI 백엔드(app.py) 및 인터랙티브 HTML5/Canvas 뷰어(static/index.html) 구축, 로컬 포트 8088 백그라운드 구동 완료 (HTTP 200 정상 확인)
+  - 핵심 기능 구현:
+    - TheGem 파노라마(1170x540) 실측 캔버스 뷰어 연동 (과잉치 보라, 매복 핑크, 치근단 빨강, 정상음영 노랑, 수복물 청록 오버레이 레이어 토글)
+    - Dental_008 과잉치(Supernumerary) 라벨링 정책 토글 (별도 Supernumerary 개체 분리 vs 32개 FDI 강제 병합)
+    - Dental_012 치근단 병소 확정 임계치(0.50) 및 검토 필요 구간(0.25~0.50), 정상 해부학적 음영 가드 설정 인터페이스
+    - Dental_013 수복물 31개 클래스의 4대 핵심 범주(Inlay/Onlay, Crown/Bridge, Implant, Endodontic-RCT) 축약 매핑
+    - 임상 기준표 저장 및 확정 엔드포인트(/api/save_criteria): clinical_criteria_v1.json 및 clinical_criteria_v1.md 자동 동기화 발행
+  - 260928_0312 문서 하단에 [260928 1005 랩탑 개발팀 2단계 임상 라벨·판정 기준 확정 도구 구축 및 사용 안내 워크스루] 결합 완료

@@ -1,0 +1,23 @@
+{
+  "supernumerary_policy": "SEPARATE_ENTITY",
+  "supernumerary_naming": "FDI Quadrant + 9 (예: #19, #29) 또는 SN-1",
+  "supernumerary_notes": "상악 제3대구치 후방 과잉치는 별도 바운딩 박스로 분리 라벨링함.",
+  "periapical_threshold_definite": 0.5,
+  "periapical_threshold_review": 0.25,
+  "periapical_anatomical_guard": true,
+  "periapical_notes": "치근단 병소는 Root Apex 반경 내 인접할 때만 귀속.",
+  "restoration_classes": [
+    "Inlay/Onlay",
+    "Crown/Bridge",
+    "Implant",
+    "Endodontic (RCT)"
+  ],
+  "restoration_mapping": {
+    "Amalgam / Resin / Inlay": "Inlay/Onlay",
+    "Gold / PFM / Zirconia Crown": "Crown/Bridge",
+    "Implant Fixture / Abutment": "Implant",
+    "Root Canal Filling / Post": "Endodontic (RCT)"
+  },
+  "restoration_notes": "4대 핵심 범주로 축약 매핑.",
+  "confirmed_by": "안현찬 치과의사"
+}
