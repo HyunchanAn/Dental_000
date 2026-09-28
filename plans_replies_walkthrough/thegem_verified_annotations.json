@@ -1,0 +1,23 @@
+{
+  "image_name": "panoramic-x-ray-thegem-blog-default.jpg",
+  "image_sha256": "80585d1c86b95b39bb73ffb0d201057f72adb345b6bb15c885aa87f53c505e1b",
+  "image_width": 1170,
+  "image_height": 540,
+  "confirmed_by": "안현찬 치과의사",
+  "boxes": [
+    {
+      "id": "box_pa1",
+      "label": "치근단 병소 검출부",
+      "fdi": "36 Apex",
+      "quadrant": "Q3 (하악 좌측)",
+      "category": "periapical",
+      "x1": 912.0,
+      "y1": 417.0,
+      "x2": 942.0,
+      "y2": 448.0,
+      "confidence": 0.541,
+      "verified": true,
+      "notes": "하악 좌측 제1대구치 치근단 병소 확정"
+    }
+  ]
+}

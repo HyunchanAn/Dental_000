@@ -1,19 +1,46 @@
 import os
 import json
+import hashlib
 from fastapi import FastAPI, HTTPException
 from fastapi.responses import HTMLResponse, FileResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
-from typing import Dict, Any, List
+from typing import Dict, Any, List, Optional
 
-app = FastAPI(title="Dental Clinical Criteria Review Tool")
+app = FastAPI(title="Dental Clinical Criteria & Annotation Review Tool")
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 STATIC_DIR = os.path.join(BASE_DIR, "static")
 OUTPUT_DIR = os.path.abspath(os.path.join(BASE_DIR, "../../plans_replies_walkthrough"))
 
 THEGEM_IMG_PATH = "D:/Github/Dental_015/example_panorama/panoramic-x-ray-thegem-blog-default.jpg"
-SAMPLE_IMG_PATH = "D:/Github/Dental_015/public/sample_panorama.png"
+THEGEM_SHA256 = "80585d1c86b95b39bb73ffb0d201057f72adb345b6bb15c885aa87f53c505e1b"
+THEGEM_WIDTH = 1170
+THEGEM_HEIGHT = 540
+
+ANNOTATIONS_FILE = os.path.join(OUTPUT_DIR, "thegem_verified_annotations.json")
+
+class AnnotationBox(BaseModel):
+    id: str
+    label: str
+    fdi: Optional[str] = None
+    quadrant: str # Q1, Q2, Q3, Q4, or General
+    category: str # supernumerary, impaction, periapical, normal_anatomy, restoration
+    x1: float
+    y1: float
+    x2: float
+    y2: float
+    confidence: Optional[float] = None
+    verified: bool = False
+    notes: Optional[str] = ""
+
+class AnnotationSavePayload(BaseModel):
+    image_name: str
+    image_sha256: str
+    image_width: int
+    image_height: int
+    confirmed_by: str = "안현찬 치과의사"
+    boxes: List[AnnotationBox]
 
 class CriteriaModel(BaseModel):
     supernumerary_policy: str
@@ -28,48 +55,187 @@ class CriteriaModel(BaseModel):
     restoration_notes: str
     confirmed_by: str = "안현찬 치과의사"
 
-@app.get("/api/images/{name}")
-def get_image(name: str):
-    if name == "thegem":
-        if os.path.exists(THEGEM_IMG_PATH):
-            return FileResponse(THEGEM_IMG_PATH, media_type="image/jpeg")
-    elif name == "sample":
-        if os.path.exists(SAMPLE_IMG_PATH):
-            return FileResponse(SAMPLE_IMG_PATH, media_type="image/png")
-    raise HTTPException(status_code=404, detail="Image not found")
+# Default raw model prediction and candidate cases for TheGem
+def get_initial_boxes() -> List[Dict[str, Any]]:
+    return [
+        # Upper Right / Q1 (Patient Right = Screen Left)
+        {
+            "id": "box_sn1",
+            "label": "과잉치 후보 (#18 인접)",
+            "fdi": "SN-1 (Q1)",
+            "quadrant": "Q1 (상악 우측)",
+            "category": "supernumerary",
+            "x1": 80, "y1": 205, "x2": 130, "y2": 265,
+            "confidence": 0.45,
+            "verified": False,
+            "notes": "상악 우측 제3대구치 후방/치관 인접 과잉치 의심"
+        },
+        {
+            "id": "box_m18",
+            "label": "#18 매복 대구치",
+            "fdi": "18",
+            "quadrant": "Q1 (상악 우측)",
+            "category": "impaction",
+            "x1": 120, "y1": 210, "x2": 190, "y2": 280,
+            "confidence": 0.85,
+            "verified": False,
+            "notes": "상악 우측 제3대구치 매복 (안현찬 치과의사 정답)"
+        },
+        {
+            "id": "box_r16",
+            "label": "#16 수복물 (Crown)",
+            "fdi": "16",
+            "quadrant": "Q1 (상악 우측)",
+            "category": "restoration",
+            "x1": 260, "y1": 235, "x2": 325, "y2": 285,
+            "confidence": 0.90,
+            "verified": False,
+            "notes": "상악 우측 제1대구치 보철물"
+        },
+        {
+            "id": "box_sinus",
+            "label": "상악동 저 음영 (정상 구조)",
+            "fdi": None,
+            "quadrant": "Q1 (상악 우측)",
+            "category": "normal_anatomy",
+            "x1": 350, "y1": 240, "x2": 430, "y2": 285,
+            "confidence": 0.28,
+            "verified": False,
+            "notes": "상악동 방사선 투과상 (치근단 병소 오탐 주의)"
+        },
 
-@app.get("/api/sample_data")
-def get_sample_data():
-    return {
-        "thegem": {
-            "image_url": "/api/images/thegem",
-            "name": "TheGem Panoramic Case (대표 경계 사례)",
-            "width": 1170,
-            "height": 540,
-            "annotations": {
-                "supernumerary_cases": [
-                    {"id": "sn1", "label": "과잉치 후보 (#18 인접)", "x": 0.08, "y": 0.42, "w": 0.045, "h": 0.09, "type": "supernumerary"},
-                    {"id": "sn2", "label": "과잉치 후보 (#28 인접)", "x": 0.88, "y": 0.43, "w": 0.045, "h": 0.09, "type": "supernumerary"},
-                ],
-                "impaction_cases": [
-                    {"id": "m18", "label": "#18 매복 대구치", "x": 0.12, "y": 0.44, "w": 0.05, "h": 0.085, "type": "impaction", "status": "Impacted (User Ground Truth)"},
-                    {"id": "m28", "label": "#28 매복 대구치", "x": 0.84, "y": 0.45, "w": 0.05, "h": 0.085, "type": "impaction", "status": "Vertical/Partially Erupted"},
-                    {"id": "m48", "label": "#48 수평 매복", "x": 0.14, "y": 0.62, "w": 0.055, "h": 0.09, "type": "impaction", "status": "Horizontal / Deep Impacted"},
-                ],
-                "periapical_cases": [
-                    {"id": "pa1", "label": "치근단 병소 검출부 (conf 0.54)", "x": 0.779, "y": 0.772, "w": 0.025, "h": 0.058, "type": "periapical", "conf": 0.541, "fdi": "46 or 47 apex"},
-                    {"id": "norm_mental", "label": "정상 하악 이공 (Mental Foramen - 오탐 위험)", "x": 0.28, "y": 0.73, "w": 0.03, "h": 0.04, "type": "normal_anatomy", "conf": 0.32},
-                    {"id": "norm_sinus", "label": "상악동 저 (Maxillary Sinus Floor - 음영)", "x": 0.32, "y": 0.48, "w": 0.06, "h": 0.05, "type": "normal_anatomy", "conf": 0.28},
-                ],
-                "restoration_cases": [
-                    {"id": "r1", "label": "#16 수복물 (Crown)", "x": 0.23, "y": 0.46, "w": 0.045, "h": 0.06, "type": "crown"},
-                    {"id": "r2", "label": "#26 수복물 (Inlay)", "x": 0.73, "y": 0.46, "w": 0.042, "h": 0.055, "type": "inlay"},
-                    {"id": "r3", "label": "#36 수복물 (Crown)", "x": 0.72, "y": 0.60, "w": 0.045, "h": 0.065, "type": "crown"},
-                    {"id": "r4", "label": "#46 잔존 수복 / 결손 인접", "x": 0.24, "y": 0.61, "w": 0.045, "h": 0.065, "type": "missing_or_crown"},
-                ]
-            }
+        # Lower Right / Q4 (Patient Right = Screen Left)
+        {
+            "id": "box_m48",
+            "label": "#48 수평 매복",
+            "fdi": "48",
+            "quadrant": "Q4 (하악 우측)",
+            "category": "impaction",
+            "x1": 130, "y1": 320, "x2": 215, "y2": 395,
+            "confidence": 0.92,
+            "verified": False,
+            "notes": "하악 우측 제3대구치 수평/심부 매복 (안현찬 치과의사 정답)"
+        },
+        {
+            "id": "box_r46",
+            "label": "#46 결손 인접 수복 (#47)",
+            "fdi": "46 or 47",
+            "quadrant": "Q4 (하악 우측)",
+            "category": "restoration",
+            "x1": 270, "y1": 320, "x2": 335, "y2": 375,
+            "confidence": 0.78,
+            "verified": False,
+            "notes": "#46 결손 및 #47 잔존 치아 보철 소견"
+        },
+        {
+            "id": "box_mental",
+            "label": "하악 이공 (Mental Foramen - 정상 구조)",
+            "fdi": None,
+            "quadrant": "Q4 (하악 우측)",
+            "category": "normal_anatomy",
+            "x1": 340, "y1": 380, "x2": 385, "y2": 425,
+            "confidence": 0.32,
+            "verified": False,
+            "notes": "소구치 하방 정상 이공 투과상 (오탐 주의)"
+        },
+
+        # Upper Left / Q2 (Patient Left = Screen Right)
+        {
+            "id": "box_sn2",
+            "label": "과잉치 후보 (#28 인접)",
+            "fdi": "SN-2 (Q2)",
+            "quadrant": "Q2 (상악 좌측)",
+            "category": "supernumerary",
+            "x1": 1025, "y1": 210, "x2": 1080, "y2": 270,
+            "confidence": 0.42,
+            "verified": False,
+            "notes": "상악 좌측 제3대구치 후방 과잉치 의심"
+        },
+        {
+            "id": "box_m28",
+            "label": "#28 매복 대구치",
+            "fdi": "28",
+            "quadrant": "Q2 (상악 좌측)",
+            "category": "impaction",
+            "x1": 970, "y1": 215, "x2": 1040, "y2": 290,
+            "confidence": 0.88,
+            "verified": False,
+            "notes": "상악 좌측 제3대구치 매복 소견"
+        },
+        {
+            "id": "box_r26",
+            "label": "#26 수복물 (Inlay/Crown)",
+            "fdi": "26",
+            "quadrant": "Q2 (상악 좌측)",
+            "category": "restoration",
+            "x1": 840, "y1": 235, "x2": 905, "y2": 285,
+            "confidence": 0.85,
+            "verified": False,
+            "notes": "상악 좌측 제1대구치 수복 소견"
+        },
+
+        # Lower Left / Q3 (Patient Left = Screen Right)
+        {
+            "id": "box_pa1",
+            "label": "치근단 병소 (Dental_012 실측 모델 원시 출력)",
+            "fdi": "36 or 37 Apex",
+            "quadrant": "Q3 (하악 좌측)",
+            "category": "periapical",
+            "x1": 912, "y1": 417, "x2": 942, "y2": 448, # Exact model detection raw coords
+            "confidence": 0.541,
+            "verified": False,
+            "notes": "Dental_012 원시 YOLO11s 출력 좌표 [912, 417, 942, 448]. 화면 우측 하단이므로 환자 좌측 하악(Q3) #36 or #37 Apex임!"
+        },
+        {
+            "id": "box_r36",
+            "label": "#36 수복물 (Crown)",
+            "fdi": "36",
+            "quadrant": "Q3 (하악 좌측)",
+            "category": "restoration",
+            "x1": 830, "y1": 320, "x2": 895, "y2": 375,
+            "confidence": 0.88,
+            "verified": False,
+            "notes": "하악 좌측 제1대구치 보철 소견"
         }
+    ]
+
+@app.get("/api/images/thegem")
+def get_thegem_image():
+    if os.path.exists(THEGEM_IMG_PATH):
+        return FileResponse(THEGEM_IMG_PATH, media_type="image/jpeg")
+    raise HTTPException(status_code=404, detail="TheGem Image not found")
+
+@app.get("/api/metadata")
+def get_metadata():
+    boxes = get_initial_boxes()
+    if os.path.exists(ANNOTATIONS_FILE):
+        try:
+            with open(ANNOTATIONS_FILE, "r", encoding="utf-8") as f:
+                saved = json.load(f)
+                boxes = saved.get("boxes", boxes)
+        except Exception:
+            pass
+
+    return {
+        "image_id": "panoramic-x-ray-thegem-blog-default.jpg",
+        "sha256": THEGEM_SHA256,
+        "width": THEGEM_WIDTH,
+        "height": THEGEM_HEIGHT,
+        "coordinate_system": "pixel_xyxy",
+        "patient_orientation": {
+            "screen_left": "Patient Right (Q1 / Q4)",
+            "screen_right": "Patient Left (Q2 / Q3)"
+        },
+        "boxes": boxes
     }
+
+@app.post("/api/save_annotations")
+def save_annotations(payload: AnnotationSavePayload):
+    os.makedirs(OUTPUT_DIR, exist_ok=True)
+    with open(ANNOTATIONS_FILE, "w", encoding="utf-8") as f:
+        json.dump(payload.dict(), f, indent=2, ensure_ascii=False)
+        
+    return {"status": "SUCCESS", "path": ANNOTATIONS_FILE, "count": len(payload.boxes)}
 
 @app.post("/api/save_criteria")
 def save_criteria(data: CriteriaModel):
@@ -77,11 +243,9 @@ def save_criteria(data: CriteriaModel):
     json_path = os.path.join(OUTPUT_DIR, "clinical_criteria_v1.json")
     md_path = os.path.join(OUTPUT_DIR, "clinical_criteria_v1.md")
     
-    # Save JSON
     with open(json_path, "w", encoding="utf-8") as f:
         json.dump(data.dict(), f, indent=2, ensure_ascii=False)
         
-    # Save Markdown
     md_content = f"""# [ 260928 치과 임상 라벨 및 판정 기준표 (v1.0 SSOT) ]
 
 - 확정자: {data.confirmed_by}
@@ -123,7 +287,6 @@ def save_criteria(data: CriteriaModel):
         
     return {"status": "SUCCESS", "json_path": json_path, "md_path": md_path}
 
-# Mount static files if present
 if os.path.exists(STATIC_DIR):
     app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
 

@@ -6,7 +6,7 @@
   <title>Dental 2단계 임상 라벨 및 판정 기준 확정 도구</title>
   <style>
     :root {
-      --bg: #0f172a;
+      --bg: #0b1120;
       --card-bg: #1e293b;
       --border: #334155;
       --text: #f8fafc;
@@ -25,16 +25,32 @@
     header {
       background: var(--card-bg);
       border-bottom: 1px solid var(--border);
-      padding: 12px 24px;
+      padding: 10px 20px;
       display: flex;
       justify-content: space-between;
       align-items: center;
       flex-shrink: 0;
     }
-    header h1 { font-size: 1.15rem; font-weight: 700; color: #60a5fa; display: flex; align-items: center; gap: 8px; }
-    .badge { background: #1e3a8a; color: #93c5fd; padding: 3px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: 600; }
-    .header-info { font-size: 0.85rem; color: var(--text-muted); }
+    header h1 { font-size: 1.1rem; font-weight: 700; color: #60a5fa; display: flex; align-items: center; gap: 8px; }
+    .badge { background: #1e3a8a; color: #93c5fd; padding: 3px 8px; border-radius: 4px; font-size: 0.72rem; font-weight: 600; }
+    .header-info { font-size: 0.8rem; color: var(--text-muted); }
     
+    /* Orientation Bar */
+    .orientation-bar {
+      background: #111827;
+      border-bottom: 1px solid #1f2937;
+      padding: 6px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.78rem;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+    }
+    .orient-left { color: #f59e0b; }
+    .orient-center { color: #94a3b8; font-weight: 500; font-size: 0.72rem; }
+    .orient-right { color: #38bdf8; }
+
     /* Layout */
     .main-container {
       display: flex;
@@ -44,163 +60,189 @@
     
     /* Left: Viewer */
     .viewer-panel {
-      flex: 1.3;
+      flex: 1.4;
       display: flex;
       flex-direction: column;
-      background: #020617;
+      background: #030712;
       border-right: 1px solid var(--border);
-      padding: 16px;
+      padding: 12px 16px;
       overflow: hidden;
     }
     .viewer-toolbar {
       display: flex;
-      gap: 12px;
-      margin-bottom: 12px;
+      gap: 8px;
+      margin-bottom: 8px;
       align-items: center;
+      flex-wrap: wrap;
     }
     .btn-toggle {
-      background: #334155;
+      background: #1e293b;
       color: var(--text);
       border: 1px solid #475569;
-      padding: 6px 12px;
+      padding: 5px 10px;
       border-radius: 6px;
       cursor: pointer;
-      font-size: 0.8rem;
-      transition: all 0.2s;
+      font-size: 0.75rem;
+      transition: all 0.15s;
     }
     .btn-toggle.active { background: var(--primary); border-color: var(--primary-hover); }
+    .btn-action-sm {
+      background: #334155;
+      color: #fff;
+      border: 1px solid #64748b;
+      padding: 5px 10px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+    .btn-action-sm:hover { background: #475569; }
+
     .canvas-wrapper {
       flex: 1;
       position: relative;
       background: #000;
       border-radius: 8px;
       overflow: hidden;
-      border: 1px solid var(--border);
+      border: 1px solid #1f2937;
       display: flex;
       justify-content: center;
       align-items: center;
+      cursor: crosshair;
     }
-    canvas { max-width: 100%; max-height: 100%; object-fit: contain; }
+    canvas { display: block; max-width: 100%; max-height: 100%; }
+
+    .meta-bar {
+      margin-top: 8px;
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.72rem;
+      color: var(--text-muted);
+    }
     .legend {
       display: flex;
-      gap: 16px;
-      margin-top: 10px;
-      font-size: 0.78rem;
+      gap: 12px;
+      font-size: 0.73rem;
+      flex-wrap: wrap;
     }
-    .legend-item { display: flex; align-items: center; gap: 6px; }
-    .legend-dot { width: 10px; height: 10px; border-radius: 2px; }
+    .legend-item { display: flex; align-items: center; gap: 5px; }
+    .legend-dot { width: 9px; height: 9px; border-radius: 2px; }
     
     /* Right: Control / Form */
     .control-panel {
       flex: 1;
       background: var(--card-bg);
       overflow-y: auto;
-      padding: 20px 24px;
+      padding: 16px 20px;
       display: flex;
       flex-direction: column;
-      gap: 20px;
+      gap: 16px;
     }
     
     .card {
       background: #0f172a;
       border: 1px solid var(--border);
       border-radius: 8px;
-      padding: 16px;
+      padding: 14px;
+    }
+    .card.highlight {
+      border-color: #38bdf8;
+      background: #0c1c38;
     }
     .card-title {
-      font-size: 0.95rem;
+      font-size: 0.88rem;
       font-weight: 700;
-      margin-bottom: 12px;
+      margin-bottom: 10px;
       display: flex;
       justify-content: space-between;
       align-items: center;
     }
     .card-title span { color: #38bdf8; }
     
-    .form-group { margin-bottom: 14px; }
+    .form-group { margin-bottom: 12px; }
     .form-group:last-child { margin-bottom: 0; }
-    label { display: block; font-size: 0.82rem; color: var(--text-muted); margin-bottom: 6px; font-weight: 500; }
+    label { display: block; font-size: 0.78rem; color: var(--text-muted); margin-bottom: 4px; font-weight: 600; }
     
-    .radio-group { display: flex; flex-direction: column; gap: 8px; }
+    .radio-group { display: flex; flex-direction: column; gap: 6px; }
     .radio-label {
       display: flex;
       align-items: flex-start;
       gap: 8px;
       background: #1e293b;
-      padding: 10px;
+      padding: 8px 10px;
       border-radius: 6px;
       border: 1px solid var(--border);
       cursor: pointer;
-      font-size: 0.83rem;
-      line-height: 1.4;
+      font-size: 0.8rem;
+      line-height: 1.35;
     }
     .radio-label input { margin-top: 3px; }
-    .radio-label:hover { border-color: var(--primary); }
     .radio-label.checked { border-color: var(--primary); background: #1e3a8a33; }
     
-    .slider-container { display: flex; align-items: center; gap: 12px; }
+    .slider-container { display: flex; align-items: center; gap: 10px; }
     .slider-container input[type="range"] { flex: 1; }
-    .slider-val { font-size: 0.85rem; font-weight: 700; color: #38bdf8; width: 45px; text-align: right; }
+    .slider-val { font-size: 0.82rem; font-weight: 700; color: #38bdf8; width: 40px; text-align: right; }
     
-    textarea, input[type="text"] {
+    textarea, input[type="text"], select {
       width: 100%;
       background: #1e293b;
       border: 1px solid var(--border);
       border-radius: 6px;
       color: var(--text);
-      padding: 8px 10px;
-      font-size: 0.82rem;
+      padding: 6px 8px;
+      font-size: 0.78rem;
     }
-    textarea:focus, input[type="text"]:focus { outline: none; border-color: var(--primary); }
+    textarea:focus, input[type="text"]:focus, select:focus { outline: none; border-color: var(--primary); }
     
     .table-mapping {
       width: 100%;
       border-collapse: collapse;
-      font-size: 0.8rem;
-      margin-top: 6px;
+      font-size: 0.76rem;
+      margin-top: 4px;
     }
     .table-mapping th, .table-mapping td {
       border: 1px solid var(--border);
-      padding: 6px 8px;
+      padding: 5px 6px;
       text-align: left;
     }
     .table-mapping th { background: #1e293b; color: var(--text-muted); }
     
     .action-panel {
-      padding-top: 10px;
       display: flex;
-      gap: 12px;
+      flex-direction: column;
+      gap: 8px;
+      margin-top: 4px;
     }
     .btn-submit {
-      flex: 1;
       background: var(--primary);
       color: #fff;
       border: none;
-      padding: 12px;
-      border-radius: 8px;
+      padding: 10px;
+      border-radius: 6px;
       font-weight: 700;
-      font-size: 0.95rem;
+      font-size: 0.88rem;
       cursor: pointer;
       display: flex;
       justify-content: center;
       align-items: center;
-      gap: 8px;
-      box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+      gap: 6px;
     }
     .btn-submit:hover { background: var(--primary-hover); }
-    
+    .btn-submit.green { background: #059669; }
+    .btn-submit.green:hover { background: #047857; }
+
     /* Toast */
     #toast {
       position: fixed;
-      bottom: 24px;
-      right: 24px;
+      bottom: 20px;
+      right: 20px;
       background: #065f46;
       color: #a7f3d0;
-      padding: 12px 20px;
-      border-radius: 8px;
+      padding: 10px 16px;
+      border-radius: 6px;
       border: 1px solid #059669;
-      box-shadow: 0 8px 24px rgba(0,0,0,0.5);
-      font-size: 0.88rem;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.5);
+      font-size: 0.82rem;
       font-weight: 600;
       display: none;
       z-index: 1000;
@@ -211,42 +253,110 @@
 
   <header>
     <div>
-      <h1>치과 AI 임상 라벨 및 판정 기준 확정 도구 <span class="badge">2단계 검토 전용</span></h1>
+      <h1>치과 AI 2단계 임상 라벨 및 판정 기준 확정 도구 <span class="badge">검수 전용 에디터</span></h1>
     </div>
     <div class="header-info">
-      확정자: <strong>안현찬 치과의사</strong> | 대상: TheGem 파노라마 & DENTEX 표준 사례
+      확정자: <strong>안현찬 치과의사</strong> | 대상: TheGem 파노라마 (1170x540)
     </div>
   </header>
+
+  <!-- Patient Orientation Bar -->
+  <div class="orientation-bar">
+    <div class="orient-left">◀ 환자 우측 [ Patient Right (Q1 / Q4) ]</div>
+    <div class="orient-center">▲ 상악 (Maxilla) | 파노라마 전치부 (Midline) | 하악 (Mandible) ▼</div>
+    <div class="orient-right">환자 좌측 [ Patient Left (Q2 / Q3) ] ▶</div>
+  </div>
 
   <div class="main-container">
     
     <!-- Left: Canvas Viewer -->
     <div class="viewer-panel">
       <div class="viewer-toolbar">
-        <button class="btn-toggle active" id="btnToggleSN" onclick="toggleLayer('sn')">과잉치 (#18/#28 인접)</button>
-        <button class="btn-toggle active" id="btnToggleImp" onclick="toggleLayer('imp')">매복치 (#18/#28/#48)</button>
-        <button class="btn-toggle active" id="btnTogglePA" onclick="toggleLayer('pa')">치근단 병소 & 정상 음영</button>
-        <button class="btn-toggle active" id="btnToggleRest" onclick="toggleLayer('rest')">수복물 (#16, 26, 36, 46)</button>
+        <button class="btn-toggle active" id="btnToggleSN" onclick="toggleLayer('supernumerary')">과잉치 (#18/#28 인접)</button>
+        <button class="btn-toggle active" id="btnToggleImp" onclick="toggleLayer('impaction')">매복치 (#18/#28/#48)</button>
+        <button class="btn-toggle active" id="btnTogglePA" onclick="toggleLayer('periapical')">치근단 병소 (#36/37)</button>
+        <button class="btn-toggle active" id="btnToggleAnat" onclick="toggleLayer('normal_anatomy')">정상 해부학적 음영</button>
+        <button class="btn-toggle active" id="btnToggleRest" onclick="toggleLayer('restoration')">수복물 (#16, 26, 36, 46)</button>
         <span style="flex:1;"></span>
-        <span style="font-size:0.75rem; color:var(--text-muted);">좌표 자동 매핑: TheGem (1170x540)</span>
+        <button class="btn-action-sm" onclick="addNewBox()">+ 새 박스 추가</button>
+        <button class="btn-action-sm" style="background:#dc2626;" onclick="deleteSelectedBox()">삭제</button>
       </div>
 
-      <div class="canvas-wrapper">
+      <div class="canvas-wrapper" id="canvasContainer">
         <canvas id="panoCanvas" width="1170" height="540"></canvas>
       </div>
 
-      <div class="legend">
-        <div class="legend-item"><div class="legend-dot" style="background:#a855f7;"></div> 보라: 과잉치 후보</div>
-        <div class="legend-item"><div class="legend-dot" style="background:#ec4899;"></div> 핑크: 매복 대구치</div>
-        <div class="legend-item"><div class="legend-dot" style="background:#ef4444;"></div> 빨강: 치근단 병소 (0.54)</div>
-        <div class="legend-item"><div class="legend-dot" style="background:#eab308;"></div> 노랑: 정상 해부학적 음영</div>
-        <div class="legend-item"><div class="legend-dot" style="background:#06b6d4;"></div> 청록: 수복물</div>
+      <div class="meta-bar">
+        <div class="legend">
+          <div class="legend-item"><div class="legend-dot" style="background:#a855f7;"></div> 보라: 과잉치</div>
+          <div class="legend-item"><div class="legend-dot" style="background:#ec4899;"></div> 핑크: 매복 대구치</div>
+          <div class="legend-item"><div class="legend-dot" style="background:#ef4444;"></div> 빨강: 치근단 병소 (012 원시)</div>
+          <div class="legend-item"><div class="legend-dot" style="background:#eab308;"></div> 노랑: 정상 해부음영</div>
+          <div class="legend-item"><div class="legend-dot" style="background:#06b6d4;"></div> 청록: 수복물</div>
+        </div>
+        <div id="imageHashLabel" style="font-family:monospace;">SHA: 80585d1c... (1170x540)</div>
       </div>
     </div>
 
-    <!-- Right: Review Form -->
+    <!-- Right: Control / Inspector / Form -->
     <div class="control-panel">
       
+      <!-- Selected Box Inspector Card -->
+      <div class="card highlight" id="inspectorCard">
+        <div class="card-title">
+          <span>선택된 박스 인스펙터 (직접 클릭/드래그 수정)</span>
+          <span id="selectedBoxBadge" style="font-size:0.75rem; color:#f59e0b;">[박스 미선택]</span>
+        </div>
+        <div style="display:flex; gap:10px; margin-bottom:8px;">
+          <div style="flex:1;">
+            <label>라벨명:</label>
+            <input type="text" id="boxLabel" oninput="updateCurrentBoxProp('label', this.value)">
+          </div>
+          <div style="width:110px;">
+            <label>치식 (FDI):</label>
+            <input type="text" id="boxFDI" oninput="updateCurrentBoxProp('fdi', this.value)">
+          </div>
+        </div>
+        <div style="display:flex; gap:10px; margin-bottom:8px;">
+          <div style="flex:1;">
+            <label>환자 기준 사분악 (Quadrant):</label>
+            <select id="boxQuadrant" onchange="updateCurrentBoxProp('quadrant', this.value)">
+              <option value="Q1 (상악 우측)">Q1 (상악 우측 / 화면 좌상)</option>
+              <option value="Q2 (상악 좌측)">Q2 (상악 좌측 / 화면 우상)</option>
+              <option value="Q3 (하악 좌측)">Q3 (하악 좌측 / 화면 우하)</option>
+              <option value="Q4 (하악 우측)">Q4 (하악 우측 / 화면 좌하)</option>
+              <option value="General">General / Midline</option>
+            </select>
+          </div>
+          <div style="width:140px;">
+            <label>소견 범주 (Category):</label>
+            <select id="boxCategory" onchange="updateCurrentBoxProp('category', this.value)">
+              <option value="supernumerary">과잉치</option>
+              <option value="impaction">매복치</option>
+              <option value="periapical">치근단 병소</option>
+              <option value="normal_anatomy">정상 해부음영</option>
+              <option value="restoration">수복물</option>
+            </select>
+          </div>
+        </div>
+        <div style="display:flex; gap:10px; align-items:center; margin-bottom:8px;">
+          <div style="flex:1; font-size:0.75rem; color:var(--text-muted); font-family:monospace;" id="boxCoordsLabel">
+            픽셀 좌표: [x1: -, y1: -, x2: -, y2: -]
+          </div>
+          <label style="display:flex; align-items:center; gap:6px; cursor:pointer; margin:0; font-size:0.8rem; color:#10b981;">
+            <input type="checkbox" id="boxVerified" onchange="updateCurrentBoxProp('verified', this.checked)">
+            <strong>안현찬 치과의사 검수 완료</strong>
+          </label>
+        </div>
+        <div class="form-group">
+          <label>임상 비고 (메모):</label>
+          <input type="text" id="boxNotes" oninput="updateCurrentBoxProp('notes', this.value)">
+        </div>
+        <button class="btn-submit green" style="padding:6px; font-size:0.8rem;" onclick="saveAnnotationsToServer()">
+          이 파노라마 검수 박스 저장 (thegem_verified_annotations.json)
+        </button>
+      </div>
+
       <!-- Section 1: Dental_008 과잉치 정책 -->
       <div class="card">
         <div class="card-title">
@@ -259,14 +369,14 @@
               <input type="radio" name="sn_policy" value="SEPARATE_ENTITY" checked onchange="updateRadio(this)">
               <div>
                 <strong>[권장] 별도 독립 `Supernumerary` 클래스로 분리 표기</strong><br>
-                <span style="font-size:0.75rem; color:var(--text-muted);">정규 32개 FDI 치식에 억지로 귀속시키지 않고 독립 개체(예: SN-1, SN-2 또는 4분악 코드 FDI-19, 29)로 분리 라벨링. 하류 FDI 번호 밀림 방지.</span>
+                <span style="font-size:0.73rem; color:var(--text-muted);">정규 32개 FDI 치식에 억지로 귀속시키지 않고 독립 개체(예: SN-1, SN-2 또는 4분악 코드 FDI-19, 29)로 분리 라벨링하여 하류 FDI 번호 밀림을 원천 차단함.</span>
               </div>
             </label>
             <label class="radio-label">
               <input type="radio" name="sn_policy" value="MERGE_NEAREST" onchange="updateRadio(this)">
               <div>
                 <strong>[기존] 인접 정규 치식으로 강제 병합</strong><br>
-                <span style="font-size:0.75rem; color:var(--text-muted);">#18 또는 #28의 일부로 흡수하여 32개 번호 체계 유지. (단, 도미노 번호 밀림 위험 잔존)</span>
+                <span style="font-size:0.73rem; color:var(--text-muted);">#18 또는 #28의 일부로 흡수하여 32개 번호 체계 유지. (도미노 번호 밀림 위험 잔존)</span>
               </div>
             </label>
           </div>
@@ -295,7 +405,7 @@
             <input type="range" id="paThreshDef" min="0.30" max="0.80" step="0.05" value="0.50" oninput="document.getElementById('valDef').innerText = this.value">
             <div class="slider-val" id="valDef">0.50</div>
           </div>
-          <span style="font-size:0.75rem; color:var(--text-muted);">이 값 이상은 명확한 치근단 방사선 투과상 병소로 자동 확정</span>
+          <span style="font-size:0.73rem; color:var(--text-muted);">이 값 이상은 명확한 치근단 방사선 투과상 병소로 자동 확정</span>
         </div>
 
         <div class="form-group">
@@ -304,7 +414,7 @@
             <input type="range" id="paThreshRev" min="0.15" max="0.45" step="0.05" value="0.25" oninput="document.getElementById('valRev').innerText = this.value">
             <div class="slider-val" id="valRev">0.25</div>
           </div>
-          <span style="font-size:0.75rem; color:var(--text-muted);">0.25 이상 0.50 미만은 "전문의 검토 필요(Review Required)"로 주황색 뱃지 표기</span>
+          <span style="font-size:0.73rem; color:var(--text-muted);">0.25 이상 0.50 미만은 "전문의 검토 필요(Review Required)"로 주황색 뱃지 표기</span>
         </div>
 
         <div class="form-group">
@@ -312,12 +422,12 @@
             <input type="checkbox" id="paAnatomyGuard" checked>
             <strong>정상 해부학적 구조(상악동, 이공) 가드 활성화</strong>
           </label>
-          <span style="font-size:0.75rem; color:var(--text-muted);">하악 이공 및 상악동 저 부근의 0.40 이하 저신뢰도 투과상은 위양성 방지를 위해 의심 소견으로 유보</span>
+          <span style="font-size:0.73rem; color:var(--text-muted);">하악 이공 및 상악동 저 부근의 0.40 이하 저신뢰도 투과상은 위양성 방지를 위해 의심 소견으로 유보</span>
         </div>
 
         <div class="form-group">
           <label>치근단 병소 임상 지침:</label>
-          <textarea id="paNotes" rows="2">치근단 병소는 반드시 치아 Root Apex 반경 내에 인접할 때만 해당 FDI 번호로 귀속하며, 단독 투과상은 턱뼈 내 낭종 또는 해부학적 음영으로 분류하여 격리함.</textarea>
+          <textarea id="paNotes" rows="2">치근단 병소는 반드시 치아 Root Apex 반경 내에 인접할 때만 해당 FDI 번호로 귀속하며(TheGem 병소는 하악 좌측 #36/#37 apex), 단독 투과상은 턱뼈 내 낭종 또는 정상 음영으로 격리함.</textarea>
         </div>
       </div>
 
@@ -326,16 +436,12 @@
         <div class="card-title">
           <span>3. Dental_013 수복물 4대 임상 분류 체계</span>
         </div>
-        <p style="font-size:0.75rem; color:var(--text-muted); margin-bottom:10px;">
-          기존 31개 클래스를 안현찬 선생님께서 지시하신 4대 핵심 임상 범주로 일원화 매핑합니다.
-        </p>
-
         <table class="table-mapping">
           <thead>
             <tr>
               <th>기존 세부 소견</th>
               <th>확정 4대 임상 범주</th>
-              <th>적용 여부</th>
+              <th>적용</th>
             </tr>
           </thead>
           <tbody>
@@ -362,16 +468,16 @@
           </tbody>
         </table>
 
-        <div class="form-group" style="margin-top:12px;">
+        <div class="form-group" style="margin-top:10px;">
           <label>수복물/보철물 임상 가이드라인:</label>
-          <textarea id="restNotes" rows="2">치아 BBox 내 수복물 세그멘테이션 마스크가 감지되면 상기 4대 범주 중 가장 일치도가 높은 단일 클래스로 단순화하여 캔버스 및 SSOT에 표기함.</textarea>
+          <textarea id="restNotes" rows="2">치아 BBox 내 수복물 마스크가 감지되면 상기 4대 범주 중 가장 일치도가 높은 단일 클래스로 단순화하여 캔버스 및 SSOT에 표기함.</textarea>
         </div>
       </div>
 
       <!-- Action -->
       <div class="action-panel">
         <button class="btn-submit" onclick="submitCriteria()">
-          <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"></path></svg>
+          <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"></path></svg>
           임상 기준표 저장 및 확정 (Save Clinical Criteria SSOT)
         </button>
       </div>
@@ -379,33 +485,86 @@
     </div>
   </div>
 
-  <div id="toast">임상 기준표가 성공적으로 확정·저장되었습니다.</div>
+  <div id="toast">저장 완료되었습니다.</div>
 
   <script>
-    let sampleData = null;
+    let metadata = null;
+    let boxes = [];
+    let selectedBoxId = null;
     let imgObj = new Image();
-    let layers = { sn: true, imp: true, pa: true, rest: true };
+    let layers = { supernumerary: true, impaction: true, periapical: true, normal_anatomy: true, restoration: true };
+    
     const canvas = document.getElementById('panoCanvas');
     const ctx = canvas.getContext('2d');
+    const container = document.getElementById('canvasContainer');
 
-    // Load data
-    fetch('/api/sample_data')
+    // Drag / Interaction State
+    let isDragging = false;
+    let isResizing = false;
+    let resizeHandle = null; // 'tl', 'tr', 'bl', 'br'
+    let dragStartX = 0;
+    let dragStartY = 0;
+    let boxStartCoords = null;
+
+    // Load Image and Metadata
+    fetch('/api/metadata')
       .then(res => res.json())
       .then(data => {
-        sampleData = data.thegem;
-        imgObj.src = sampleData.image_url;
-        imgObj.onload = () => draw();
+        metadata = data;
+        boxes = data.boxes;
+        imgObj.src = '/api/images/thegem';
+        imgObj.onload = () => {
+          resizeCanvas();
+          draw();
+        };
       });
 
-    function toggleLayer(layer) {
-      layers[layer] = !layers[layer];
-      const btn = document.getElementById({
-        sn: 'btnToggleSN',
-        imp: 'btnToggleImp',
-        pa: 'btnTogglePA',
-        rest: 'btnToggleRest'
-      }[layer]);
-      if (layers[layer]) btn.classList.add('active');
+    window.addEventListener('resize', () => {
+      resizeCanvas();
+      draw();
+    });
+
+    function resizeCanvas() {
+      // Keep backing store at native 1170x540 for 1:1 pixel exactness
+      canvas.width = 1170;
+      canvas.height = 540;
+    }
+
+    function getCanvasTransform() {
+      const cw = canvas.width;
+      const ch = canvas.height;
+      const iw = 1170;
+      const ih = 540;
+      const scale = Math.min(cw / iw, ch / ih);
+      const offsetX = (cw - iw * scale) / 2;
+      const offsetY = (ch - ih * scale) / 2;
+      return { scale, offsetX, offsetY };
+    }
+
+    function screenToPixel(clientX, clientY) {
+      const rect = canvas.getBoundingClientRect();
+      const cssX = clientX - rect.left;
+      const cssY = clientY - rect.top;
+      const { scale, offsetX, offsetY } = getCanvasTransform();
+      // Adjust CSS to canvas internal resolution
+      const internalX = cssX * (canvas.width / rect.width);
+      const internalY = cssY * (canvas.height / rect.height);
+      const px = (internalX - offsetX) / scale;
+      const py = (internalY - offsetY) / scale;
+      return { x: px, y: py };
+    }
+
+    function toggleLayer(cat) {
+      layers[cat] = !layers[cat];
+      const btnMap = {
+        supernumerary: 'btnToggleSN',
+        impaction: 'btnToggleImp',
+        periapical: 'btnTogglePA',
+        normal_anatomy: 'btnToggleAnat',
+        restoration: 'btnToggleRest'
+      };
+      const btn = document.getElementById(btnMap[cat]);
+      if (layers[cat]) btn.classList.add('active');
       else btn.classList.remove('active');
       draw();
     }
@@ -415,65 +574,250 @@
       el.closest('.radio-label').classList.add('checked');
     }
 
-    function draw() {
-      if (!sampleData || !imgObj.complete) return;
+    function getCategoryColor(cat) {
+      switch (cat) {
+        case 'supernumerary': return '#a855f7'; // Purple
+        case 'impaction': return '#ec4899'; // Pink
+        case 'periapical': return '#ef4444'; // Red
+        case 'normal_anatomy': return '#eab308'; // Yellow
+        case 'restoration': return '#06b6d4'; // Cyan
+        default: return '#3b82f6';
+      }
+    }
 
+    function draw() {
+      if (!imgObj.complete) return;
       const cw = canvas.width;
       const ch = canvas.height;
       ctx.clearRect(0, 0, cw, ch);
 
-      // Draw background image
-      ctx.drawImage(imgObj, 0, 0, cw, ch);
+      const { scale, offsetX, offsetY } = getCanvasTransform();
 
-      const ann = sampleData.annotations;
+      // Draw background panorama
+      ctx.drawImage(imgObj, offsetX, offsetY, 1170 * scale, 540 * scale);
 
-      // 1. Supernumerary (Purple)
-      if (layers.sn && ann.supernumerary_cases) {
-        ann.supernumerary_cases.forEach(item => {
-          drawBox(item.x * cw, item.y * ch, item.w * cw, item.h * ch, '#a855f7', item.label, true);
-        });
-      }
+      // Draw boxes
+      boxes.forEach(b => {
+        if (!layers[b.category]) return;
 
-      // 2. Impaction (Pink)
-      if (layers.imp && ann.impaction_cases) {
-        ann.impaction_cases.forEach(item => {
-          drawBox(item.x * cw, item.y * ch, item.w * cw, item.h * ch, '#ec4899', item.label);
-        });
-      }
+        const sx1 = offsetX + b.x1 * scale;
+        const sy1 = offsetY + b.y1 * scale;
+        const sx2 = offsetX + b.x2 * scale;
+        const sy2 = offsetY + b.y2 * scale;
+        const sw = sx2 - sx1;
+        const sh = sy2 - sy1;
 
-      // 3. Periapical & Anatomy (Red & Yellow)
-      if (layers.pa && ann.periapical_cases) {
-        ann.periapical_cases.forEach(item => {
-          const color = item.type === 'periapical' ? '#ef4444' : '#eab308';
-          drawBox(item.x * cw, item.y * ch, item.w * cw, item.h * ch, color, `${item.label}`);
-        });
-      }
+        const isSelected = (b.id === selectedBoxId);
+        const color = getCategoryColor(b.category);
 
-      // 4. Restorations (Cyan)
-      if (layers.rest && ann.restoration_cases) {
-        ann.restoration_cases.forEach(item => {
-          drawBox(item.x * cw, item.y * ch, item.w * cw, item.h * ch, '#06b6d4', item.label);
-        });
-      }
+        ctx.save();
+        ctx.strokeStyle = isSelected ? '#38bdf8' : color;
+        ctx.lineWidth = isSelected ? 3.5 : (b.verified ? 2.5 : 2.0);
+
+        if (!b.verified && !isSelected) {
+          ctx.setLineDash([5, 3]); // Dashed for unverified
+        }
+
+        ctx.strokeRect(sx1, sy1, sw, sh);
+
+        // Header label
+        const statusTag = b.verified ? '[검수완료]' : '[예시/미검증]';
+        const displayLabel = `${b.label} ${b.fdi ? '('+b.fdi+')' : ''} ${statusTag}`;
+
+        ctx.fillStyle = isSelected ? '#0284c7' : color;
+        ctx.font = 'bold 11px sans-serif';
+        const textWidth = ctx.measureText(displayLabel).width;
+        ctx.fillRect(sx1, Math.max(0, sy1 - 18), textWidth + 8, 18);
+
+        ctx.fillStyle = '#ffffff';
+        ctx.fillText(displayLabel, sx1 + 4, Math.max(13, sy1 - 5));
+
+        // Draw handles if selected
+        if (isSelected) {
+          drawHandle(sx1, sy1);
+          drawHandle(sx2, sy1);
+          drawHandle(sx1, sy2);
+          drawHandle(sx2, sy2);
+        }
+
+        ctx.restore();
+      });
     }
 
-    function drawBox(x, y, w, h, color, label, dashed = false) {
-      ctx.save();
-      ctx.strokeStyle = color;
-      ctx.lineWidth = 2.5;
-      if (dashed) ctx.setLineDash([5, 3]);
-      ctx.strokeRect(x, y, w, h);
+    function drawHandle(x, y) {
+      ctx.fillStyle = '#38bdf8';
+      ctx.strokeStyle = '#ffffff';
+      ctx.lineWidth = 1.5;
+      ctx.fillRect(x - 5, y - 5, 10, 10);
+      ctx.strokeRect(x - 5, y - 5, 10, 10);
+    }
 
-      // Label background
-      ctx.fillStyle = color;
-      ctx.font = 'bold 11px sans-serif';
-      const textWidth = ctx.measureText(label).width;
-      ctx.fillRect(x, Math.max(0, y - 18), textWidth + 8, 18);
+    // Canvas Mouse Events
+    canvas.addEventListener('mousedown', (e) => {
+      const p = screenToPixel(e.clientX, e.clientY);
+      dragStartX = p.x;
+      dragStartY = p.y;
 
-      // Label text
-      ctx.fillStyle = '#ffffff';
-      ctx.fillText(label, x + 4, Math.max(13, y - 5));
-      ctx.restore();
+      // 1. Check if clicking handle of currently selected box
+      if (selectedBoxId) {
+        const b = boxes.find(x => x.id === selectedBoxId);
+        if (b) {
+          const tol = 12; // Pixel tolerance
+          if (Math.hypot(p.x - b.x1, p.y - b.y1) < tol) { isResizing = true; resizeHandle = 'tl'; return; }
+          if (Math.hypot(p.x - b.x2, p.y - b.y1) < tol) { isResizing = true; resizeHandle = 'tr'; return; }
+          if (Math.hypot(p.x - b.x1, p.y - b.y2) < tol) { isResizing = true; resizeHandle = 'bl'; return; }
+          if (Math.hypot(p.x - b.x2, p.y - b.y2) < tol) { isResizing = true; resizeHandle = 'br'; return; }
+        }
+      }
+
+      // 2. Check if clicking inside any visible box
+      let clickedBox = null;
+      for (let i = boxes.length - 1; i >= 0; i--) {
+        const b = boxes[i];
+        if (!layers[b.category]) continue;
+        if (p.x >= b.x1 && p.x <= b.x2 && p.y >= b.y1 && p.y <= b.y2) {
+          clickedBox = b;
+          break;
+        }
+      }
+
+      if (clickedBox) {
+        selectedBoxId = clickedBox.id;
+        isDragging = true;
+        boxStartCoords = { x1: clickedBox.x1, y1: clickedBox.y1, x2: clickedBox.x2, y2: clickedBox.y2 };
+        updateInspector();
+        draw();
+      } else {
+        selectedBoxId = null;
+        updateInspector();
+        draw();
+      }
+    });
+
+    window.addEventListener('mousemove', (e) => {
+      if (!isDragging && !isResizing) return;
+      const p = screenToPixel(e.clientX, e.clientY);
+      const b = boxes.find(x => x.id === selectedBoxId);
+      if (!b) return;
+
+      const dx = p.x - dragStartX;
+      const dy = p.y - dragStartY;
+
+      if (isDragging && boxStartCoords) {
+        const width = boxStartCoords.x2 - boxStartCoords.x1;
+        const height = boxStartCoords.y2 - boxStartCoords.y1;
+        b.x1 = Math.max(0, Math.min(1170 - width, Math.round(boxStartCoords.x1 + dx)));
+        b.y1 = Math.max(0, Math.min(540 - height, Math.round(boxStartCoords.y1 + dy)));
+        b.x2 = b.x1 + width;
+        b.y2 = b.y1 + height;
+      } else if (isResizing) {
+        if (resizeHandle === 'tl') { b.x1 = Math.round(p.x); b.y1 = Math.round(p.y); }
+        if (resizeHandle === 'tr') { b.x2 = Math.round(p.x); b.y1 = Math.round(p.y); }
+        if (resizeHandle === 'bl') { b.x1 = Math.round(p.x); b.y2 = Math.round(p.y); }
+        if (resizeHandle === 'br') { b.x2 = Math.round(p.x); b.y2 = Math.round(p.y); }
+        // Ensure x1 < x2 and y1 < y2
+        if (b.x1 > b.x2) { const t = b.x1; b.x1 = b.x2; b.x2 = t; }
+        if (b.y1 > b.y2) { const t = b.y1; b.y1 = b.y2; b.y2 = t; }
+      }
+
+      updateCoordsLabel(b);
+      draw();
+    });
+
+    window.addEventListener('mouseup', () => {
+      isDragging = false;
+      isResizing = false;
+      resizeHandle = null;
+    });
+
+    function updateInspector() {
+      const card = document.getElementById('inspectorCard');
+      const badge = document.getElementById('selectedBoxBadge');
+      const b = boxes.find(x => x.id === selectedBoxId);
+
+      if (!b) {
+        badge.innerText = '[박스 미선택]';
+        badge.style.color = '#f59e0b';
+        document.getElementById('boxLabel').value = '';
+        document.getElementById('boxFDI').value = '';
+        document.getElementById('boxQuadrant').value = 'Q1 (상악 우측)';
+        document.getElementById('boxCategory').value = 'supernumerary';
+        document.getElementById('boxVerified').checked = false;
+        document.getElementById('boxNotes').value = '';
+        document.getElementById('boxCoordsLabel').innerText = '픽셀 좌표: [x1: -, y1: -, x2: -, y2: -]';
+        return;
+      }
+
+      badge.innerText = b.verified ? `[선택됨: 검수완료 (${b.id})]` : `[선택됨: 미검증 (${b.id})]`;
+      badge.style.color = b.verified ? '#10b981' : '#38bdf8';
+      document.getElementById('boxLabel').value = b.label;
+      document.getElementById('boxFDI').value = b.fdi || '';
+      document.getElementById('boxQuadrant').value = b.quadrant;
+      document.getElementById('boxCategory').value = b.category;
+      document.getElementById('boxVerified').checked = b.verified;
+      document.getElementById('boxNotes').value = b.notes || '';
+      updateCoordsLabel(b);
+    }
+
+    function updateCoordsLabel(b) {
+      document.getElementById('boxCoordsLabel').innerText = `픽셀 좌표: [x1: ${b.x1}, y1: ${b.y1}, x2: ${b.x2}, y2: ${b.y2}] (${b.x2 - b.x1}x${b.y2 - b.y1}px)`;
+    }
+
+    function updateCurrentBoxProp(prop, val) {
+      const b = boxes.find(x => x.id === selectedBoxId);
+      if (!b) return;
+      b[prop] = val;
+      updateInspector();
+      draw();
+    }
+
+    function addNewBox() {
+      const newId = 'box_user_' + Date.now();
+      const newBox = {
+        id: newId,
+        label: '신규 검수 소견',
+        fdi: '',
+        quadrant: 'Q1 (상악 우측)',
+        category: 'supernumerary',
+        x1: 500, y1: 220, x2: 600, y2: 300,
+        confidence: 1.0,
+        verified: true,
+        notes: '치과의사 수동 추가 박스'
+      };
+      boxes.push(newBox);
+      selectedBoxId = newId;
+      updateInspector();
+      draw();
+    }
+
+    function deleteSelectedBox() {
+      if (!selectedBoxId) return;
+      boxes = boxes.filter(x => x.id !== selectedBoxId);
+      selectedBoxId = null;
+      updateInspector();
+      draw();
+    }
+
+    function saveAnnotationsToServer() {
+      const payload = {
+        image_name: "panoramic-x-ray-thegem-blog-default.jpg",
+        image_sha256: "80585d1c86b95b39bb73ffb0d201057f72adb345b6bb15c885aa87f53c505e1b",
+        image_width: 1170,
+        image_height: 540,
+        confirmed_by: "안현찬 치과의사",
+        boxes: boxes
+      };
+
+      fetch('/api/save_annotations', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      })
+      .then(res => res.json())
+      .then(data => {
+        showToast("어노테이션 박스 저장 완료: thegem_verified_annotations.json");
+      })
+      .catch(err => alert("어노테이션 저장 실패: " + err));
     }
 
     function submitCriteria() {
@@ -504,12 +848,16 @@
       })
       .then(res => res.json())
       .then(data => {
-        const toast = document.getElementById('toast');
-        toast.innerText = "기준표 저장 완료: clinical_criteria_v1.json / md 생성됨";
-        toast.style.display = 'block';
-        setTimeout(() => { toast.style.display = 'none'; }, 4000);
+        showToast("임상 기준표 저장 완료: clinical_criteria_v1.json / md 발행됨");
       })
-      .catch(err => alert("저장 실패: " + err));
+      .catch(err => alert("기준표 저장 실패: " + err));
+    }
+
+    function showToast(msg) {
+      const toast = document.getElementById('toast');
+      toast.innerText = msg;
+      toast.style.display = 'block';
+      setTimeout(() => { toast.style.display = 'none'; }, 4000);
     }
   </script>
 </body>
