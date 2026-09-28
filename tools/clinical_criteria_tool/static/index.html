@@ -545,7 +545,14 @@
       });
 
     function onCaseChange(fn) {
-      loadCase(fn);
+      // 1. Auto-save current case before switching
+      if (currentCase && boxes && boxes.length > 0) {
+        saveAnnotationsToServerSilently(() => {
+          loadCase(fn);
+        });
+      } else {
+        loadCase(fn);
+      }
     }
 
     function loadCase(fn) {
@@ -564,7 +571,102 @@
             canvas.height = data.height;
             draw();
           };
-        });
+        })
+        .catch(err => alert("케이스 로드 실패: " + err));
+    }
+
+    function saveAnnotationsToServerSilently(callback) {
+      if (!currentCase) { if (callback) callback(); return; }
+      const payload = {
+        image_name: currentCase.filename,
+        image_sha256: currentCase.sha256,
+        image_width: currentCase.width,
+        image_height: currentCase.height,
+        confirmed_by: "안현찬 치과의사",
+        boxes: boxes
+      };
+
+      fetch('/api/save_annotations', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (callback) callback();
+      })
+      .catch(err => {
+        console.error("자동 저장 실패:", err);
+        if (callback) callback();
+      });
+    }
+
+    function saveAnnotationsToServer() {
+      if (!currentCase) return;
+      const payload = {
+        image_name: currentCase.filename,
+        image_sha256: currentCase.sha256,
+        image_width: currentCase.width,
+        image_height: currentCase.height,
+        confirmed_by: "안현찬 치과의사",
+        boxes: boxes
+      };
+
+      fetch('/api/save_annotations', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      })
+      .then(res => res.json())
+      .then(data => {
+        showToast(`현재 파노라마(${currentCase.filename}) 검수 박스 저장 완료!`);
+      })
+      .catch(err => alert("어노테이션 저장 실패: " + err));
+    }
+
+    function submitCriteria() {
+      // 1. First save current case boxes immediately so changes are never lost!
+      if (currentCase && boxes) {
+        saveAnnotationsToServerSilently();
+      }
+
+      const selectedPolicy = document.querySelector('input[name="sn_policy"]:checked').value;
+      const criteria = {
+        supernumerary_policy: selectedPolicy,
+        supernumerary_naming: document.getElementById('snNaming').value,
+        supernumerary_notes: document.getElementById('snNotes').value,
+        periapical_threshold_definite: parseFloat(document.getElementById('paThreshDef').value),
+        periapical_threshold_review: parseFloat(document.getElementById('paThreshRev').value),
+        periapical_anatomical_guard: document.getElementById('paAnatomyGuard').checked,
+        periapical_notes: document.getElementById('paNotes').value,
+        restoration_classes: ["Inlay/Onlay", "Crown/Bridge", "Implant", "Endodontic (RCT)"],
+        restoration_mapping: {
+          "Amalgam / Resin / Inlay": "Inlay/Onlay",
+          "Gold / PFM / Zirconia Crown": "Crown/Bridge",
+          "Implant Fixture / Abutment": "Implant",
+          "Root Canal Filling / Post": "Endodontic (RCT)"
+        },
+        restoration_notes: document.getElementById('restNotes').value,
+        confirmed_by: "안현찬 치과의사"
+      };
+
+      fetch('/api/save_criteria', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(criteria)
+      })
+      .then(res => res.json())
+      .then(data => {
+        showToast("임상 기준표 및 현재 파노라마 박스 저장 완결!");
+      })
+      .catch(err => alert("기준표 저장 실패: " + err));
+    }
+
+    function showToast(msg) {
+      const toast = document.getElementById('toast');
+      toast.innerText = msg;
+      toast.style.display = 'block';
+      setTimeout(() => { toast.style.display = 'none'; }, 3000);
     }
 
     function getCanvasTransform() {
@@ -839,68 +941,6 @@
       draw();
     }
 
-    function saveAnnotationsToServer() {
-      if (!currentCase) return;
-      const payload = {
-        image_name: currentCase.filename,
-        image_sha256: currentCase.sha256,
-        image_width: currentCase.width,
-        image_height: currentCase.height,
-        confirmed_by: "안현찬 치과의사",
-        boxes: boxes
-      };
-
-      fetch('/api/save_annotations', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      })
-      .then(res => res.json())
-      .then(data => {
-        showToast(`검수 박스 저장 완료: verified_${currentCase.filename}.json`);
-      })
-      .catch(err => alert("어노테이션 저장 실패: " + err));
-    }
-
-    function submitCriteria() {
-      const selectedPolicy = document.querySelector('input[name="sn_policy"]:checked').value;
-      const criteria = {
-        supernumerary_policy: selectedPolicy,
-        supernumerary_naming: document.getElementById('snNaming').value,
-        supernumerary_notes: document.getElementById('snNotes').value,
-        periapical_threshold_definite: parseFloat(document.getElementById('paThreshDef').value),
-        periapical_threshold_review: parseFloat(document.getElementById('paThreshRev').value),
-        periapical_anatomical_guard: document.getElementById('paAnatomyGuard').checked,
-        periapical_notes: document.getElementById('paNotes').value,
-        restoration_classes: ["Inlay/Onlay", "Crown/Bridge", "Implant", "Endodontic (RCT)"],
-        restoration_mapping: {
-          "Amalgam / Resin / Inlay": "Inlay/Onlay",
-          "Gold / PFM / Zirconia Crown": "Crown/Bridge",
-          "Implant Fixture / Abutment": "Implant",
-          "Root Canal Filling / Post": "Endodontic (RCT)"
-        },
-        restoration_notes: document.getElementById('restNotes').value,
-        confirmed_by: "안현찬 치과의사"
-      };
-
-      fetch('/api/save_criteria', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(criteria)
-      })
-      .then(res => res.json())
-      .then(data => {
-        showToast("임상 기준표 저장 완료: clinical_criteria_v1.json / md 발행됨");
-      })
-      .catch(err => alert("기준표 저장 실패: " + err));
-    }
-
-    function showToast(msg) {
-      const toast = document.getElementById('toast');
-      toast.innerText = msg;
-      toast.style.display = 'block';
-      setTimeout(() => { toast.style.display = 'none'; }, 4000);
-    }
   </script>
 </body>
 </html>
