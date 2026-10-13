@@ -521,12 +521,33 @@
   - TheGem 세부 매칭 잔여 P0 불일치 해소: plans_replies_walkthrough/260928_0312_Codex_Dental_Module_Weights_Full_Audit.md 문서 내 TheGem 설명 텍스트를 10_cases_quantitative_benchmark.json 상세 레코드와 1:1 완벽 동기화 (TP 8건: #36 치근단 1건, #18/#28/#38/#48 매복치 4건, #16/#26/#46 수복물 3건 / FN 3건: #36 수복물 IoU 0.11 < 0.25, #19 과잉치 클러스터링 병합, #29 과잉치 IoU 0.16 < 0.25 / FP 8건: 미매칭 수복물 7건, 미매칭 과잉치 예측 1건)
   - 매칭 임계치 규칙 및 FDI/BBox 분리 명시: TheGem 복합 검증 매칭 임계치(IoU >= 0.25) 및 공간 검출과 치아 귀속 축 분리 원칙 문서화
   - 10_cases_quantitative_benchmark.json 하드웨어 식별자 동기화: Laptop Dev Team (Intel Core i5-14450HX / RTX 4060 Laptop GPU / 16GB RAM) 확인 및 보존
-
-
-
-
-
-
-
-
-
+- 메인 워크스테이션 261013 1338 Codex 검수 의견 전면 수용 및 최종 정합 완결:
+  - TheGem 상세 매칭 잔여 P0 불일치 원천 해소:
+    - 보고서 본문 설명 및 1:1 대조표를 plans_replies_walkthrough/10_cases_quantitative_benchmark.json의 상세 레코드와 1문자 1숫자도 어긋남 없이 100% 완전 일치시킴
+    - 참양성(TP) 8건 확정 목록: 치근단 1건(#36 Apex, IoU 1.000), 매복치 4건(#18 IoU 0.288, #28 IoU 0.583, #38 IoU 0.577, #48 IoU 0.624), 수복물 3건(#16 IoU 0.864, #26 IoU 0.712, #46 IoU 0.389)
+    - 위음성(FN) 3건 확정 목록: #36 수복물(IoU 0.110 < 0.25 임계치 미달), #19 과잉치(#18 매복치 영역 클러스터링 병합), #29 과잉치(IoU 0.160 < 0.25 임계치 미달)
+    - 위양성(FP) 8건 확정 목록: 미매칭 수복물 후보 7건, 미매칭 과잉치 후보 1건(예측 #29 [901.5, 18.7, 988.4, 200.4], 골드 대비 IoU 0.160 미달로 별도 위양성 산입)
+    - 정량 지표: Precision 50.0% (8/16), Recall 72.7% (8/11), FDI Match 100.0% (8/8) 일원화 확정
+  - TheGem 통일 매칭 임계치 및 규칙 사전 고정:
+    - TheGem 복합 검증의 공간 BBox 매칭 기준을 단일 임계치 IoU >= 0.25로 사전 고정 선언하고 10_cases_quantitative_benchmark.json matching_policy에 명시적 반영
+    - 공간 검출(Spatial BBox IoU)과 치아 귀속(FDI Match) 평가 축 분리 원칙 공식화
+  - P1 임상 근거 및 평가 범위 성격 규정:
+    - Dental_009 제3대구치 높이비 88% 기준을 검증된 일반 임상 표준이 아닌 탐색적 엔지니어링 휴리스틱 및 경계 사례 선별 규칙으로 성격 한정
+    - 10개 대표 검증 사례를 일반화 성능 검증용 대규모 독립 벤치마크가 아닌 체어사이드 파이프라인 통합 무결성 및 임상 정합성 검증용 대표 기준 사례로 명확히 명시
+- 안현찬 총괄 공식 프로젝트 거버넌스 및 R&R(역할 분담) 체계 확정 (261013 1449 KST):
+  - 1. 안현찬 (프로젝트 총괄 / 치과의사 전문의) & 메인 워크스테이션 (AMD 라이젠9 9900X, RTX 5080 16GB, 64GB DDR5):
+    - 공동 핵심 의사결정 주체 (임상 SSOT 최종 승인, 운영 모델 판정, 기술 아키텍처 및 로드맵 채택)
+    - 고성능 연산 집행 (신경망 모델 재학습, 대규모 무누수 검증셋 실측 벤치마크, 핵심 파이프라인 알고리즘 핫픽스)
+  - 2. 랩탑 개발팀 (Intel Core i5-14450HX, RTX 4060 Laptop):
+    - 체어사이드 프론트엔드 웹 플랫폼 개발 (Dental_015 캔버스 뷰어, 오돈토그램, 임상 대시보드 UI/UX)
+    - 배포 파이프라인 및 서비스 레벨 클라이언트 연동, 현장 체어사이드 UAT 테스트 환경 운영
+  - 3. Codex (독립 감사관):
+    - 의사결정 및 개발 집행에서 완전히 배제된 제3자 객관적 사후 감사 전담 (데이터 누수, 모델 가중치 지문, 문서-JSON 내부 정합성 검증)
+  - 원칙 확립: 의사결정과 개발 집행은 총괄과 엔지니어링 팀이 완결하고, 감사관은 독립된 사후 검증 기준만을 유지하여 자기 감사 모순 및 관료적 교착 상태를 영구 차단함
+- Codex 261013 1348 검수 의견 잔여 P0(TheGem 미달 후보 IoU의 JSON 미보존) 조치 완결:
+  - plans_replies_walkthrough/10_cases_quantitative_benchmark.json 내 TheGem #36 수복물 및 #29 과잉치 FN/FP 레코드에 추적성 메타데이터 100% 보강
+    - #36 수복물 FN: best_candidate_pred_bbox: [767.0, 303.0, 847.0, 365.0], best_candidate_iou: 0.11, 대응 FP: candidate_gold_id: "box_user_1790558369468", candidate_gold_fdi: "#36", candidate_iou: 0.11 보존
+    - #29 과잉치 FN: best_candidate_pred_bbox: [901.5, 18.7, 988.4, 200.4], best_candidate_iou: 0.16, 대응 FP: candidate_gold_id: "box_user_1790558328044", candidate_gold_fdi: "#29", candidate_iou: 0.16 보존
+  - 단일 임계치(IoU >= 0.25) 및 1:1 매칭 무결성(Gold 11, TP 8, FP 8, FN 3)을 엄격히 유지하면서 보고서 텍스트와 JSON 간의 수치·좌표 100% 동기화 완결
+- plans_replies_walkthrough/260928_0312_Codex_Dental_Module_Weights_Full_Audit.md 최하단에 [261013 1455 안현찬 총괄 R&R 확정 디렉티브 및 메인 워크스테이션 Codex 1348 미달 IoU 추적성 보존 최종 완료 보고서] 공식 결합 완결
+- 형상 관리 무결성 유지: 작업 트리 클린 상태 보존 및 Codex 독립 감사관 앞 최종 PASS 승인 요청 인계

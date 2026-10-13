@@ -3,7 +3,7 @@
   "evaluation_date": "2026-10-13",
   "hardware": "Intel Core i5-14450HX / RTX 4060 Laptop GPU / 16GB RAM (Laptop Dev Team)",
   "matching_policy": {
-    "Composite_TheGem": "Evaluated 4 Gold Categories (periapical, impaction, restoration, supernumerary). Normal teeth and caries excluded as unannotated.",
+    "Composite_TheGem": "Unified threshold IoU >= 0.25 across all 4 evaluated gold categories (impaction, periapical, restoration, supernumerary). Normal teeth and caries excluded as unannotated in gold. One-to-one greedy matching by IoU with FDI match verification on TPs.",
     "Dental_008": "IoU >= 0.50, DENTEX quadrant/tooth converted to FDI ((q+1)*10 + (t+1)). FDI_Match evaluated on TPs.",
     "Dental_012": "IoU >= 0.30 periapical lesion spatial matching. Gold FDI lacks tooth numbers -> FDI_Match: N/A.",
     "Dental_013": "IoU >= 0.50 restoration spatial matching (4 clinical categories). Gold FDI lacks tooth numbers -> FDI_Match: N/A."
@@ -322,8 +322,16 @@
         "pred_fdi": null,
         "pred_bbox": null,
         "iou": 0.0,
+        "best_candidate_pred_bbox": [
+          767.0,
+          303.0,
+          847.0,
+          365.0
+        ],
+        "best_candidate_iou": 0.11,
         "fdi_match": false,
-        "status": "FN"
+        "status": "FN",
+        "note": "Sub-threshold candidate IoU 0.110 < 0.25 (candidate counted separately as FP)"
       },
       {
         "category": "restoration",
@@ -433,9 +441,13 @@
           847.0,
           365.0
         ],
+        "candidate_gold_id": "box_user_1790558369468",
+        "candidate_gold_fdi": "#36",
+        "candidate_iou": 0.11,
         "iou": 0.0,
         "fdi_match": false,
-        "status": "FP"
+        "status": "FP",
+        "note": "Sub-threshold candidate IoU 0.110 < 0.25 (evaluated against gold #36)"
       },
       {
         "category": "supernumerary",
@@ -466,8 +478,16 @@
         "pred_fdi": null,
         "pred_bbox": null,
         "iou": 0.0,
+        "best_candidate_pred_bbox": [
+          901.5,
+          18.7,
+          988.4,
+          200.4
+        ],
+        "best_candidate_iou": 0.16,
         "fdi_match": false,
-        "status": "FN"
+        "status": "FN",
+        "note": "Sub-threshold candidate IoU 0.160 < 0.25 (candidate counted separately as FP)"
       },
       {
         "category": "supernumerary",
@@ -481,9 +501,13 @@
           988.4,
           200.4
         ],
+        "candidate_gold_id": "box_user_1790558328044",
+        "candidate_gold_fdi": "#29",
+        "candidate_iou": 0.16,
         "iou": 0.0,
         "fdi_match": false,
-        "status": "FP"
+        "status": "FP",
+        "note": "Sub-threshold candidate IoU 0.160 < 0.25 (evaluated against gold #29)"
       }
     ],
     "case_008_dentex_1_train_283.png": [
