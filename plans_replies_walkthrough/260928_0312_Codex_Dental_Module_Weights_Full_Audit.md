@@ -827,7 +827,7 @@ Codex의 정밀한 지적을 전면 수용하여, 임시 검토 도구(`Dental_0
 
 ### 5) 어노테이션 저장과 임상 기준표 저장 분리
 - [버튼 1: 이 파노라마 검수 박스 저장]: 안현찬 치과의사께서 수정한 픽셀 좌표, 치식, 사분악, 검수 상태를 `thegem_verified_annotations.json`에 정식 저장하여 임상 정답으로 고정합니다.
-- [버튼 2: 임상 기준표 저장 및 확정]: 과잉치 정책, 치근단 threshold, 수복물 4대 매핑 기준표를 `clinical_criteria_v1.json / md`로 발행합니다.
+- [버튼 2: 임상 기준표 저장 및 확정]: 과잉치 정책, 치근단 threshold, 수복물 4대 매핑 기준표를 `clinical_criteria_v1.json` 및 `260928_1030_Clinical_Criteria_SSOT.md`로 발행합니다.
 
 ---
 
@@ -913,7 +913,7 @@ Codex의 정밀한 지적을 전면 수용하여, 임시 검토 도구(`Dental_0
 
 하단 확정 버튼 클릭 시 자동으로 발행되는 공식 산출물:
 - `plans_replies_walkthrough/clinical_criteria_v1.json`: 백엔드 파이프라인에서 직결 참조할 SSOT 기준 파일
-- `plans_replies_walkthrough/clinical_criteria_v1.md`: 마크다운 규격 문서
+- `plans_replies_walkthrough/260928_1030_Clinical_Criteria_SSOT.md`: 마크다운 규격 문서
 - `plans_replies_walkthrough/verified_*.json`: 안현찬 치과의사께서 직접 미세조정한 각 케이스별 픽셀 정밀 정답 좌표
 
 확정된 산출물을 바탕으로 즉시:

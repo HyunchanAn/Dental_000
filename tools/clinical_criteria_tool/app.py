@@ -149,7 +149,7 @@ def save_annotations(payload: AnnotationSavePayload):
 def save_criteria(data: CriteriaModel):
     os.makedirs(OUTPUT_DIR, exist_ok=True)
     json_path = os.path.join(OUTPUT_DIR, "clinical_criteria_v1.json")
-    md_path = os.path.join(OUTPUT_DIR, "clinical_criteria_v1.md")
+    md_path = os.path.join(OUTPUT_DIR, "260928_1030_Clinical_Criteria_SSOT.md")
     
     with open(json_path, "w", encoding="utf-8") as f:
         json.dump(data.dict(), f, indent=2, ensure_ascii=False)
