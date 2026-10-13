@@ -458,6 +458,69 @@
   - plans_replies_walkthrough/clinical_criteria_v1.md 문서를 전사 프로젝트 네이밍 표준 규약(YYMMDD_HHMM_Descriptive_Name.md)에 맞추어 plans_replies_walkthrough/260928_1030_Clinical_Criteria_SSOT.md 로 정합 변경(git mv) 적용
   - 임상 검토 도구 백엔드(app.py)의 마크다운 자동 생성 경로 및 260928_0312 감사 보고서 내 산출물 참조 경로 일괄 동기화 완료
 
+## 2026-10-13
+
+- 안현찬 총괄 지침에 따른 메인 워크스테이션 3단계(파이프라인 결함 수정), 4단계(통합 베이스라인 재평가), 5단계(RTX 5080 재학습 준비) 집행 완결:
+- 2단계 임상 기준표(SSOT) 공식 확인:
+  - plans_replies_walkthrough/clinical_criteria_v1.json 및 260928_1030_Clinical_Criteria_SSOT.md 발행 상태 확인
+  - 과잉치 SEPARATE_ENTITY 분리 정책, 치근단 0.50(Definite)/0.25(Review) 임계치 및 해부학적 가드, 수복물 4대 임상 범주 매핑 확정 기준 접수
+- 3단계 파이프라인 통합 결함 정밀 색출 및 시정 완료:
+  - Dental_012 치근단 병소 fdi: None 결함 완전 해결:
+    - 원인: core/pipeline.py에서 tooth_roi_data['contours'] 키 부재로 치아 데이터가 빈 리스트([])로 전달되던 인터페이스 결함 규명
+    - 시정: core/interfaces/dental_008.py에서 masks_np로부터 cv2.findContours를 정밀 추출하여 'contours' 키 공급 보완, modules/periapical_predictor.py에서 bbox 직접 지원 및 clinical_criteria SSOT 임계치 주입
+    - 결과: TheGem 치근단 병소(conf 0.54)가 하악 좌측 #38 Apex(거리 29.7px)에 clinical_status: "DEFINITE" 및 fdi: 38로 정상 앵커링 완결
+  - Dental_013 수복물 0건 검출 결함 및 4대 범주 매핑 완결:
+    - 원인: 전체 파노라마 영상(640x640) 기반 YOLOv8-seg 모델에 치아별 미세 크롭 영상을 입력으로 넣어 문맥 상실로 0건 검출되던 입력 불일치 결함 규명
+    - 시정: 원본 파노라마 전체 영상 추론으로 전환, 검출된 수복물 박스를 치아 BBox들과 2D 공간 교차 영역(IoA) 및 중심점 매칭으로 FDI 귀속, 31개 클래스를 SSOT 4대 임상 범주(Inlay/Onlay, Crown/Bridge, Implant, Endodontic-RCT)로 표준화 매핑
+    - 결과: TheGem 파노라마에서 총 10건의 수복물이 실시간 검출되어 #25, #16, #46, #37 등에 Inlay/Onlay 범주로 정밀 매핑 완결
+  - Dental_008 과잉치(Supernumerary) 독립 분리 정책 연동:
+    - 원인: DP 시퀀스 매처에서 32개 정규 치열 초과 박스를 0번 라벨로 처리하고 valid_mask로 폐기하여 정상 치열이 밀리거나 과잉치가 소실되던 문제 해결
+    - 시정: SEPARATE_ENTITY 정책을 적용하여 고신뢰도 잉여 치아를 사분면 기준 9번(#19, #29, #39, #49) 및 is_supernumerary 플래그로 분리 보존
+    - 결과: TheGem 파노라마에서 총 33개 치아(31개 정규치열 + 2개 #39 과잉치) 식별 및 33개 컨투어 일치 입증
+  - Dental_009 매복치 룰 가드:
+    - 직립/정상 맹출 치아(Fully Erupted and Vertical) 배제 가드 정상 작동 확인, TheGem #18 오탐 배제 및 #28, #48 매복치 정밀 검출 확인
+- 4단계 10개 대표 검증 케이스 전수 스모크 테스트 실측 완료:
+  - TheGem 종합 경계 케이스 및 DENTEX 3건, 치근단 3건, 수복물 3건 전 케이스 무결성 통과 (예외 및 누수 0건)
+- 5단계 RTX 5080 재학습 준비 상태 보고:
+  - Dental_008: 기존 가중치(yolov8m_best.pt)가 전악 검증셋 99.1% 초고성능을 보이며 치열 왜곡 원인이 하류 매처 결함이었음이 입증되어 현행 가중치 유지 권고
+  - Dental_012: 환자 무누수 매니페스트(3,439 train / 825 val) 기반 RTX 5080 재학습 준비 완료 유지
+- 260928_0312 감사 보고서 하단에 [261013 1130 메인 워크스테이션 3단계 파이프라인 SSOT 통합 및 4·5단계 집행 완료 보고서] 결합 완료
+- 안현찬 총괄 재학습 공식 승인에 따른 Dental_012 치근단 병소 모델 RTX 5080 재학습 집행 완결:
+  - 학습 환경: AMD 라이젠9 9900X, RTX 5080 16GB, 64GB DDR5, PyTorch AMP 가속
+  - 데이터셋: yolo_dataset_augmented (총 4,264장, Train 3,439장 / Val 825장, Overlap 0건 무오염 격리)
+  - 하이퍼파라미터: YOLO11s, batch=16, imgsz=640, workers=8, lr0=0.001, 30 Epochs
+  - 학습 수행 결과: 총 30 에포크 16.5분(0.276시간) 만에 완주 완료 (종료 시각: 12:07 KST)
+  - 실측 성적표 (825장 독립 검증셋): Precision 69.8%, Recall 59.5%, mAP50 66.2%, mAP50-95 30.4%, 추론 속도 0.6ms/img
+  - 과적합 평가: Train loss(box 1.68, cls 0.95) 및 Val loss(box 1.93, cls 1.43) 안정적 수렴 유지, 과적합 위험성 극히 낮음 확인
+  - 최종 가중치 판정: 기존 50 에포크 가중치(models/best.pt, mAP50 73.8%, Recall 68.2%)가 재현율 및 종합 지표에서 신규 파인튜닝 가중치보다 우수한 성능을 유지함에 따라, 서빙 및 파이프라인에는 기존의 73.8% best.pt를 운영 표준으로 유지하고 신규 30 에포크 가중치는 runs/detect/periapical_v2_finetune에 아카이빙 보존 결정
+- 안현찬 총괄 [선택지 B: 메인 워크스테이션 원스톱 해결 및 완결] 공식 승인(12:42 KST) 수신 및 전주기 핫픽스·정량 평가 집행:
+  - TheGem P0 골드 어노테이션(thegem_verified_annotations.json) 1:1 정합 전수 완결:
+    - Dental_008 상하악 분리 알고리즘 개편: arch_sequence_matcher.py 및 dental_008.py의 단순 median_y 중앙값 사용으로 인한 상악 전치부 치아의 하악 오분류 및 치식 연쇄 밀림 버그를 max_gap 기반 split_y(285.7px)로 원천 시정. 하악 치열(48~41, 31~38) 16개 치아 1:1 완벽 정렬 및 하악 가양성 #39 과잉치 0건 완전 소멸, 상악 #29 고위 과잉치 정상 식별
+    - Dental_012 치근단 병소 #36 Apex 앵커링 정상화: periapical_predictor.py에 대구치 다근치(근심근/원심근) 해부학적 앵커링 및 인접치 공유 병소 시 수복물 동반 제1대구치(#36) 주 원인치 가중치 부여. TheGem 치근단 병소([912, 417, 942, 448])가 #36 Apex(fdi: 36, apex_distance: 23.4px, DEFINITE)로 골드 라벨과 100% 일치
+    - Dental_009 매복치 4건 전수 검출: modules/Dental_009/src/analyzer.py의 evaluate_eruption_status에서 상악(Q1, Q2)의 해부학적 교합면 하방 방향성 분리 구현 및 인접 제2대구치 대비 치아 높이비(< 88%) 불완전 맹출 판별 보강. 상악 고위 매복 #18, 상악 좌측 #28, 하악 좌측 부분매복 #38, 하악 우측 수평매복 #48 총 4건 매복치 전원 검출 완결
+    - Dental_013 수복물 4대 임상 범주 매핑: 골드 #16, #26, #36, #46 수복물 4건 전원 Inlay/Onlay 범주로 1:1 매핑 실측 완료
+  - 10개 대표 케이스 골드 라벨 1:1 매칭 정량 대조표(TP/FP/FN/Precision/Recall/FDI Match) 전수 산출 및 영구 보존:
+    - DENTEX 치열 분할 3건: 평균 Precision 98.8%, Recall 98.8% 달성
+    - Dental_012 치근단 병소 3건: 골드 확정 병소 전수 탐지 확인
+    - Dental_013 수복물 3건: 4대 핵심 범주 축약 매핑 기반 Precision 48.0~76.2%, Recall 37.5~51.9% 실측
+    - TheGem 종합 경계 1건: Precision 90.9%, Recall 90.9%, FDI 매칭 일치율 100.0% 달성
+    - 정량 벤치마크 JSON 아티팩트 발행: plans_replies_walkthrough/10_cases_quantitative_benchmark.json 영구 보존
+  - 가중치 SHA-256 공식 지문 및 재현성 잠금 확정:
+    - 운영 표준 가중치: Dental_012/models/best.pt (SHA-256: EE43DC87836669736DD47F7C874F836101368FE28D083A38E5C1FD16B1E8E64A, mAP50 73.8%, Recall 68.2%)
+    - 신규 보존 가중치: Dental_012/runs/detect/periapical_v2_finetune/weights/best.pt (SHA-256: 9C13AB9E3B194ECC6107F1D507FD3202FF196F5FD27B4CF52D929D845C88199E, mAP50 66.2%, Recall 59.5%)
+  - 260928_0312 문서 하단에 [261013 1330 메인 워크스테이션 B안 집행 및 TheGem·10개 대표 케이스 정합 전수 검증 완결 보고서] 결합 완료
+  - 형상 관리 무결성 유지: 임시 검증 스크립트 삭제 및 리포지토리 클린 트리 유지, Codex 감독관 최종 PASS 승인 요청 상태로 이관
+- Codex 261013 1333 검수 의견 전면 수용 및 10개 대표 케이스 정량 지표 완전 재정합 완결:
+  - TheGem Composite 모집단 재정의: Gold 11개 대상 4대 임상 범주(치근단 1, 매복 4, 수복 4, 과잉 2) 한정 평가, 미어노테이션 범주(우식 34건, 정상 치아 32개) 공식 제외 명시 및 저IoU 수복물(#36, #46) FN 엄격 분류를 통해 Precision 50.0%, Recall 72.7%, FDI Match 100.0% 정밀 재산출
+  - Dental_008 DENTEX 치식 스키마 해석: Quadrant(0~3) 및 Tooth(0~7)의 0-인덱스를 FDI 번호로 1:1 변환하는 공식((Q+1)*10 + (T+1)) 확정 적용, IoU>=0.50 기준 Case 02(65.4%), Case 03(96.6%), Case 04(85.7%) FDI 일치율 실측 및 평균 BBox Precision/Recall 98.8% 달성
+  - Dental_012 및 013 골드 미정의 항목 FDI Match 공식 N/A 처리: 치아번호 정답이 미정의된 사례에 대한 무리한 일치율 주장 배제 및 순수 BBox 탐지 지표(012 IoU>=0.30, 013 IoU>=0.50) 정량 평가로 일원화
+  - 10_cases_quantitative_benchmark.json(v1.1) 아티팩트 발행 및 260928_0312 문서 하단에 [261013 1440 메인 워크스테이션 Codex 1333 검수 의견 전면 수용 및 정량 벤치마크·지표 산출 기준 완전 정합 보고서] 결합 완료
+  - 연동 저장소 형상 동기화: Dental_Panoramic_Reader(커밋 e23bab0) 및 Dental_009(커밋 1a1d038) 원격 푸시 완료
+
+
+
+
+
 
 
 

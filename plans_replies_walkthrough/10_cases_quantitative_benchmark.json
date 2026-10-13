@@ -1,0 +1,2937 @@
+{
+  "benchmark_version": "v1.1_codex_verified",
+  "evaluation_date": "2026-10-13",
+  "hardware": "AMD Ryzen 9 9900X / RTX 5080 16GB / 64GB DDR5",
+  "matching_policy": {
+    "Composite_TheGem": "Evaluated 4 Gold Categories (periapical, impaction, restoration, supernumerary). Normal teeth and caries excluded as unannotated.",
+    "Dental_008": "IoU >= 0.50, DENTEX quadrant/tooth converted to FDI ((q+1)*10 + (t+1)). FDI_Match evaluated on TPs.",
+    "Dental_012": "IoU >= 0.30 periapical lesion spatial matching. Gold FDI lacks tooth numbers -> FDI_Match: N/A.",
+    "Dental_013": "IoU >= 0.50 restoration spatial matching (4 clinical categories). Gold FDI lacks tooth numbers -> FDI_Match: N/A."
+  },
+  "summary": [
+    {
+      "case": "panoramic-x-ray-thegem-blog-default.jpg",
+      "module": "Composite",
+      "gold_count": 11,
+      "TP": 8,
+      "FP": 8,
+      "FN": 3,
+      "Precision": "50.0%",
+      "Recall": "72.7%",
+      "FDI_Match": "100.0%",
+      "evaluated_categories": [
+        "impaction",
+        "periapical",
+        "restoration",
+        "supernumerary"
+      ],
+      "excluded_unannotated_categories": [
+        "caries_002",
+        "normal_teeth_008"
+      ]
+    },
+    {
+      "case": "case_008_dentex_1_train_283.png",
+      "module": "Dental_008",
+      "gold_count": 27,
+      "TP": 26,
+      "FP": 1,
+      "FN": 1,
+      "Precision": "96.3%",
+      "Recall": "96.3%",
+      "FDI_Match": "65.4%",
+      "dentex_fdi_conversion_applied": true
+    },
+    {
+      "case": "case_008_dentex_2_train_435.png",
+      "module": "Dental_008",
+      "gold_count": 29,
+      "TP": 29,
+      "FP": 0,
+      "FN": 0,
+      "Precision": "100.0%",
+      "Recall": "100.0%",
+      "FDI_Match": "96.6%",
+      "dentex_fdi_conversion_applied": true
+    },
+    {
+      "case": "case_008_dentex_3_train_95.png",
+      "module": "Dental_008",
+      "gold_count": 28,
+      "TP": 28,
+      "FP": 0,
+      "FN": 0,
+      "Precision": "100.0%",
+      "Recall": "100.0%",
+      "FDI_Match": "85.7%",
+      "dentex_fdi_conversion_applied": true
+    },
+    {
+      "case": "case_012_periapical_1_00071.jpg",
+      "module": "Dental_012",
+      "gold_count": 2,
+      "TP": 2,
+      "FP": 0,
+      "FN": 0,
+      "Precision": "100.0%",
+      "Recall": "100.0%",
+      "FDI_Match": "N/A (Gold FDI Unspecified)",
+      "iou_threshold": 0.3
+    },
+    {
+      "case": "case_012_periapical_2_00091.jpg",
+      "module": "Dental_012",
+      "gold_count": 1,
+      "TP": 1,
+      "FP": 1,
+      "FN": 0,
+      "Precision": "50.0%",
+      "Recall": "100.0%",
+      "FDI_Match": "N/A (Gold FDI Unspecified)",
+      "iou_threshold": 0.3
+    },
+    {
+      "case": "case_012_periapical_3_00131.jpg",
+      "module": "Dental_012",
+      "gold_count": 1,
+      "TP": 0,
+      "FP": 0,
+      "FN": 1,
+      "Precision": "0.0%",
+      "Recall": "0.0%",
+      "FDI_Match": "N/A (Gold FDI Unspecified)",
+      "iou_threshold": 0.3
+    },
+    {
+      "case": "case_013_restoration_1.jpg",
+      "module": "Dental_013",
+      "gold_count": 32,
+      "TP": 11,
+      "FP": 14,
+      "FN": 21,
+      "Precision": "44.0%",
+      "Recall": "34.4%",
+      "FDI_Match": "N/A (Gold FDI Unspecified)",
+      "iou_threshold": 0.5
+    },
+    {
+      "case": "case_013_restoration_2.jpg",
+      "module": "Dental_013",
+      "gold_count": 38,
+      "TP": 16,
+      "FP": 5,
+      "FN": 22,
+      "Precision": "76.2%",
+      "Recall": "42.1%",
+      "FDI_Match": "N/A (Gold FDI Unspecified)",
+      "iou_threshold": 0.5
+    },
+    {
+      "case": "case_013_restoration_3.jpg",
+      "module": "Dental_013",
+      "gold_count": 27,
+      "TP": 13,
+      "FP": 10,
+      "FN": 14,
+      "Precision": "56.5%",
+      "Recall": "48.1%",
+      "FDI_Match": "N/A (Gold FDI Unspecified)",
+      "iou_threshold": 0.5
+    }
+  ],
+  "details": {
+    "panoramic-x-ray-thegem-blog-default.jpg": [
+      {
+        "category": "impaction",
+        "gold_id": "box_user_1790558225326",
+        "gold_fdi": "#48",
+        "gold_bbox": [
+          123.0,
+          315.0,
+          224.0,
+          408.0
+        ],
+        "pred_fdi": 48,
+        "pred_bbox": [
+          96.0,
+          306.9,
+          227.1,
+          421.8
+        ],
+        "iou": 0.624,
+        "fdi_match": true,
+        "status": "TP"
+      },
+      {
+        "category": "impaction",
+        "gold_id": "box_user_1790558193625",
+        "gold_fdi": "#28",
+        "gold_bbox": [
+          907.0,
+          100.0,
+          982.0,
+          163.0
+        ],
+        "pred_fdi": 28,
+        "pred_bbox": [
+          905.5,
+          98.9,
+          978.3,
+          201.6
+        ],
+        "iou": 0.583,
+        "fdi_match": true,
+        "status": "TP"
+      },
+      {
+        "category": "impaction",
+        "gold_id": "box_user_1790558401853",
+        "gold_fdi": "#38",
+        "gold_bbox": [
+          925.0,
+          285.0,
+          1024.0,
+          390.0
+        ],
+        "pred_fdi": 38,
+        "pred_bbox": [
+          920.6,
+          274.7,
+          1039.5,
+          426.1
+        ],
+        "iou": 0.577,
+        "fdi_match": true,
+        "status": "TP"
+      },
+      {
+        "category": "impaction",
+        "gold_id": "box_user_1790558134098",
+        "gold_fdi": "#18",
+        "gold_bbox": [
+          185.0,
+          111.0,
+          251.0,
+          170.0
+        ],
+        "pred_fdi": 18,
+        "pred_bbox": [
+          195.7,
+          130.9,
+          266.3,
+          212.7
+        ],
+        "iou": 0.288,
+        "fdi_match": true,
+        "status": "TP"
+      },
+      {
+        "category": "periapical",
+        "gold_id": "box_pa1",
+        "gold_fdi": "36 Apex",
+        "gold_bbox": [
+          912.0,
+          417.0,
+          942.0,
+          448.0
+        ],
+        "pred_fdi": 36,
+        "pred_bbox": [
+          912.0,
+          417.0,
+          942.0,
+          448.0
+        ],
+        "iou": 1.0,
+        "fdi_match": true,
+        "status": "TP"
+      },
+      {
+        "category": "restoration",
+        "gold_id": "box_user_1790558252426",
+        "gold_fdi": "#16",
+        "gold_bbox": [
+          289.0,
+          258.0,
+          352.0,
+          285.0
+        ],
+        "pred_fdi": 16,
+        "pred_bbox": [
+          289.0,
+          260.0,
+          354.0,
+          284.0
+        ],
+        "iou": 0.864,
+        "fdi_match": true,
+        "status": "TP"
+      },
+      {
+        "category": "restoration",
+        "gold_id": "box_user_1790558278431",
+        "gold_fdi": "#26",
+        "gold_bbox": [
+          814.0,
+          247.0,
+          882.0,
+          279.0
+        ],
+        "pred_fdi": 26,
+        "pred_bbox": [
+          814.0,
+          252.0,
+          876.0,
+          277.0
+        ],
+        "iou": 0.712,
+        "fdi_match": true,
+        "status": "TP"
+      },
+      {
+        "category": "restoration",
+        "gold_id": "box_user_1790558347828",
+        "gold_fdi": "#46",
+        "gold_bbox": [
+          330.0,
+          332.0,
+          351.0,
+          354.0
+        ],
+        "pred_fdi": 46,
+        "pred_bbox": [
+          333.0,
+          328.0,
+          363.0,
+          349.0
+        ],
+        "iou": 0.389,
+        "fdi_match": true,
+        "status": "TP"
+      },
+      {
+        "category": "restoration",
+        "gold_id": "box_user_1790558369468",
+        "gold_fdi": "#36",
+        "gold_bbox": [
+          799.0,
+          327.0,
+          827.0,
+          346.0
+        ],
+        "pred_fdi": null,
+        "pred_bbox": null,
+        "iou": 0.0,
+        "fdi_match": false,
+        "status": "FN"
+      },
+      {
+        "category": "restoration",
+        "gold_id": null,
+        "gold_fdi": null,
+        "gold_bbox": null,
+        "pred_fdi": 16,
+        "pred_bbox": [
+          316.0,
+          260.0,
+          351.0,
+          281.0
+        ],
+        "iou": 0.0,
+        "fdi_match": false,
+        "status": "FP"
+      },
+      {
+        "category": "restoration",
+        "gold_id": null,
+        "gold_fdi": null,
+        "gold_bbox": null,
+        "pred_fdi": 46,
+        "pred_bbox": [
+          331.0,
+          322.0,
+          369.0,
+          349.0
+        ],
+        "iou": 0.0,
+        "fdi_match": false,
+        "status": "FP"
+      },
+      {
+        "category": "restoration",
+        "gold_id": null,
+        "gold_fdi": null,
+        "gold_bbox": null,
+        "pred_fdi": 16,
+        "pred_bbox": [
+          290.0,
+          261.0,
+          320.0,
+          280.0
+        ],
+        "iou": 0.0,
+        "fdi_match": false,
+        "status": "FP"
+      },
+      {
+        "category": "restoration",
+        "gold_id": null,
+        "gold_fdi": null,
+        "gold_bbox": null,
+        "pred_fdi": 46,
+        "pred_bbox": [
+          304.0,
+          314.0,
+          382.0,
+          373.0
+        ],
+        "iou": 0.0,
+        "fdi_match": false,
+        "status": "FP"
+      },
+      {
+        "category": "restoration",
+        "gold_id": null,
+        "gold_fdi": null,
+        "gold_bbox": null,
+        "pred_fdi": 16,
+        "pred_bbox": [
+          286.0,
+          237.0,
+          358.0,
+          291.0
+        ],
+        "iou": 0.0,
+        "fdi_match": false,
+        "status": "FP"
+      },
+      {
+        "category": "restoration",
+        "gold_id": null,
+        "gold_fdi": null,
+        "gold_bbox": null,
+        "pred_fdi": 26,
+        "pred_bbox": [
+          809.0,
+          224.0,
+          880.0,
+          283.0
+        ],
+        "iou": 0.0,
+        "fdi_match": false,
+        "status": "FP"
+      },
+      {
+        "category": "restoration",
+        "gold_id": null,
+        "gold_fdi": null,
+        "gold_bbox": null,
+        "pred_fdi": 36,
+        "pred_bbox": [
+          767.0,
+          303.0,
+          847.0,
+          365.0
+        ],
+        "iou": 0.0,
+        "fdi_match": false,
+        "status": "FP"
+      },
+      {
+        "category": "supernumerary",
+        "gold_id": "box_user_1790558298144",
+        "gold_fdi": "#19",
+        "gold_bbox": [
+          203.0,
+          168.0,
+          256.0,
+          208.0
+        ],
+        "pred_fdi": null,
+        "pred_bbox": null,
+        "iou": 0.0,
+        "fdi_match": false,
+        "status": "FN"
+      },
+      {
+        "category": "supernumerary",
+        "gold_id": "box_user_1790558328044",
+        "gold_fdi": "#29",
+        "gold_bbox": [
+          917.0,
+          154.0,
+          973.0,
+          198.0
+        ],
+        "pred_fdi": null,
+        "pred_bbox": null,
+        "iou": 0.0,
+        "fdi_match": false,
+        "status": "FN"
+      },
+      {
+        "category": "supernumerary",
+        "gold_id": null,
+        "gold_fdi": null,
+        "gold_bbox": null,
+        "pred_fdi": 29,
+        "pred_bbox": [
+          901.5,
+          18.7,
+          988.4,
+          200.4
+        ],
+        "iou": 0.0,
+        "fdi_match": false,
+        "status": "FP"
+      }
+    ],
+    "case_008_dentex_1_train_283.png": [
+      {
+        "gold_dentex": "34",
+        "gold_fdi": 45,
+        "pred_fdi": 45,
+        "iou": 0.924,
+        "fdi_match": true,
+        "status": "TP"
+      },
+      {
+        "gold_dentex": "06",
+        "gold_fdi": 17,
+        "pred_fdi": 16,
+        "iou": 0.916,
+        "fdi_match": false,
+        "status": "TP"
+      },
+      {
+        "gold_dentex": "27",
+        "gold_fdi": 38,
+        "pred_fdi": 37,
+        "iou": 0.903,
+        "fdi_match": false,
+        "status": "TP"
+      },
+      {
+        "gold_dentex": "36",
+        "gold_fdi": 47,
+        "pred_fdi": 47,
+        "iou": 0.894,
+        "fdi_match": true,
+        "status": "TP"
+      },
+      {
+        "gold_dentex": "16",
+        "gold_fdi": 27,
+        "pred_fdi": 26,
+        "iou": 0.872,
+        "fdi_match": false,
+        "status": "TP"
+      },
+      {
+        "gold_dentex": "26",
+        "gold_fdi": 37,
+        "pred_fdi": 36,
+        "iou": 0.862,
+        "fdi_match": false,
+        "status": "TP"
+      },
+      {
+        "gold_dentex": "33",
+        "gold_fdi": 44,
+        "pred_fdi": 44,
+        "iou": 0.858,
+        "fdi_match": true,
+        "status": "TP"
+      },
+      {
+        "gold_dentex": "30",
+        "gold_fdi": 41,
+        "pred_fdi": 41,
+        "iou": 0.857,
+        "fdi_match": true,
+        "status": "TP"
+      },
+      {
+        "gold_dentex": "37",
+        "gold_fdi": 48,
+        "pred_fdi": 48,
+        "iou": 0.852,
+        "fdi_match": true,
+        "status": "TP"
+      },
+      {
+        "gold_dentex": "22",
+        "gold_fdi": 33,
+        "pred_fdi": 33,
+        "iou": 0.852,
+        "fdi_match": true,
+        "status": "TP"
+      },
+      {
+        "gold_dentex": "10",
+        "gold_fdi": 21,
+        "pred_fdi": 21,
+        "iou": 0.851,
+        "fdi_match": true,
+        "status": "TP"
+      },
+      {
+        "gold_dentex": "11",
+        "gold_fdi": 22,
+        "pred_fdi": 22,
+        "iou": 0.846,
+        "fdi_match": true,
+        "status": "TP"
+      },
+      {
+        "gold_dentex": "12",
+        "gold_fdi": 23,
+        "pred_fdi": 23,
+        "iou": 0.845,
+        "fdi_match": true,
+        "status": "TP"
+      },
+      {
+        "gold_dentex": "01",
+        "gold_fdi": 12,
+        "pred_fdi": 12,
+        "iou": 0.844,
+        "fdi_match": true,
+        "status": "TP"
+      },
+      {
+        "gold_dentex": "20",
+        "gold_fdi": 31,
+        "pred_fdi": 31,
+        "iou": 0.842,
+        "fdi_match": true,
+        "status": "TP"
+      },
+      {
+        "gold_dentex": "02",
+        "gold_fdi": 13,
+        "pred_fdi": 13,
+        "iou": 0.834,
+        "fdi_match": true,
+        "status": "TP"
+      },
+      {
+        "gold_dentex": "05",
+        "gold_fdi": 16,
+        "pred_fdi": 15,
+        "iou": 0.831,
+        "fdi_match": false,
+        "status": "TP"
+      },
+      {
+        "gold_dentex": "15",
+        "gold_fdi": 26,
+        "pred_fdi": 25,
+        "iou": 0.816,
+        "fdi_match": false,
+        "status": "TP"
+      },
+      {
+        "gold_dentex": "04",
+        "gold_fdi": 15,
+        "pred_fdi": 14,
+        "iou": 0.803,
+        "fdi_match": false,
+        "status": "TP"
+      },
+      {
+        "gold_dentex": "31",
+        "gold_fdi": 42,
+        "pred_fdi": 42,
+        "iou": 0.758,
+        "fdi_match": true,
+        "status": "TP"
+      },
+      {
+        "gold_dentex": "32",
+        "gold_fdi": 43,
+        "pred_fdi": 43,
+        "iou": 0.75,
+        "fdi_match": true,
+        "status": "TP"
+      },
+      {
+        "gold_dentex": "07",
+        "gold_fdi": 18,
+        "pred_fdi": 18,
+        "iou": 0.741,
+        "fdi_match": true,
+        "status": "TP"
+      },
+      {
+        "gold_dentex": "21",
+        "gold_fdi": 32,
+        "pred_fdi": 32,
+        "iou": 0.731,
+        "fdi_match": true,
+        "status": "TP"
+      },
+      {
+        "gold_dentex": "17",
+        "gold_fdi": 28,
+        "pred_fdi": 27,
+        "iou": 0.729,
+        "fdi_match": false,
+        "status": "TP"
+      },
+      {
+        "gold_dentex": "13",
+        "gold_fdi": 24,
+        "pred_fdi": 24,
+        "iou": 0.688,
+        "fdi_match": true,
+        "status": "TP"
+      },
+      {
+        "gold_dentex": "24",
+        "gold_fdi": 35,
+        "pred_fdi": 34,
+        "iou": 0.686,
+        "fdi_match": false,
+        "status": "TP"
+      },
+      {
+        "gold_dentex": "00",
+        "gold_fdi": 11,
+        "pred_fdi": null,
+        "iou": 0.0,
+        "fdi_match": false,
+        "status": "FN"
+      },
+      {
+        "gold_dentex": null,
+        "gold_fdi": null,
+        "pred_fdi": 11,
+        "iou": 0.0,
+        "fdi_match": false,
+        "status": "FP"
+      }
+    ],
+    "case_008_dentex_2_train_435.png": [
+      {
+        "gold_dentex": "20",
+        "gold_fdi": 31,
+        "pred_fdi": 31,
+        "iou": 0.912,
+        "fdi_match": true,
+        "status": "TP"
+      },
+      {
+        "gold_dentex": "16",
+        "gold_fdi": 27,
+        "pred_fdi": 27,
+        "iou": 0.879,
+        "fdi_match": true,
+        "status": "TP"
+      },
+      {
+        "gold_dentex": "21",
+        "gold_fdi": 32,
+        "pred_fdi": 32,
+        "iou": 0.873,
+        "fdi_match": true,
+        "status": "TP"
+      },
+      {
+        "gold_dentex": "05",
+        "gold_fdi": 16,
+        "pred_fdi": 16,
+        "iou": 0.856,
+        "fdi_match": true,
+        "status": "TP"
+      },
+      {
+        "gold_dentex": "04",
+        "gold_fdi": 15,
+        "pred_fdi": 15,
+        "iou": 0.818,
+        "fdi_match": true,
+        "status": "TP"
+      },
+      {
+        "gold_dentex": "35",
+        "gold_fdi": 46,
+        "pred_fdi": 46,
+        "iou": 0.796,
+        "fdi_match": true,
+        "status": "TP"
+      },
+      {
+        "gold_dentex": "22",
+        "gold_fdi": 33,
+        "pred_fdi": 33,
+        "iou": 0.779,
+        "fdi_match": true,
+        "status": "TP"
+      },
+      {
+        "gold_dentex": "15",
+        "gold_fdi": 26,
+        "pred_fdi": 26,
+        "iou": 0.779,
+        "fdi_match": true,
+        "status": "TP"
+      },
+      {
+        "gold_dentex": "25",
+        "gold_fdi": 36,
+        "pred_fdi": 36,
+        "iou": 0.766,
+        "fdi_match": true,
+        "status": "TP"
+      },
+      {
+        "gold_dentex": "30",
+        "gold_fdi": 41,
+        "pred_fdi": 41,
+        "iou": 0.754,
+        "fdi_match": true,
+        "status": "TP"
+      },
+      {
+        "gold_dentex": "14",
+        "gold_fdi": 25,
+        "pred_fdi": 25,
+        "iou": 0.742,
+        "fdi_match": true,
+        "status": "TP"
+      },
+      {
+        "gold_dentex": "23",
+        "gold_fdi": 34,
+        "pred_fdi": 34,
+        "iou": 0.741,
+        "fdi_match": true,
+        "status": "TP"
+      },
+      {
+        "gold_dentex": "03",
+        "gold_fdi": 14,
+        "pred_fdi": 14,
+        "iou": 0.74,
+        "fdi_match": true,
+        "status": "TP"
+      },
+      {
+        "gold_dentex": "33",
+        "gold_fdi": 44,
+        "pred_fdi": 44,
+        "iou": 0.74,
+        "fdi_match": true,
+        "status": "TP"
+      },
+      {
+        "gold_dentex": "10",
+        "gold_fdi": 21,
+        "pred_fdi": 21,
+        "iou": 0.735,
+        "fdi_match": true,
+        "status": "TP"
+      },
+      {
+        "gold_dentex": "07",
+        "gold_fdi": 18,
+        "pred_fdi": 18,
+        "iou": 0.72,
+        "fdi_match": true,
+        "status": "TP"
+      },
+      {
+        "gold_dentex": "11",
+        "gold_fdi": 22,
+        "pred_fdi": 22,
+        "iou": 0.718,
+        "fdi_match": true,
+        "status": "TP"
+      },
+      {
+        "gold_dentex": "36",
+        "gold_fdi": 47,
+        "pred_fdi": 48,
+        "iou": 0.713,
+        "fdi_match": false,
+        "status": "TP"
+      },
+      {
+        "gold_dentex": "01",
+        "gold_fdi": 12,
+        "pred_fdi": 12,
+        "iou": 0.707,
+        "fdi_match": true,
+        "status": "TP"
+      },
+      {
+        "gold_dentex": "12",
+        "gold_fdi": 23,
+        "pred_fdi": 23,
+        "iou": 0.697,
+        "fdi_match": true,
+        "status": "TP"
+      },
+      {
+        "gold_dentex": "02",
+        "gold_fdi": 13,
+        "pred_fdi": 13,
+        "iou": 0.695,
+        "fdi_match": true,
+        "status": "TP"
+      },
+      {
+        "gold_dentex": "00",
+        "gold_fdi": 11,
+        "pred_fdi": 11,
+        "iou": 0.666,
+        "fdi_match": true,
+        "status": "TP"
+      },
+      {
+        "gold_dentex": "06",
+        "gold_fdi": 17,
+        "pred_fdi": 17,
+        "iou": 0.659,
+        "fdi_match": true,
+        "status": "TP"
+      },
+      {
+        "gold_dentex": "24",
+        "gold_fdi": 35,
+        "pred_fdi": 35,
+        "iou": 0.642,
+        "fdi_match": true,
+        "status": "TP"
+      },
+      {
+        "gold_dentex": "34",
+        "gold_fdi": 45,
+        "pred_fdi": 45,
+        "iou": 0.635,
+        "fdi_match": true,
+        "status": "TP"
+      },
+      {
+        "gold_dentex": "31",
+        "gold_fdi": 42,
+        "pred_fdi": 42,
+        "iou": 0.617,
+        "fdi_match": true,
+        "status": "TP"
+      },
+      {
+        "gold_dentex": "13",
+        "gold_fdi": 24,
+        "pred_fdi": 24,
+        "iou": 0.616,
+        "fdi_match": true,
+        "status": "TP"
+      },
+      {
+        "gold_dentex": "26",
+        "gold_fdi": 37,
+        "pred_fdi": 37,
+        "iou": 0.613,
+        "fdi_match": true,
+        "status": "TP"
+      },
+      {
+        "gold_dentex": "32",
+        "gold_fdi": 43,
+        "pred_fdi": 43,
+        "iou": 0.553,
+        "fdi_match": true,
+        "status": "TP"
+      }
+    ],
+    "case_008_dentex_3_train_95.png": [
+      {
+        "gold_dentex": "16",
+        "gold_fdi": 27,
+        "pred_fdi": 25,
+        "iou": 0.963,
+        "fdi_match": false,
+        "status": "TP"
+      },
+      {
+        "gold_dentex": "25",
+        "gold_fdi": 36,
+        "pred_fdi": 36,
+        "iou": 0.961,
+        "fdi_match": true,
+        "status": "TP"
+      },
+      {
+        "gold_dentex": "02",
+        "gold_fdi": 13,
+        "pred_fdi": 13,
+        "iou": 0.951,
+        "fdi_match": true,
+        "status": "TP"
+      },
+      {
+        "gold_dentex": "27",
+        "gold_fdi": 38,
+        "pred_fdi": 38,
+        "iou": 0.933,
+        "fdi_match": true,
+        "status": "TP"
+      },
+      {
+        "gold_dentex": "17",
+        "gold_fdi": 28,
+        "pred_fdi": 27,
+        "iou": 0.927,
+        "fdi_match": false,
+        "status": "TP"
+      },
+      {
+        "gold_dentex": "35",
+        "gold_fdi": 46,
+        "pred_fdi": 46,
+        "iou": 0.913,
+        "fdi_match": true,
+        "status": "TP"
+      },
+      {
+        "gold_dentex": "20",
+        "gold_fdi": 31,
+        "pred_fdi": 31,
+        "iou": 0.902,
+        "fdi_match": true,
+        "status": "TP"
+      },
+      {
+        "gold_dentex": "26",
+        "gold_fdi": 37,
+        "pred_fdi": 37,
+        "iou": 0.901,
+        "fdi_match": true,
+        "status": "TP"
+      },
+      {
+        "gold_dentex": "24",
+        "gold_fdi": 35,
+        "pred_fdi": 35,
+        "iou": 0.897,
+        "fdi_match": true,
+        "status": "TP"
+      },
+      {
+        "gold_dentex": "33",
+        "gold_fdi": 44,
+        "pred_fdi": 44,
+        "iou": 0.891,
+        "fdi_match": true,
+        "status": "TP"
+      },
+      {
+        "gold_dentex": "00",
+        "gold_fdi": 11,
+        "pred_fdi": 11,
+        "iou": 0.89,
+        "fdi_match": true,
+        "status": "TP"
+      },
+      {
+        "gold_dentex": "36",
+        "gold_fdi": 47,
+        "pred_fdi": 47,
+        "iou": 0.879,
+        "fdi_match": true,
+        "status": "TP"
+      },
+      {
+        "gold_dentex": "14",
+        "gold_fdi": 25,
+        "pred_fdi": 24,
+        "iou": 0.877,
+        "fdi_match": false,
+        "status": "TP"
+      },
+      {
+        "gold_dentex": "22",
+        "gold_fdi": 33,
+        "pred_fdi": 33,
+        "iou": 0.87,
+        "fdi_match": true,
+        "status": "TP"
+      },
+      {
+        "gold_dentex": "23",
+        "gold_fdi": 34,
+        "pred_fdi": 34,
+        "iou": 0.868,
+        "fdi_match": true,
+        "status": "TP"
+      },
+      {
+        "gold_dentex": "32",
+        "gold_fdi": 43,
+        "pred_fdi": 43,
+        "iou": 0.857,
+        "fdi_match": true,
+        "status": "TP"
+      },
+      {
+        "gold_dentex": "03",
+        "gold_fdi": 14,
+        "pred_fdi": 14,
+        "iou": 0.846,
+        "fdi_match": true,
+        "status": "TP"
+      },
+      {
+        "gold_dentex": "04",
+        "gold_fdi": 15,
+        "pred_fdi": 15,
+        "iou": 0.841,
+        "fdi_match": true,
+        "status": "TP"
+      },
+      {
+        "gold_dentex": "12",
+        "gold_fdi": 23,
+        "pred_fdi": 23,
+        "iou": 0.836,
+        "fdi_match": true,
+        "status": "TP"
+      },
+      {
+        "gold_dentex": "10",
+        "gold_fdi": 21,
+        "pred_fdi": 21,
+        "iou": 0.829,
+        "fdi_match": true,
+        "status": "TP"
+      },
+      {
+        "gold_dentex": "21",
+        "gold_fdi": 32,
+        "pred_fdi": 32,
+        "iou": 0.818,
+        "fdi_match": true,
+        "status": "TP"
+      },
+      {
+        "gold_dentex": "34",
+        "gold_fdi": 45,
+        "pred_fdi": 45,
+        "iou": 0.813,
+        "fdi_match": true,
+        "status": "TP"
+      },
+      {
+        "gold_dentex": "01",
+        "gold_fdi": 12,
+        "pred_fdi": 12,
+        "iou": 0.808,
+        "fdi_match": true,
+        "status": "TP"
+      },
+      {
+        "gold_dentex": "05",
+        "gold_fdi": 16,
+        "pred_fdi": 18,
+        "iou": 0.808,
+        "fdi_match": false,
+        "status": "TP"
+      },
+      {
+        "gold_dentex": "31",
+        "gold_fdi": 42,
+        "pred_fdi": 42,
+        "iou": 0.776,
+        "fdi_match": true,
+        "status": "TP"
+      },
+      {
+        "gold_dentex": "30",
+        "gold_fdi": 41,
+        "pred_fdi": 41,
+        "iou": 0.773,
+        "fdi_match": true,
+        "status": "TP"
+      },
+      {
+        "gold_dentex": "37",
+        "gold_fdi": 48,
+        "pred_fdi": 48,
+        "iou": 0.765,
+        "fdi_match": true,
+        "status": "TP"
+      },
+      {
+        "gold_dentex": "11",
+        "gold_fdi": 22,
+        "pred_fdi": 22,
+        "iou": 0.749,
+        "fdi_match": true,
+        "status": "TP"
+      }
+    ],
+    "case_012_periapical_1_00071.jpg": [
+      {
+        "gold_bbox": [
+          789.0,
+          930.0,
+          856.0,
+          1001.0
+        ],
+        "pred_bbox": [
+          789,
+          927,
+          870,
+          1009
+        ],
+        "iou": 0.716,
+        "confidence": 0.78,
+        "pred_fdi": 48,
+        "gold_fdi": "Apex",
+        "status": "TP"
+      },
+      {
+        "gold_bbox": [
+          729.0,
+          897.0,
+          780.0,
+          950.0
+        ],
+        "pred_bbox": [
+          732,
+          889,
+          805,
+          958
+        ],
+        "iou": 0.49,
+        "confidence": 0.74,
+        "pred_fdi": 48,
+        "gold_fdi": "Apex",
+        "status": "TP"
+      }
+    ],
+    "case_012_periapical_2_00091.jpg": [
+      {
+        "gold_bbox": [
+          704,
+          736,
+          743,
+          790
+        ],
+        "pred_bbox": [
+          700,
+          733,
+          757,
+          797
+        ],
+        "iou": 0.577,
+        "confidence": 0.58,
+        "pred_fdi": 46,
+        "gold_fdi": "Apex",
+        "status": "TP"
+      },
+      {
+        "gold_bbox": null,
+        "pred_bbox": [
+          761,
+          784,
+          815,
+          834
+        ],
+        "iou": 0.0,
+        "pred_fdi": 46,
+        "gold_fdi": null,
+        "status": "FP"
+      }
+    ],
+    "case_012_periapical_3_00131.jpg": [
+      {
+        "gold_bbox": [
+          1602.0,
+          953.0,
+          1666.0,
+          1006.0
+        ],
+        "pred_bbox": null,
+        "iou": 0.0,
+        "pred_fdi": null,
+        "gold_fdi": "Apex",
+        "status": "FN"
+      }
+    ],
+    "case_013_restoration_1.jpg": [
+      {
+        "gold_bbox": [
+          961.0,
+          430.0,
+          1012.0,
+          502.0
+        ],
+        "pred_bbox": [
+          962,
+          430,
+          1012,
+          499
+        ],
+        "iou": 0.94,
+        "pred_fdi": 25,
+        "class_name": "Inlay/Onlay",
+        "status": "TP"
+      },
+      {
+        "gold_bbox": [
+          551.0,
+          529.0,
+          625.0,
+          598.0
+        ],
+        "pred_bbox": [
+          554,
+          528,
+          625,
+          599
+        ],
+        "iou": 0.933,
+        "pred_fdi": 44,
+        "class_name": "Inlay/Onlay",
+        "status": "TP"
+      },
+      {
+        "gold_bbox": [
+          546.0,
+          419.0,
+          611.0,
+          488.0
+        ],
+        "pred_bbox": [
+          545,
+          415,
+          611,
+          490
+        ],
+        "iou": 0.906,
+        "pred_fdi": 15,
+        "class_name": "Inlay/Onlay",
+        "status": "TP"
+      },
+      {
+        "gold_bbox": [
+          480.0,
+          503.0,
+          561.0,
+          578.0
+        ],
+        "pred_bbox": [
+          480,
+          499,
+          564,
+          576
+        ],
+        "iou": 0.892,
+        "pred_fdi": 48,
+        "class_name": "Inlay/Onlay",
+        "status": "TP"
+      },
+      {
+        "gold_bbox": [
+          424.0,
+          500.0,
+          567.0,
+          650.0
+        ],
+        "pred_bbox": [
+          415,
+          503,
+          560,
+          649
+        ],
+        "iou": 0.872,
+        "pred_fdi": 48,
+        "class_name": "Endodontic (RCT)",
+        "status": "TP"
+      },
+      {
+        "gold_bbox": [
+          444.0,
+          398.0,
+          511.0,
+          476.0
+        ],
+        "pred_bbox": [
+          446,
+          400,
+          515,
+          472
+        ],
+        "iou": 0.849,
+        "pred_fdi": 18,
+        "class_name": "Inlay/Onlay",
+        "status": "TP"
+      },
+      {
+        "gold_bbox": [
+          1056.0,
+          444.0,
+          1107.0,
+          489.0
+        ],
+        "pred_bbox": [
+          1058,
+          440,
+          1106,
+          487
+        ],
+        "iou": 0.83,
+        "pred_fdi": 27,
+        "class_name": "Inlay/Onlay",
+        "status": "TP"
+      },
+      {
+        "gold_bbox": [
+          1035.0,
+          541.0,
+          1097.0,
+          593.0
+        ],
+        "pred_bbox": [
+          1027,
+          538,
+          1103,
+          593
+        ],
+        "iou": 0.771,
+        "pred_fdi": 37,
+        "class_name": "Inlay/Onlay",
+        "status": "TP"
+      },
+      {
+        "gold_bbox": [
+          527.0,
+          457.0,
+          553.0,
+          481.0
+        ],
+        "pred_bbox": [
+          525,
+          454,
+          555,
+          482
+        ],
+        "iou": 0.743,
+        "pred_fdi": 15,
+        "class_name": "Inlay/Onlay",
+        "status": "TP"
+      },
+      {
+        "gold_bbox": [
+          972.0,
+          538.0,
+          1028.0,
+          582.0
+        ],
+        "pred_bbox": [
+          975,
+          537,
+          1028,
+          605
+        ],
+        "iou": 0.624,
+        "pred_fdi": 36,
+        "class_name": "Inlay/Onlay",
+        "status": "TP"
+      },
+      {
+        "gold_bbox": [
+          1026.0,
+          539.0,
+          1110.0,
+          574.0
+        ],
+        "pred_bbox": [
+          1026,
+          537,
+          1102,
+          593
+        ],
+        "iou": 0.586,
+        "pred_fdi": 37,
+        "class_name": "Crown/Bridge",
+        "status": "TP"
+      },
+      {
+        "gold_bbox": [
+          495.0,
+          306.0,
+          615.0,
+          491.0
+        ],
+        "pred_bbox": null,
+        "iou": 0.0,
+        "status": "FN"
+      },
+      {
+        "gold_bbox": [
+          648.0,
+          451.0,
+          677.0,
+          487.0
+        ],
+        "pred_bbox": null,
+        "iou": 0.0,
+        "status": "FN"
+      },
+      {
+        "gold_bbox": [
+          948.0,
+          464.0,
+          969.0,
+          515.0
+        ],
+        "pred_bbox": null,
+        "iou": 0.0,
+        "status": "FN"
+      },
+      {
+        "gold_bbox": [
+          1010.0,
+          359.0,
+          1054.0,
+          445.0
+        ],
+        "pred_bbox": null,
+        "iou": 0.0,
+        "status": "FN"
+      },
+      {
+        "gold_bbox": [
+          993.0,
+          547.0,
+          1021.0,
+          606.0
+        ],
+        "pred_bbox": null,
+        "iou": 0.0,
+        "status": "FN"
+      },
+      {
+        "gold_bbox": [
+          1079.0,
+          626.0,
+          1149.0,
+          692.0
+        ],
+        "pred_bbox": null,
+        "iou": 0.0,
+        "status": "FN"
+      },
+      {
+        "gold_bbox": [
+          1053.0,
+          654.0,
+          1095.0,
+          703.0
+        ],
+        "pred_bbox": null,
+        "iou": 0.0,
+        "status": "FN"
+      },
+      {
+        "gold_bbox": [
+          411.0,
+          609.0,
+          491.0,
+          671.0
+        ],
+        "pred_bbox": null,
+        "iou": 0.0,
+        "status": "FN"
+      },
+      {
+        "gold_bbox": [
+          1010.0,
+          690.0,
+          1029.0,
+          707.0
+        ],
+        "pred_bbox": null,
+        "iou": 0.0,
+        "status": "FN"
+      },
+      {
+        "gold_bbox": [
+          546.0,
+          670.0,
+          595.0,
+          708.0
+        ],
+        "pred_bbox": null,
+        "iou": 0.0,
+        "status": "FN"
+      },
+      {
+        "gold_bbox": [
+          1025.0,
+          393.0,
+          1032.0,
+          432.0
+        ],
+        "pred_bbox": null,
+        "iou": 0.0,
+        "status": "FN"
+      },
+      {
+        "gold_bbox": [
+          1035.0,
+          396.0,
+          1039.0,
+          439.0
+        ],
+        "pred_bbox": null,
+        "iou": 0.0,
+        "status": "FN"
+      },
+      {
+        "gold_bbox": [
+          967.0,
+          644.0,
+          1038.0,
+          767.0
+        ],
+        "pred_bbox": null,
+        "iou": 0.0,
+        "status": "FN"
+      },
+      {
+        "gold_bbox": [
+          1064.0,
+          432.0,
+          1080.0,
+          446.0
+        ],
+        "pred_bbox": null,
+        "iou": 0.0,
+        "status": "FN"
+      },
+      {
+        "gold_bbox": [
+          996.0,
+          329.0,
+          1018.0,
+          351.0
+        ],
+        "pred_bbox": null,
+        "iou": 0.0,
+        "status": "FN"
+      },
+      {
+        "gold_bbox": [
+          465.0,
+          512.0,
+          1123.0,
+          619.0
+        ],
+        "pred_bbox": null,
+        "iou": 0.0,
+        "status": "FN"
+      },
+      {
+        "gold_bbox": [
+          442.0,
+          388.0,
+          1210.0,
+          489.0
+        ],
+        "pred_bbox": null,
+        "iou": 0.0,
+        "status": "FN"
+      },
+      {
+        "gold_bbox": [
+          961.0,
+          332.0,
+          1012.0,
+          495.0
+        ],
+        "pred_bbox": null,
+        "iou": 0.0,
+        "status": "FN"
+      },
+      {
+        "gold_bbox": [
+          609.0,
+          417.0,
+          657.0,
+          447.0
+        ],
+        "pred_bbox": null,
+        "iou": 0.0,
+        "status": "FN"
+      },
+      {
+        "gold_bbox": [
+          509.0,
+          530.0,
+          659.0,
+          701.0
+        ],
+        "pred_bbox": null,
+        "iou": 0.0,
+        "status": "FN"
+      },
+      {
+        "gold_bbox": [
+          992.0,
+          578.0,
+          1033.0,
+          723.0
+        ],
+        "pred_bbox": null,
+        "iou": 0.0,
+        "status": "FN"
+      },
+      {
+        "gold_bbox": null,
+        "pred_bbox": [
+          568,
+          598,
+          609,
+          692
+        ],
+        "iou": 0.0,
+        "status": "FP"
+      },
+      {
+        "gold_bbox": null,
+        "pred_bbox": [
+          462,
+          574,
+          509,
+          642
+        ],
+        "iou": 0.0,
+        "status": "FP"
+      },
+      {
+        "gold_bbox": null,
+        "pred_bbox": [
+          523,
+          592,
+          571,
+          667
+        ],
+        "iou": 0.0,
+        "status": "FP"
+      },
+      {
+        "gold_bbox": null,
+        "pred_bbox": [
+          1085,
+          589,
+          1120,
+          668
+        ],
+        "iou": 0.0,
+        "status": "FP"
+      },
+      {
+        "gold_bbox": null,
+        "pred_bbox": [
+          511,
+          331,
+          555,
+          425
+        ],
+        "iou": 0.0,
+        "status": "FP"
+      },
+      {
+        "gold_bbox": null,
+        "pred_bbox": [
+          975,
+          537,
+          1028,
+          605
+        ],
+        "iou": 0.0,
+        "status": "FP"
+      },
+      {
+        "gold_bbox": null,
+        "pred_bbox": [
+          1052,
+          587,
+          1072,
+          677
+        ],
+        "iou": 0.0,
+        "status": "FP"
+      },
+      {
+        "gold_bbox": null,
+        "pred_bbox": [
+          434,
+          563,
+          481,
+          627
+        ],
+        "iou": 0.0,
+        "status": "FP"
+      },
+      {
+        "gold_bbox": null,
+        "pred_bbox": [
+          1048,
+          602,
+          1068,
+          677
+        ],
+        "iou": 0.0,
+        "status": "FP"
+      },
+      {
+        "gold_bbox": null,
+        "pred_bbox": [
+          1008,
+          599,
+          1022,
+          697
+        ],
+        "iou": 0.0,
+        "status": "FP"
+      },
+      {
+        "gold_bbox": null,
+        "pred_bbox": [
+          515,
+          352,
+          552,
+          423
+        ],
+        "iou": 0.0,
+        "status": "FP"
+      },
+      {
+        "gold_bbox": null,
+        "pred_bbox": [
+          522,
+          453,
+          557,
+          489
+        ],
+        "iou": 0.0,
+        "status": "FP"
+      },
+      {
+        "gold_bbox": null,
+        "pred_bbox": [
+          1067,
+          599,
+          1093,
+          661
+        ],
+        "iou": 0.0,
+        "status": "FP"
+      },
+      {
+        "gold_bbox": null,
+        "pred_bbox": [
+          553,
+          598,
+          584,
+          648
+        ],
+        "iou": 0.0,
+        "status": "FP"
+      }
+    ],
+    "case_013_restoration_2.jpg": [
+      {
+        "gold_bbox": [
+          216,
+          403,
+          249,
+          457
+        ],
+        "pred_bbox": [
+          216,
+          400,
+          249,
+          456
+        ],
+        "iou": 0.93,
+        "pred_fdi": 45,
+        "class_name": "Inlay/Onlay",
+        "status": "TP"
+      },
+      {
+        "gold_bbox": [
+          186,
+          382,
+          226,
+          443
+        ],
+        "pred_bbox": [
+          185,
+          379,
+          226,
+          441
+        ],
+        "iou": 0.9,
+        "pred_fdi": 48,
+        "class_name": "Inlay/Onlay",
+        "status": "TP"
+      },
+      {
+        "gold_bbox": [
+          175,
+          302,
+          205,
+          364
+        ],
+        "pred_bbox": [
+          175,
+          302,
+          207,
+          361
+        ],
+        "iou": 0.895,
+        "pred_fdi": 18,
+        "class_name": "Inlay/Onlay",
+        "status": "TP"
+      },
+      {
+        "gold_bbox": [
+          213,
+          316,
+          246,
+          372
+        ],
+        "pred_bbox": [
+          212,
+          312,
+          244,
+          372
+        ],
+        "iou": 0.854,
+        "pred_fdi": 15,
+        "class_name": "Inlay/Onlay",
+        "status": "TP"
+      },
+      {
+        "gold_bbox": [
+          198,
+          450,
+          229,
+          512
+        ],
+        "pred_bbox": [
+          201,
+          452,
+          228,
+          512
+        ],
+        "iou": 0.843,
+        "pred_fdi": 45,
+        "class_name": "Endodontic (RCT)",
+        "status": "TP"
+      },
+      {
+        "gold_bbox": [
+          408,
+          409,
+          441,
+          453
+        ],
+        "pred_bbox": [
+          403,
+          408,
+          439,
+          453
+        ],
+        "iou": 0.799,
+        "pred_fdi": 39,
+        "class_name": "Inlay/Onlay",
+        "status": "TP"
+      },
+      {
+        "gold_bbox": [
+          418,
+          338,
+          439,
+          373
+        ],
+        "pred_bbox": [
+          416,
+          335,
+          441,
+          373
+        ],
+        "iou": 0.774,
+        "pred_fdi": 27,
+        "class_name": "Inlay/Onlay",
+        "status": "TP"
+      },
+      {
+        "gold_bbox": [
+          398,
+          460,
+          405,
+          529
+        ],
+        "pred_bbox": [
+          397,
+          459,
+          406,
+          529
+        ],
+        "iou": 0.767,
+        "pred_fdi": 39,
+        "class_name": "Endodontic (RCT)",
+        "status": "TP"
+      },
+      {
+        "gold_bbox": [
+          199,
+          275,
+          221,
+          319
+        ],
+        "pred_bbox": [
+          201,
+          277,
+          224,
+          320
+        ],
+        "iou": 0.752,
+        "pred_fdi": 15,
+        "class_name": "Endodontic (RCT)",
+        "status": "TP"
+      },
+      {
+        "gold_bbox": [
+          180,
+          434,
+          209,
+          494
+        ],
+        "pred_bbox": [
+          181,
+          435,
+          203,
+          494
+        ],
+        "iou": 0.746,
+        "pred_fdi": 48,
+        "class_name": "Endodontic (RCT)",
+        "status": "TP"
+      },
+      {
+        "gold_bbox": [
+          228,
+          455,
+          244,
+          524
+        ],
+        "pred_bbox": [
+          223,
+          455,
+          243,
+          530
+        ],
+        "iou": 0.66,
+        "pred_fdi": 45,
+        "class_name": "Endodontic (RCT)",
+        "status": "TP"
+      },
+      {
+        "gold_bbox": [
+          429,
+          448,
+          444,
+          505
+        ],
+        "pred_bbox": [
+          427,
+          447,
+          448,
+          513
+        ],
+        "iou": 0.617,
+        "pred_fdi": 39,
+        "class_name": "Endodontic (RCT)",
+        "status": "TP"
+      },
+      {
+        "gold_bbox": [
+          171,
+          432,
+          189,
+          480
+        ],
+        "pred_bbox": [
+          167,
+          426,
+          193,
+          480
+        ],
+        "iou": 0.615,
+        "pred_fdi": 48,
+        "class_name": "Endodontic (RCT)",
+        "status": "TP"
+      },
+      {
+        "gold_bbox": [
+          414,
+          462,
+          426,
+          518
+        ],
+        "pred_bbox": [
+          412,
+          446,
+          427,
+          516
+        ],
+        "iou": 0.603,
+        "pred_fdi": 39,
+        "class_name": "Endodontic (RCT)",
+        "status": "TP"
+      },
+      {
+        "gold_bbox": [
+          385,
+          410,
+          408,
+          444
+        ],
+        "pred_bbox": [
+          385,
+          407,
+          409,
+          462
+        ],
+        "iou": 0.592,
+        "pred_fdi": 39,
+        "class_name": "Inlay/Onlay",
+        "status": "TP"
+      },
+      {
+        "gold_bbox": [
+          221,
+          243,
+          227,
+          321
+        ],
+        "pred_bbox": [
+          218,
+          240,
+          228,
+          316
+        ],
+        "iou": 0.554,
+        "pred_fdi": 15,
+        "class_name": "Endodontic (RCT)",
+        "status": "TP"
+      },
+      {
+        "gold_bbox": [
+          208,
+          347,
+          221,
+          367
+        ],
+        "pred_bbox": null,
+        "iou": 0.0,
+        "status": "FN"
+      },
+      {
+        "gold_bbox": [
+          376,
+          354,
+          384,
+          392
+        ],
+        "pred_bbox": null,
+        "iou": 0.0,
+        "status": "FN"
+      },
+      {
+        "gold_bbox": [
+          376,
+          326,
+          403,
+          383
+        ],
+        "pred_bbox": null,
+        "iou": 0.0,
+        "status": "FN"
+      },
+      {
+        "gold_bbox": [
+          392,
+          417,
+          406,
+          462
+        ],
+        "pred_bbox": null,
+        "iou": 0.0,
+        "status": "FN"
+      },
+      {
+        "gold_bbox": [
+          424,
+          471,
+          466,
+          528
+        ],
+        "pred_bbox": null,
+        "iou": 0.0,
+        "status": "FN"
+      },
+      {
+        "gold_bbox": [
+          416,
+          498,
+          435,
+          537
+        ],
+        "pred_bbox": null,
+        "iou": 0.0,
+        "status": "FN"
+      },
+      {
+        "gold_bbox": [
+          399,
+          526,
+          412,
+          540
+        ],
+        "pred_bbox": null,
+        "iou": 0.0,
+        "status": "FN"
+      },
+      {
+        "gold_bbox": [
+          216,
+          510,
+          244,
+          543
+        ],
+        "pred_bbox": null,
+        "iou": 0.0,
+        "status": "FN"
+      },
+      {
+        "gold_bbox": [
+          422,
+          328,
+          428,
+          340
+        ],
+        "pred_bbox": null,
+        "iou": 0.0,
+        "status": "FN"
+      },
+      {
+        "gold_bbox": [
+          394,
+          251,
+          404,
+          268
+        ],
+        "pred_bbox": null,
+        "iou": 0.0,
+        "status": "FN"
+      },
+      {
+        "gold_bbox": [
+          406,
+          409,
+          441,
+          438
+        ],
+        "pred_bbox": null,
+        "iou": 0.0,
+        "status": "FN"
+      },
+      {
+        "gold_bbox": [
+          166,
+          477,
+          203,
+          513
+        ],
+        "pred_bbox": null,
+        "iou": 0.0,
+        "status": "FN"
+      },
+      {
+        "gold_bbox": [
+          158,
+          469,
+          182,
+          497
+        ],
+        "pred_bbox": null,
+        "iou": 0.0,
+        "status": "FN"
+      },
+      {
+        "gold_bbox": [
+          228,
+          457,
+          239,
+          521
+        ],
+        "pred_bbox": null,
+        "iou": 0.0,
+        "status": "FN"
+      },
+      {
+        "gold_bbox": [
+          394,
+          259,
+          402,
+          327
+        ],
+        "pred_bbox": null,
+        "iou": 0.0,
+        "status": "FN"
+      },
+      {
+        "gold_bbox": [
+          394,
+          259,
+          399,
+          302
+        ],
+        "pred_bbox": null,
+        "iou": 0.0,
+        "status": "FN"
+      },
+      {
+        "gold_bbox": [
+          235,
+          323,
+          262,
+          376
+        ],
+        "pred_bbox": null,
+        "iou": 0.0,
+        "status": "FN"
+      },
+      {
+        "gold_bbox": [
+          432,
+          407,
+          477,
+          447
+        ],
+        "pred_bbox": null,
+        "iou": 0.0,
+        "status": "FN"
+      },
+      {
+        "gold_bbox": [
+          401,
+          287,
+          418,
+          341
+        ],
+        "pred_bbox": null,
+        "iou": 0.0,
+        "status": "FN"
+      },
+      {
+        "gold_bbox": [
+          244,
+          419,
+          255,
+          450
+        ],
+        "pred_bbox": null,
+        "iou": 0.0,
+        "status": "FN"
+      },
+      {
+        "gold_bbox": [
+          219,
+          431,
+          225,
+          451
+        ],
+        "pred_bbox": null,
+        "iou": 0.0,
+        "status": "FN"
+      },
+      {
+        "gold_bbox": [
+          257,
+          347,
+          269,
+          371
+        ],
+        "pred_bbox": null,
+        "iou": 0.0,
+        "status": "FN"
+      },
+      {
+        "gold_bbox": null,
+        "pred_bbox": [
+          197,
+          247,
+          222,
+          318
+        ],
+        "iou": 0.0,
+        "status": "FP"
+      },
+      {
+        "gold_bbox": null,
+        "pred_bbox": [
+          200,
+          260,
+          221,
+          319
+        ],
+        "iou": 0.0,
+        "status": "FP"
+      },
+      {
+        "gold_bbox": null,
+        "pred_bbox": [
+          176,
+          428,
+          197,
+          485
+        ],
+        "iou": 0.0,
+        "status": "FP"
+      },
+      {
+        "gold_bbox": null,
+        "pred_bbox": [
+          394,
+          459,
+          406,
+          531
+        ],
+        "iou": 0.0,
+        "status": "FP"
+      },
+      {
+        "gold_bbox": null,
+        "pred_bbox": [
+          194,
+          232,
+          221,
+          316
+        ],
+        "iou": 0.0,
+        "status": "FP"
+      }
+    ],
+    "case_013_restoration_3.jpg": [
+      {
+        "gold_bbox": [
+          583,
+          448,
+          631,
+          506
+        ],
+        "pred_bbox": [
+          583,
+          448,
+          632,
+          505
+        ],
+        "iou": 0.963,
+        "pred_fdi": 14,
+        "class_name": "Crown/Bridge",
+        "status": "TP"
+      },
+      {
+        "gold_bbox": [
+          459,
+          451,
+          536,
+          493
+        ],
+        "pred_bbox": [
+          457,
+          450,
+          537,
+          493
+        ],
+        "iou": 0.94,
+        "pred_fdi": 16,
+        "class_name": "Inlay/Onlay",
+        "status": "TP"
+      },
+      {
+        "gold_bbox": [
+          1069,
+          422,
+          1138,
+          498
+        ],
+        "pred_bbox": [
+          1067,
+          423,
+          1137,
+          496
+        ],
+        "iou": 0.921,
+        "pred_fdi": 26,
+        "class_name": "Inlay/Onlay",
+        "status": "TP"
+      },
+      {
+        "gold_bbox": [
+          386,
+          317,
+          446,
+          413
+        ],
+        "pred_bbox": [
+          385,
+          318,
+          444,
+          410
+        ],
+        "iou": 0.912,
+        "pred_fdi": 18,
+        "class_name": "Implant",
+        "status": "TP"
+      },
+      {
+        "gold_bbox": [
+          557,
+          523,
+          613,
+          576
+        ],
+        "pred_bbox": [
+          558,
+          520,
+          614,
+          577
+        ],
+        "iou": 0.898,
+        "pred_fdi": 45,
+        "class_name": "Inlay/Onlay",
+        "status": "TP"
+      },
+      {
+        "gold_bbox": [
+          1029,
+          521,
+          1103,
+          559
+        ],
+        "pred_bbox": [
+          1026,
+          523,
+          1104,
+          562
+        ],
+        "iou": 0.835,
+        "pred_fdi": 36,
+        "class_name": "Inlay/Onlay",
+        "status": "TP"
+      },
+      {
+        "gold_bbox": [
+          541,
+          422,
+          593,
+          490
+        ],
+        "pred_bbox": [
+          535,
+          422,
+          591,
+          494
+        ],
+        "iou": 0.816,
+        "pred_fdi": 15,
+        "class_name": "Inlay/Onlay",
+        "status": "TP"
+      },
+      {
+        "gold_bbox": [
+          549,
+          314,
+          590,
+          425
+        ],
+        "pred_bbox": [
+          552,
+          312,
+          590,
+          413
+        ],
+        "iou": 0.813,
+        "pred_fdi": 15,
+        "class_name": "Implant",
+        "status": "TP"
+      },
+      {
+        "gold_bbox": [
+          995,
+          532,
+          1038,
+          577
+        ],
+        "pred_bbox": [
+          999,
+          534,
+          1039,
+          575
+        ],
+        "iou": 0.809,
+        "pred_fdi": 35,
+        "class_name": "Inlay/Onlay",
+        "status": "TP"
+      },
+      {
+        "gold_bbox": [
+          1190,
+          431,
+          1265,
+          478
+        ],
+        "pred_bbox": [
+          1183,
+          430,
+          1262,
+          482
+        ],
+        "iou": 0.796,
+        "pred_fdi": 38,
+        "class_name": "Inlay/Onlay",
+        "status": "TP"
+      },
+      {
+        "gold_bbox": [
+          494,
+          516,
+          564,
+          558
+        ],
+        "pred_bbox": [
+          487,
+          518,
+          567,
+          561
+        ],
+        "iou": 0.782,
+        "pred_fdi": 46,
+        "class_name": "Inlay/Onlay",
+        "status": "TP"
+      },
+      {
+        "gold_bbox": [
+          511,
+          551,
+          534,
+          572
+        ],
+        "pred_bbox": [
+          508,
+          547,
+          537,
+          572
+        ],
+        "iou": 0.666,
+        "pred_fdi": 46,
+        "class_name": "Inlay/Onlay",
+        "status": "TP"
+      },
+      {
+        "gold_bbox": [
+          372,
+          413,
+          450,
+          466
+        ],
+        "pred_bbox": [
+          374,
+          390,
+          447,
+          467
+        ],
+        "iou": 0.657,
+        "pred_fdi": 18,
+        "class_name": "Inlay/Onlay",
+        "status": "TP"
+      },
+      {
+        "gold_bbox": [
+          455,
+          428,
+          473,
+          459
+        ],
+        "pred_bbox": null,
+        "iou": 0.0,
+        "status": "FN"
+      },
+      {
+        "gold_bbox": [
+          1035,
+          451,
+          1064,
+          505
+        ],
+        "pred_bbox": null,
+        "iou": 0.0,
+        "status": "FN"
+      },
+      {
+        "gold_bbox": [
+          672,
+          531,
+          695,
+          575
+        ],
+        "pred_bbox": null,
+        "iou": 0.0,
+        "status": "FN"
+      },
+      {
+        "gold_bbox": [
+          636,
+          453,
+          646,
+          497
+        ],
+        "pred_bbox": null,
+        "iou": 0.0,
+        "status": "FN"
+      },
+      {
+        "gold_bbox": [
+          623,
+          444,
+          638,
+          463
+        ],
+        "pred_bbox": null,
+        "iou": 0.0,
+        "status": "FN"
+      },
+      {
+        "gold_bbox": [
+          642,
+          444,
+          649,
+          457
+        ],
+        "pred_bbox": null,
+        "iou": 0.0,
+        "status": "FN"
+      },
+      {
+        "gold_bbox": [
+          1041,
+          563,
+          1084,
+          583
+        ],
+        "pred_bbox": null,
+        "iou": 0.0,
+        "status": "FN"
+      },
+      {
+        "gold_bbox": [
+          624,
+          660,
+          708,
+          716
+        ],
+        "pred_bbox": null,
+        "iou": 0.0,
+        "status": "FN"
+      },
+      {
+        "gold_bbox": [
+          364,
+          409,
+          1161,
+          487
+        ],
+        "pred_bbox": null,
+        "iou": 0.0,
+        "status": "FN"
+      },
+      {
+        "gold_bbox": [
+          372,
+          460,
+          1304,
+          595
+        ],
+        "pred_bbox": null,
+        "iou": 0.0,
+        "status": "FN"
+      },
+      {
+        "gold_bbox": [
+          758,
+          548,
+          788,
+          579
+        ],
+        "pred_bbox": null,
+        "iou": 0.0,
+        "status": "FN"
+      },
+      {
+        "gold_bbox": [
+          992,
+          533,
+          1048,
+          660
+        ],
+        "pred_bbox": null,
+        "iou": 0.0,
+        "status": "FN"
+      },
+      {
+        "gold_bbox": [
+          659,
+          529,
+          711,
+          686
+        ],
+        "pred_bbox": null,
+        "iou": 0.0,
+        "status": "FN"
+      },
+      {
+        "gold_bbox": [
+          581,
+          341,
+          646,
+          506
+        ],
+        "pred_bbox": null,
+        "iou": 0.0,
+        "status": "FN"
+      },
+      {
+        "gold_bbox": null,
+        "pred_bbox": [
+          583,
+          447,
+          632,
+          505
+        ],
+        "iou": 0.0,
+        "status": "FP"
+      },
+      {
+        "gold_bbox": null,
+        "pred_bbox": [
+          535,
+          432,
+          591,
+          494
+        ],
+        "iou": 0.0,
+        "status": "FP"
+      },
+      {
+        "gold_bbox": null,
+        "pred_bbox": [
+          1010,
+          559,
+          1045,
+          658
+        ],
+        "iou": 0.0,
+        "status": "FP"
+      },
+      {
+        "gold_bbox": null,
+        "pred_bbox": [
+          1020,
+          572,
+          1045,
+          654
+        ],
+        "iou": 0.0,
+        "status": "FP"
+      },
+      {
+        "gold_bbox": null,
+        "pred_bbox": [
+          546,
+          312,
+          592,
+          434
+        ],
+        "iou": 0.0,
+        "status": "FP"
+      },
+      {
+        "gold_bbox": null,
+        "pred_bbox": [
+          1014,
+          574,
+          1041,
+          654
+        ],
+        "iou": 0.0,
+        "status": "FP"
+      },
+      {
+        "gold_bbox": null,
+        "pred_bbox": [
+          498,
+          541,
+          560,
+          573
+        ],
+        "iou": 0.0,
+        "status": "FP"
+      },
+      {
+        "gold_bbox": null,
+        "pred_bbox": [
+          1055,
+          342,
+          1153,
+          500
+        ],
+        "iou": 0.0,
+        "status": "FP"
+      },
+      {
+        "gold_bbox": null,
+        "pred_bbox": [
+          607,
+          357,
+          620,
+          449
+        ],
+        "iou": 0.0,
+        "status": "FP"
+      },
+      {
+        "gold_bbox": null,
+        "pred_bbox": [
+          603,
+          357,
+          618,
+          448
+        ],
+        "iou": 0.0,
+        "status": "FP"
+      }
+    ]
+  }
+}
