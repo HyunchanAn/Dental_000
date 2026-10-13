@@ -1,7 +1,7 @@
 {
   "benchmark_version": "v1.1_codex_verified",
   "evaluation_date": "2026-10-13",
-  "hardware": "AMD Ryzen 9 9900X / RTX 5080 16GB / 64GB DDR5",
+  "hardware": "Intel Core i5-14450HX / RTX 4060 Laptop GPU / 16GB RAM (Laptop Dev Team)",
   "matching_policy": {
     "Composite_TheGem": "Evaluated 4 Gold Categories (periapical, impaction, restoration, supernumerary). Normal teeth and caries excluded as unannotated.",
     "Dental_008": "IoU >= 0.50, DENTEX quadrant/tooth converted to FDI ((q+1)*10 + (t+1)). FDI_Match evaluated on TPs.",

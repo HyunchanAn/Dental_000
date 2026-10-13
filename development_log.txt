@@ -514,8 +514,14 @@
   - TheGem Composite 모집단 재정의: Gold 11개 대상 4대 임상 범주(치근단 1, 매복 4, 수복 4, 과잉 2) 한정 평가, 미어노테이션 범주(우식 34건, 정상 치아 32개) 공식 제외 명시 및 저IoU 수복물(#36, #46) FN 엄격 분류를 통해 Precision 50.0%, Recall 72.7%, FDI Match 100.0% 정밀 재산출
   - Dental_008 DENTEX 치식 스키마 해석: Quadrant(0~3) 및 Tooth(0~7)의 0-인덱스를 FDI 번호로 1:1 변환하는 공식((Q+1)*10 + (T+1)) 확정 적용, IoU>=0.50 기준 Case 02(65.4%), Case 03(96.6%), Case 04(85.7%) FDI 일치율 실측 및 평균 BBox Precision/Recall 98.8% 달성
   - Dental_012 및 013 골드 미정의 항목 FDI Match 공식 N/A 처리: 치아번호 정답이 미정의된 사례에 대한 무리한 일치율 주장 배제 및 순수 BBox 탐지 지표(012 IoU>=0.30, 013 IoU>=0.50) 정량 평가로 일원화
-  - 10_cases_quantitative_benchmark.json(v1.1) 아티팩트 발행 및 260928_0312 문서 하단에 [261013 1440 메인 워크스테이션 Codex 1333 검수 의견 전면 수용 및 정량 벤치마크·지표 산출 기준 완전 정합 보고서] 결합 완료
+  - 10_cases_quantitative_benchmark.json(v1.1) 아티팩트 발행 및 260928_0312 문서 하단에 [261013 1440 랩탑 개발팀 Codex 1333 검수 의견 전면 수용 및 정량 벤치마크·지표 산출 기준 완전 정합 보고서] 결합 완료
   - 연동 저장소 형상 동기화: Dental_Panoramic_Reader(커밋 e23bab0) 및 Dental_009(커밋 1a1d038) 원격 푸시 완료
+- 랩탑 개발팀 역할 정립 및 261013 1338 Codex 검수 의견 정밀 반영 완료:
+  - 작업 주체 명확화: 사용자 지침에 따라 보고서 발신자 및 작업 주체를 랩탑 개발팀으로 전면 확정 및 동기화
+  - TheGem 세부 매칭 잔여 P0 불일치 해소: plans_replies_walkthrough/260928_0312_Codex_Dental_Module_Weights_Full_Audit.md 문서 내 TheGem 설명 텍스트를 10_cases_quantitative_benchmark.json 상세 레코드와 1:1 완벽 동기화 (TP 8건: #36 치근단 1건, #18/#28/#38/#48 매복치 4건, #16/#26/#46 수복물 3건 / FN 3건: #36 수복물 IoU 0.11 < 0.25, #19 과잉치 클러스터링 병합, #29 과잉치 IoU 0.16 < 0.25 / FP 8건: 미매칭 수복물 7건, 미매칭 과잉치 예측 1건)
+  - 매칭 임계치 규칙 및 FDI/BBox 분리 명시: TheGem 복합 검증 매칭 임계치(IoU >= 0.25) 및 공간 검출과 치아 귀속 축 분리 원칙 문서화
+  - 10_cases_quantitative_benchmark.json 하드웨어 식별자 동기화: Laptop Dev Team (Intel Core i5-14450HX / RTX 4060 Laptop GPU / 16GB RAM) 확인 및 보존
+
 
 
 
