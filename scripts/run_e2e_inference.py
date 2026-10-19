@@ -1,8 +1,14 @@
 import cv2
 import sys
 import os
+from pathlib import Path
 
-reader_path = os.path.abspath(r'D:\Github\Dental_Panoramic_Reader')
+repo_root = Path(__file__).resolve().parents[1]
+if str(repo_root) not in sys.path:
+    sys.path.insert(0, str(repo_root))
+from config.paths import resolve_module_dir
+
+reader_path = str(resolve_module_dir("Dental_Panoramic_Reader"))
 if reader_path not in sys.path:
     sys.path.append(reader_path)
 

@@ -87,7 +87,7 @@ def compute_relative_caries_bbox(
 
 def generate_patch_dataset(
     split: str = "val",
-    output_dir: str = r"D:\Github\Dental_000\data\caries_patches\val",
+    output_dir: str = str(Path(__file__).resolve().parents[1] / "data" / "caries_patches" / "val"),
     margin_ratio: float = 0.15,
     include_negative_ratio: float = 1.0,
     max_samples: int = None,
@@ -235,7 +235,7 @@ def generate_patch_dataset(
 def parse_args():
     parser = argparse.ArgumentParser(description="2-Stage Caries Patch Dataset Generator")
     parser.add_argument("--split", type=str, default="val", choices=["val", "train"])
-    parser.add_argument("--output-dir", type=str, default=r"D:\Github\Dental_000\data\caries_patches\val")
+    parser.add_argument("--output-dir", type=str, default=str(Path(__file__).resolve().parents[1] / "data" / "caries_patches" / "val"))
     parser.add_argument("--margin", type=float, default=0.15, help="Tooth bbox margin ratio (default: 0.15)")
     parser.add_argument("--neg-ratio", type=float, default=1.0, help="Negative normal tooth inclusion ratio")
     parser.add_argument("--max-samples", type=int, default=None, help="Max images to process for quick verification")

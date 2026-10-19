@@ -14,7 +14,11 @@ from glob import glob
 from typing import Dict, Any, List
 
 core_root = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
-dental_008_src = os.path.abspath(os.path.join(core_root, "..", "Dental_008", "src"))
+if core_root not in sys.path:
+    sys.path.insert(0, core_root)
+from config.paths import resolve_module_dir
+
+dental_008_src = str(resolve_module_dir("Dental_008") / "src")
 if dental_008_src not in sys.path:
     sys.path.append(dental_008_src)
 
@@ -23,10 +27,13 @@ try:
 except ImportError:
     DENTEXDataset = None
 
+DEFAULT_012_DATA = str(resolve_module_dir("Dental_012") / "data" / "yolo_dataset")
+DEFAULT_012_AUG = str(resolve_module_dir("Dental_012") / "data" / "yolo_dataset_augmented")
+
 
 def inject_negative_samples(
-    dataset_dir: str = r"D:\Github\Dental_012\data\yolo_dataset",
-    output_dir: str = r"D:\Github\Dental_012\data\yolo_dataset_augmented",
+    dataset_dir: str = DEFAULT_012_DATA,
+    output_dir: str = DEFAULT_012_AUG,
     train_negative_count: int = 300,
     val_negative_count: int = 40,
 ) -> Dict[str, Any]:
@@ -128,8 +135,7 @@ def inject_negative_samples(
     print(f"Injected Negative Background Samples -> Train: {injected_stats['train_neg']}, Val: {injected_stats['val_neg']}")
 
     # 3. Generate data.yaml for retraining
-    norm_path = output_dir.replace("\\", "/")
-    yaml_content = f"path: {norm_path}\ntrain: images/train\nval: images/val\n\nnames:\n  0: Periapical_Lesion\n"
+    yaml_content = "path: .\ntrain: images/train\nval: images/val\n\nnames:\n  0: Periapical_Lesion\n"
     yaml_path = os.path.join(output_dir, "data.yaml")
     with open(yaml_path, "w", encoding="utf-8") as f:
         f.write(yaml_content)
@@ -152,8 +158,8 @@ def inject_negative_samples(
 
 def parse_args():
     parser = argparse.ArgumentParser(description="Dental_012 Negative Sample Augmentation")
-    parser.add_argument("--src-dir", type=str, default=r"D:\Github\Dental_012\data\yolo_dataset")
-    parser.add_argument("--out-dir", type=str, default=r"D:\Github\Dental_012\data\yolo_dataset_augmented")
+    parser.add_argument("--src-dir", type=str, default=DEFAULT_012_DATA)
+    parser.add_argument("--out-dir", type=str, default=DEFAULT_012_AUG)
     parser.add_argument("--train-neg", type=int, default=300)
     parser.add_argument("--val-neg", type=int, default=40)
     return parser.parse_args()

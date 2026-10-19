@@ -1,5 +1,12 @@
 import os
+import sys
 import subprocess
+from pathlib import Path
+
+repo_root = Path(__file__).resolve().parents[1]
+if str(repo_root) not in sys.path:
+    sys.path.insert(0, str(repo_root))
+from config.paths import resolve_module_dir
 
 repos = {
     'tests_001': 'Dental_001',
@@ -9,10 +16,9 @@ repos = {
     'tests_005': 'Dental_005',
     'tests_006': 'Dental_006',
     'tests_008': 'Dental_008',
-    'tests_009_010': 'Dental_010', # Assuming it targets 010 or 009
+    'tests_009_010': 'Dental_010',
     'tests_panoramic_reader': 'Dental_Panoramic_Reader'
 }
-base_dir = r'C:\Users\chema\Github'
 
 def run_tests():
     total_passed = True
@@ -22,7 +28,7 @@ def run_tests():
             
         print(f"\n[{repo_name}] Running E2E tests in {test_folder}...")
         env = os.environ.copy()
-        repo_path = os.path.join(base_dir, repo_name)
+        repo_path = str(resolve_module_dir(repo_name))
         
         # Add the repo path to PYTHONPATH so 'src' can be imported
         if 'PYTHONPATH' in env:

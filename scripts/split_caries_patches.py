@@ -1,18 +1,25 @@
-﻿#!/usr/bin/env python3
+#!/usr/bin/env python3
 """
 Strict Patient-Level Train/Val Split for 2-Stage Caries Patch Dataset (8:2)
 Zero Data Leakage: Patches from the same panorama NEVER cross train and val.
 """
 import os
+import sys
 import shutil
 import glob
 import random
+from pathlib import Path
+
+repo_root = Path(__file__).resolve().parents[1]
+if str(repo_root) not in sys.path:
+    sys.path.insert(0, str(repo_root))
+from config.paths import DATA_ROOT
 
 random.seed(42)  # Fixed seed for reproducibility
 
-src_images = r"Y:\Dental_000\data\caries_patches\val\images"
-src_labels = r"Y:\Dental_000\data\caries_patches\val\labels"
-base_out = r"Y:\Dental_000\data\caries_patches_split"
+src_images = str(DATA_ROOT / "caries_patches" / "val" / "images")
+src_labels = str(DATA_ROOT / "caries_patches" / "val" / "labels")
+base_out = str(DATA_ROOT / "caries_patches_split")
 
 # Group patches by panorama base name (e.g., 'val_0', 'val_10')
 pano_groups = {}
@@ -35,8 +42,9 @@ train_panos = set(all_panos[:split_idx])
 val_panos = set(all_panos[split_idx:])
 
 print(f"Total Panoramas: {len(all_panos)}")
-print(f"Train Panoramas: {len(train_panos)} ({len(train_panos)/len(all_panos)*100:.1f}%)")
-print(f"Val Panoramas (Unseen): {len(val_panos)} ({len(val_panos)/len(all_panos)*100:.1f}%)")
+if all_panos:
+    print(f"Train Panoramas: {len(train_panos)} ({len(train_panos)/len(all_panos)*100:.1f}%)")
+    print(f"Val Panoramas (Unseen): {len(val_panos)} ({len(val_panos)/len(all_panos)*100:.1f}%)")
 
 # Ensure clean directories
 for split in ["train", "val"]:
@@ -71,8 +79,8 @@ print(f"Split Complete!")
 print(f"Train Patches: {train_count} images")
 print(f"Validation Patches (Pure Unseen Test): {val_count} images")
 
-# Generate strict dataset yaml
-yaml_content = f"""path: Y:/Dental_000/data/caries_patches_split
+# Generate strict dataset yaml with relative path
+yaml_content = """path: .
 train: train/images
 val: val/images
 names:

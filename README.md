@@ -65,3 +65,14 @@ pytest tests/tests_002/ -v
 # 전체 통합 E2E 검증 테스트
 pytest tests/tests_panoramic_reader/ -v
 ```
+
+---
+
+## 5. 라이선스 및 데이터셋 출처 고지 (License & Data Provenance)
+
+- [소스 코드 라이선스]: 본 저장소(`Dental_000`) 및 시리즈 공통 파이프라인·테스트 스위트 소스 코드는 [LICENSE](LICENSE)에 명시된 `MIT License`를 따릅니다.
+- [데이터셋 및 파생 라벨 라이선스 (`CC BY-NC-SA 4.0`)]:
+  - `data/yolo_fdi/`에 수록된 파노라마 영상 및 FDI 32클래스 세그멘테이션 라벨과 `reports_archive/dental_008_dentex_manifest.csv`는 `DENTEX (Dental Enumeration and Diagnosis on Panoramic X-rays Challenge, Hamamci et al., 2023)` 데이터셋에서 파생되었으며, 원본과 동일하게 `Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International (CC BY-NC-SA 4.0)` 라이선스가 적용됩니다(상세 고지: [data/yolo_fdi/README.md](data/yolo_fdi/README.md)).
+  - 비영리(`NonCommercial`) 조건이 포함된 데이터셋으로 학습된 가중치(`chemahc94/Dental-AI-Models` 등)는 학술 연구 및 비영리 교육 목적으로만 사용할 수 있습니다.
+- [전체 18개 저장소 및 Hugging Face 가중치 라이선스 매트릭스]:
+  - 시리즈 전체의 코드·데이터셋·가중치 라이선스 SSOT 매트릭스는 [reports/261020_0205_Dental_Series_License_and_Data_Provenance_Matrix.md](reports/261020_0205_Dental_Series_License_and_Data_Provenance_Matrix.md)에서 확인할 수 있습니다.

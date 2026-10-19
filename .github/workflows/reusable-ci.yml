@@ -55,6 +55,14 @@ jobs:
       run: |
         ruff check . || echo "Ruff failed but continuing"
 
+    - name: Check Repository Hygiene & Portable Paths
+      run: |
+        if [ -f Dental_000/scripts/check_repo_hygiene.py ]; then
+          python Dental_000/scripts/check_repo_hygiene.py --root Dental_000
+        elif [ -f scripts/check_repo_hygiene.py ]; then
+          python scripts/check_repo_hygiene.py --root .
+        fi
+
     - name: Run Tests
       run: |
         ${{ inputs.test_command }}

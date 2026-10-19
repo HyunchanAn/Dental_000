@@ -1,19 +1,25 @@
-﻿#!/usr/bin/env python3
+#!/usr/bin/env python3
 """
 Dental_002 2-Stage Caries Patch YOLO Retraining with Strict Train/Val Split (Zero Leakage)
 """
 import os
 import sys
+from pathlib import Path
 import torch
 from ultralytics import YOLO
+
+repo_root = Path(__file__).resolve().parents[1]
+if str(repo_root) not in sys.path:
+    sys.path.insert(0, str(repo_root))
+from config.paths import DATA_ROOT, RUNS_ROOT
 
 def main():
     print(f"=== Starting Strict 2-Stage Caries Patch Retraining (Zero Leakage) ===")
     device = "0" if torch.cuda.is_available() else "cpu"
     print(f"Device: {device} ({torch.cuda.get_device_name(0) if torch.cuda.is_available() else 'CPU'})")
     
-    data_yaml = r"Y:/Dental_000/data/caries_patches_split/caries_patch_split.yaml"
-    project_dir = r"Y:/Dental_000/runs"
+    data_yaml = str(DATA_ROOT / "caries_patches_split" / "caries_patch_split.yaml")
+    project_dir = str(RUNS_ROOT)
     run_name = "caries_patch_strict_v2"
 
     # Pretrained YOLOv8s as backbone

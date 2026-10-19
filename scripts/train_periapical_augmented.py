@@ -1,19 +1,25 @@
-﻿#!/usr/bin/env python3
+#!/usr/bin/env python3
 """
 Dental_012 Periapical Lesion Retraining on RTX 5080 (Negative Sample Augmented Dataset)
 """
 import os
 import sys
+from pathlib import Path
 import torch
 from ultralytics import YOLO
+
+repo_root = Path(__file__).resolve().parents[1]
+if str(repo_root) not in sys.path:
+    sys.path.insert(0, str(repo_root))
+from config.paths import RUNS_ROOT, resolve_module_dir
 
 def main():
     print(f"=== Starting Dental_012 Periapical Retraining (Augmented 4,264 Images) ===")
     device = "0" if torch.cuda.is_available() else "cpu"
     print(f"Device: {device} ({torch.cuda.get_device_name(0) if torch.cuda.is_available() else 'CPU'})")
     
-    data_yaml = r"Y:/Dental_012/data/yolo_dataset_augmented/data.yaml"
-    project_dir = r"Y:/Dental_000/runs"
+    data_yaml = str(resolve_module_dir("Dental_012") / "data" / "yolo_dataset_augmented" / "data.yaml")
+    project_dir = str(RUNS_ROOT)
     run_name = "periapical_augmented_v1"
 
     # YOLO11s as backbone

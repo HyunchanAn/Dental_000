@@ -271,3 +271,35 @@
 2. [README 및 GitHub 이슈 종결]:
    - `Dental_000/README.md` 및 `Dental_008/README.md`의 `[RTX 5080 무누수 507/127 분할 재학습 대기]` 문구를 위 실측 무누수 검증셋 지표 및 독립 무치악 홀드아웃 결과로 전면 교체 완료.
    - GitHub 이슈 `Dental_000#1` 및 `Dental_008#1`에 실측 지표를 코멘트로 기록 후 `CLOSED` 처리 완료, 총괄 이슈 `Dental_000#12` 체크리스트 동기화 완료. 이로써 전체 Dental 시리즈의 `[P0]` 오픈 이슈는 `0건`(전수 해결)으로 마감되었다.
+
+---
+
+# [ 261020 0215 랩탑 개발팀 ] 메인 워크스테이션 가중치 동기화 검증 및 잔여 `[P1]` 과업 13건 전수 해결·종결 Walkthrough
+
+## 1. 메인 워크스테이션(`RTX 5080`) 재학습 가중치 동기화 및 무결성 검증 (Step 1)
+- `Dental_008@7a7d59e`, `Dental_Panoramic_Reader@6bbda80`, `Dental_000@da5ed96` 원격 동기화(`git pull origin main`) 완료.
+- `Dental_Panoramic_Reader/setup_env.py`의 `ensure_weight_file('dental_008_seg')`를 실행하여 신규 재학습 가중치(`modules/Dental_008/weights/best.pt`)의 SHA-256 해시가 `88db875aa9ec209731dfce6fa630b4ee4169e3a57b084d585d5aa150263fe9b7`과 100% 일치함을 검증 완료.
+- `pytest tests/tests_008 tests/tests_panoramic_reader` 실행 결과 무누수 매니페스트·데이터셋 교집합 0건 검증 테스트(`test_leak_free_manifest_and_dataset_disjointness`) 및 E2E 파이프라인 테스트 전수 통과 확인.
+
+## 2. 잔여 `[P1]` 과업 13건(+UI 보정 1건) 전수 해결 및 GitHub 이슈 종결 내역 (Step 2)
+
+| 번호 | 저장소 및 이슈 | 분류 | 핵심 조치 내역 및 반영 커밋 | 상태 |
+| :---: | :--- | :--- | :--- | :---: |
+| 1 | `Dental_000#4` | `[P1]` 절대경로·이식성 | `config/paths.py` 신설(`REPO_ROOT`, `DENTAL_ROOT`, `DATA_ROOT`, `RUNS_ROOT`, `resolve_module_dir`), `scripts/` 내 7개 스크립트 및 `args.yaml`의 `C:/`, `D:/`, `Y:/`, UNC 하드코딩 경로 0건화, `.github/workflows/reusable-ci.yml`에 `check_repo_hygiene.py` CI 게이트 추가 | `[CLOSED]` |
+| 2 | `Dental_000#5` | `[P1]` 위험 자동화 차단 | 무검토 `git add .` 일괄 푸시 및 구형 마이그레이션 일회성 스크립트 8종(`auto_cicd_check.py`, `commit_fixes.py`, `delete_old_hf_repos.py` 등) `git rm` 영구 삭제, `.pre-commit-config.yaml` 및 `scripts/check_repo_hygiene.py`(1024KB 초과 대용량 파일·위험 확장자 차단기) 도입 및 차단 단위 테스트(`test_repo_hygiene_and_large_file_blocker`) 검증 | `[CLOSED]` |
+| 3 | `Dental_000#6` | `[P1]` DENTEX 라이선스 | `data/yolo_fdi/README.md` 신설(DENTEX Hamamci et al., 2023 원 출처 인용, `CC BY-NC-SA 4.0` 비영리·동일조건 승계, FDI 32클래스 재라벨링 및 중복 38장 제거 내역 명시) 및 `Dental_000/README.md` 5장 라이선스 섹션 추가 | `[CLOSED]` |
+| 4 | `Dental_000#7` | `[P1]` 전 시리즈 LICENSE·HF 카드 | 18개 전 저장소 루트 `LICENSE` 파일 100% 완비(누락 0건), 시리즈 라이선스 SSOT 매트릭스(`reports/261020_0205_Dental_Series_License_and_Data_Provenance_Matrix.md`) 작성, Hugging Face 공개 모델 저장소 11개(`chemahc94/Dental-AI-Models` 외 10개) 모델 카드 YAML `license:` 및 학습 데이터·비영리 조건 일괄 업데이트 | `[CLOSED]` |
+| 5 | `Dental_006#51` | `[P1]` 저작권·보안 준수 | `src/ingest/scihub_fallback.py` 삭제, `downloader.py`에서 Sci-Hub·스텔스 우회·사용자 실제 Chrome 프로필 연결(`get_default_chrome_user_data_dir`)·대학 EZproxy 도메인 재작성 전면 제거, 합법 OA API(Unpaywall, PMC OA, Europe PMC, Crossref TDM) 및 `tempfile.mkdtemp()` 격리 프로필로 일원화 (`Dental_006@a487084`) | `[CLOSED]` |
+| 6 | `Dental_006#52` | `[P1]` 출판사 PDF 제거 | `reference_materials/` 내 출판사 저작물 논문 PDF 4편 `git rm` 제거 및 서지정보·공식 DOI 링크 안내 문서(`reference_materials/README.md`)로 대체 (`Dental_006@a487084`) | `[CLOSED]` |
+| 7 | `Dental_007#1` | `[P1]` 대용량 바이너리 제거 | `Miniforge3-Linux-x86_64.sh` 및 `.sh.1`(각 85.8MB, 총 171.6MB)과 `src/__pycache__/*.pyc` 10개 `git rm` 제거, `.gitignore` 보강, `LICENSE` 및 `README.md` 공식 설치 가이드 반영 (`Dental_007@e956c47`) | `[CLOSED]` |
+| 8 | `Dental_011#1` | `[P1]` 연령 추정 3분할 검증 | `src/dataset.py` 결정론적 3-Way 분할(`train` 206 / `val` 44 / 독립 `test` 45, `seed=42`) 및 SHA-256 중복 점검 구현, 독립 Test 셋(`n=45`) 기준 `MAE 0.7755년`(95% Bootstrap CI `[0.5762, 1.0055]년`) vs 중앙값 기준선(`1.9333년`) 및 연령대별 MAE 산출·문서화 (`Dental_011@e402262`) | `[CLOSED]` |
+| 9 | `Dental_013#1` | `[P1]` 아키텍처·테스트 정합화 | `Dental_013/README.md`에 단독 치아 ROI 분류기(`EfficientNet-B0`)와 통합 리더 31클래스 YOLOv8-seg ONNX(`best_restoration_model.onnx` → 4대 임상 범주 매핑, 10례 검출률 100%) 이중 구조 및 Kaggle 데이터 출처 명시, `tests/test_predict.py` 단위 테스트 추가 (`Dental_013@5771031`) | `[CLOSED]` |
+| 10 | `Dental_014#2` | `[P1]` 데이터 출처·환자 분할 | `scripts/prepare_brar_dataset.py`에 환자 접두사 그룹 인식(`extract_patient_group_key`) 80/20 분할 및 교차 누수 단언(`assert isdisjoint`) 구현, `Dental_014/README.md`에 BRAR 1,104명 코호트 비공개 접근 제한·비영리 연구 조건 및 분할 정책 명시 (`Dental_014@4026730`) | `[CLOSED]` |
+| 11 | `Dental_Core#2` | `[P1]` 공통 유틸리티 실구현 | `dental_core/io/dicom.py`(`apply_windowing`, `strip_phi_tags`, `load_medical_image`), `utils/logging.py`(`get_logger`), `utils/device.py`(`get_device`, `get_onnx_providers`) 구현, `README.md` UTF-8 재작성, 단위 테스트 10건(`tests/test_dental_core.py`) 및 CI 추가, `v0.1.0` 태그 발행 (`Dental_Core@c2684c3`) | `[CLOSED]` |
+| 12 | `Dental_003#5` | `[P1]` FastAPI 서버 복구 | `api/main.py`의 `dummy_yolo.pt` 및 잘못된 `PerioLandmarkPredictor` 호출 수정, 실가중치 로드 및 미존재 시 HTTP 503 반환, 응답에 `measurement_method: geometric_heuristic_30_40_rule` 명시 (`Dental_003@b508973`) | `[CLOSED]` |
+| 13 | `Dental_015#1` | `[P1]` 데모 배너·해시 게이트·FDI 보정 UI | 초기 화면 빈 리포트(`isDemoMode=false`) 시작, 데모 로드 시 상시 상단 `DEMO DATA — 실제 환자 판독 결과가 아닌 데모 화면입니다` 경고 배너 표시, 업로드 영상 SHA-256 해시 불일치 시 오버레이 차단 게이트, `uncertain` 치아 클릭 시 FDI 번호(`11`~`48`) 수동 보정(`clinicianCorrected: true`) UI 구현 및 빌드 검증 (`Dental_015@5d44a5f`) | `[CLOSED]` |
+
+## 3. 시리즈 전체 잔여 이슈 통계 (P0·P1 100% 종결 완료)
+- `[P0]` 원격 오픈 이슈: `0건` (전수 종결 완료)
+- `[P1]` 원격 오픈 이슈: `0건` (전수 종결 완료)
+- 현재 18개 저장소에 남아 있는 원격 오픈 이슈는 경미한 위생·문서 정돈 성격의 `[P2]` 이슈 `27건`(+총괄 트래킹 `Dental_000#12`)뿐이며, 모든 `[P0]` 및 `[P1]` 기술·보안·데이터·라이선스 과업은 100% 완결되었다.

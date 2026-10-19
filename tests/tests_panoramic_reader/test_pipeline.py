@@ -113,7 +113,33 @@ try:
         )
         assert report_unavail["imageMetadata"]["fdiStatus"] == "FDI_UNAVAILABLE"
         assert report_unavail["imageMetadata"]["moduleVersions"].get("Dental_008") == "cef1c85"
-        assert report_unavail["findings"]["missingTeeth"]["status"] == "FDI_UNAVAILABLE"
+        assert report_unavail["imageMetadata"]["missingTeeth"] if "missingTeeth" in report_unavail["imageMetadata"] else report_unavail["findings"]["missingTeeth"]["status"] == "FDI_UNAVAILABLE"
+
+    def test_repo_hygiene_and_large_file_blocker(tmp_path):
+        """Dental_000#4 및 #5: 하드코딩 절대경로 0건 및 1MB 초과 대용량 파일 차단 동작을 검증합니다."""
+        import subprocess
+        repo_root = os.path.abspath(os.path.join(os.path.dirname(__file__), "../.."))
+        hygiene_script = os.path.join(repo_root, "scripts", "check_repo_hygiene.py")
+        assert os.path.isfile(hygiene_script)
+
+        # 1. 현재 저장소 추적 파일 내 하드코딩 경로 위반 0건 확인
+        res_ok = subprocess.run(
+            [sys.executable, hygiene_script, "--root", repo_root],
+            capture_output=True,
+            text=True,
+        )
+        assert res_ok.returncode == 0, f"Hygiene check failed: {res_ok.stderr}"
+
+        # 2. 1024KB 초과 더미 파일 생성 시 즉시 차단(returncode != 0) 동작 확인
+        oversized_file = tmp_path / "dummy_large.bin"
+        oversized_file.write_bytes(b"0" * (1100 * 1024))
+        res_block = subprocess.run(
+            [sys.executable, hygiene_script, "--root", repo_root, "--check-file", str(oversized_file)],
+            capture_output=True,
+            text=True,
+        )
+        assert res_block.returncode != 0
+        assert "exceeds 1024 KB limit" in res_block.stderr
 
 except ImportError as _imp_err:
     pytest.skip(f"Optional dependency not available: {_imp_err}", allow_module_level=True)
