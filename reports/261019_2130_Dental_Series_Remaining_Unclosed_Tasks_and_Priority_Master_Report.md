@@ -176,5 +176,52 @@
    - `api_server.py` 기본 `127.0.0.1` 바인딩(`ALLOW_EXTERNAL_ACCESS=true` 옵션화), `ALLOWED_ORIGINS` 화이트리스트(`allow_credentials=False`), 업로드 크기 30MB·50M 픽셀 제한, 선택적 API 토큰(`DPR_API_TOKEN`) 검증 및 `request_id` 기반 일반화 에러 응답 적용 완료.
 
 ## 3. 잔여 통계 갱신
-- GitHub 원격 오픈 이슈: 기존 49건 → 44건 (추가 5건 `CLOSED`: `Dental_Panoramic_Reader#5`, `#6`, `#9`, `Dental_000#2`, `#3`)
+- GitHub 원격 오픈 이슈: 기존 49건 → 39건 (우리 측 5건 `CLOSED` + Grok의 macOS 오등록 5건 `NOT_PLANNED` 종결 반영, 총괄 이슈 `Dental_000#12` 별도)
 - `[P0]` 원격 오픈 이슈는 `Dental_000#1`(RTX 5080 무누수 분할 재학습 대기) 단 1건만 남았으며, 코딩·CI·셋업 영역의 `[P0]` 이슈는 전수 해소되었다.
+
+---
+
+# [ 261019 2250 랩탑 개발팀 ] 메인 워크스테이션(RTX 5080) 이관 작업 요청서 — `Dental_000#1` 및 `Dental_008#1` 재학습·검증 마감 요청
+
+- 수신: `메인 워크스테이션` (`RTX5080Desktop-HC` — AMD Ryzen 9 9900X / RTX 5080 16GB / 64GB RAM)
+- 발신: `랩탑 개발팀` (`RTX4060Laptop-HC`)
+- 대상 이슈:
+  - [필수] `Dental_000#1` (`[P0]` `Dental_008` 대표 성능 `99.2%/98.4%`, `mAP50 0.995`가 학습셋과 100% 중복된 검증셋 38장에서 산출된 문제 해결)
+  - [권장 동시 처리] `Dental_008#1` (`[P1]` 무치악 Hard Negative 75장을 학습·평가가 공유하던 문제를 학습 60장 / 독립 검증 15장 홀드아웃으로 분리 평가)
+
+## 1. `랩탑 개발팀`에서 사전 준비 완료해 둔 사항 (코드·문서 커밋 및 푸시 완료)
+1. 무누수 분할 매니페스트 생성 및 커밋 완료:
+   - 경로: `Dental_000/reports_archive/dental_008_dentex_manifest.csv`
+   - 내역: DENTEX 전체 634장을 `seed=42` 기준 `train` 507장(80%) / `val` 127장(20%)으로 분할 완료(Train-Val 파일명 교집합 `0건` 검증 완료).
+2. 데이터셋 분할 스크립트 패치 완료 (`Dental_008@cbe529f`):
+   - 경로: `Dental_008/prepare_yolo_data.py`
+   - 내역: 기존 `[:50]` 슬라이싱으로 인해 검증셋이 학습셋과 중복되던 로직을 제거하고, `Dental_000/reports_archive/dental_008_dentex_manifest.csv`를 우선 로드(파일 부재 시에도 `random.Random(42)` 80/20 무누수 분할 보장)하도록 수정 완료.
+3. README 누수 수치 폐기 공시 완료 (`Dental_000@200ee1c`, `Dental_008@cbe529f`):
+   - `Dental_000/README.md` 및 `Dental_008/README.md`에서 기존 `99.2% / 98.4%` (`mAP50 0.995`) 수치를 공식 폐기하고 `[RTX 5080 무누수 507/127 분할 재학습 대기]` 상태로 공시 완료.
+
+## 2. `메인 워크스테이션`에서 수행해 주실 작업 (순서대로 실행 요청)
+
+### Step 1. 최신 커밋 Pull
+- `Dental_000`, `Dental_008`, `Dental_Panoramic_Reader` 저장소에서 각각 `git pull origin main`을 실행하여 위 패치와 매니페스트를 동기화해 주십시오.
+
+### Step 2. 무누수 YOLO 데이터셋 재생성 (`prepare_yolo_data.py`)
+- `Dental_008` 디렉터리에서 DENTEX 원본(`quadrant_enumeration/xrays/` 및 `train_quadrant_enumeration.json`)이 준비된 상태로 아래 명령을 실행해 주십시오:
+  ```powershell
+  python prepare_yolo_data.py
+  ```
+- 실행 후 `yolo_dataset/images/train`(507장)과 `yolo_dataset/images/val`(127장) 간 파일명 중복이 0건인지 확인해 주십시오.
+- [추가 권장 — `Dental_008#1` 동시 해결]: `edentulous_images/`(75장)를 병합할 때 `scripts/prepare_v3_dataset.py`에서 75장 전부를 `train`에 넣지 말고 `60장(train) / 15장(독립 edentulous_val)`으로 분리한 뒤, 학습 완료 후 `scripts/test_on_edentulous.py`로 학습에 사용되지 않은 15장에 대한 False Positive 억제율을 측정해 주시면 `Dental_008#1`도 함께 종결할 수 있습니다.
+
+### Step 3. `YOLOv8m-seg` 무누수 재학습 및 지표 산출 (`train.py`)
+- `Dental_008`에서 RTX 5080(`device=0`)으로 100 에포크 재학습을 수행해 주십시오:
+  ```powershell
+  python train.py
+  ```
+- 학습 완료 후 무누수 검증셋(Val 127장) 기준 다음 지표를 기록해 주십시오:
+  - `Box Precision`, `Box Recall`, `Box mAP@0.5`, `Box mAP@0.5:0.95`
+  - `Mask Precision`, `Mask Recall`, `Mask mAP@0.5`, `Mask mAP@0.5:0.95`
+
+### Step 4. 가중치 반영, README 수치 업데이트 및 GitHub 이슈 종결
+1. 재학습된 `best.pt`를 `Dental_008/weights/best.pt`에 복사하고, Hugging Face Hub(`chemahc94/Dental-AI-Models` 내 `Dental_008_weights_best.pt`)에 업로드한 뒤 `Dental_Panoramic_Reader/weights_manifest.yaml`의 `dental_008_seg` `sha256` 해시를 갱신해 주십시오.
+2. `Dental_000/README.md`(20행) 및 `Dental_008/README.md`(29~33행)의 재학습 대기 문구를 실측된 무누수 `mAP` 지표로 교체하고 커밋·푸시해 주십시오.
+3. GitHub 이슈 `Dental_000#1`(및 무치악 홀드아웃 평가 시 `Dental_008#1`)을 `gh issue close`로 닫고, 본 문서 하단에 `# [ yymmdd hhmm 메인 워크스테이션 ]` 서명으로 완료 결과를 남겨 주십시오.

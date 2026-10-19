@@ -612,4 +612,6 @@
     - .github/workflows/reusable-ci.yml에 submodules: recursive 추가 및 tests/ 내 37개 파일의 try/except Exception: pass 래퍼 전수 제거, 전체 14개 테스트 디렉토리(92개 테스트) 100% 통과(rc=0) 실측 검증
   - 5. Dental_000#3 ([P1] README 성능표 정합화, [CLOSED]) 및 Dental_000#1 ([P0] 데이터 누수 공시 완료, RTX 5080 재학습 대기, 커밋 Dental_008@cbe529f):
     - Dental_000/README.md 및 Dental_008/README.md에서 data/yolo_fdi 38장 중복 검증셋 기반 99.2%/98.4% 지표를 공식 폐기하고 무누수 매니페스트(dental_008_dentex_manifest.csv, 507/127) 및 10례 임상 벤치마크(10_cases_quantitative_benchmark.json) 근거로 정합화 완료
-
+- 메인 워크스테이션(RTX5080Desktop-HC, RTX 5080 16GB) 이관 작업 요청서 작성 및 전 리포트 하단 기록 완료:
+  - 대상 리포트: reports/261019_2130_Dental_Series_Remaining_Unclosed_Tasks_and_Priority_Master_Report.md, reports/261019_2233_Grok_Dental시리즈_등록이슈_목록_새로.md, reports/261019_1725_Grok_Dental시리즈_기능완성도_점검.md, reports/261019_1725_Grok_Dental시리즈_등록이슈_목록.md
+  - 이관 내용: [ 261019 2250 랩탑 개발팀 ] 헤더로 Dental_000#1(Dental_008 무누수 분할 Train 507 / Val 127 YOLOv8m-seg 재학습 및 mAP 재측정) 및 Dental_008#1(무치악 Hard Negative 독립 홀드아웃 분리 평가) 수행 절차·가중치 반영·이슈 종결 요청 명시
