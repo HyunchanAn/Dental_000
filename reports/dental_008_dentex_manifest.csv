@@ -44,7 +44,7 @@ image_id,filename,split,tooth_count,width,height
 43,train_482.png,train,30,2783,1316
 44,train_487.png,train,28,2878,1316
 45,train_3.png,val,30,2950,1316
-46,train_0.png,train,30,2955,1316
+46,train_0.png,val,30,2955,1316
 47,train_292.png,val,31,2767,1316
 48,train_19.png,train,31,2802,1316
 49,train_617.png,val,32,2920,1316
@@ -98,7 +98,7 @@ image_id,filename,split,tooth_count,width,height
 97,train_452.png,train,28,2891,1316
 98,train_66.png,train,25,2844,1316
 99,train_300.png,train,32,2922,1316
-100,train_500.png,val,32,2868,1504
+100,train_500.png,train,32,2868,1504
 101,train_531.png,train,30,2942,1316
 102,train_246.png,train,28,2736,1316
 103,train_35.png,train,32,2885,1316
@@ -173,7 +173,7 @@ image_id,filename,split,tooth_count,width,height
 172,train_155.png,train,22,2951,1316
 173,train_356.png,train,24,2947,1316
 174,train_362.png,train,30,2927,1316
-175,train_10.png,train,28,2905,1316
+175,train_10.png,val,28,2905,1316
 176,train_570.png,val,30,2808,1316
 177,train_327.png,train,26,1976,976
 178,train_506.png,train,40,2882,1316
@@ -249,7 +249,7 @@ image_id,filename,split,tooth_count,width,height
 248,train_11.png,train,32,2820,1316
 249,train_373.png,train,24,2850,1316
 250,train_542.png,train,31,2868,1504
-251,train_181.png,val,29,2868,1504
+251,train_181.png,train,29,2868,1504
 252,train_156.png,train,27,2991,1316
 253,train_57.png,val,27,2931,1316
 254,train_555.png,train,31,1976,976

@@ -615,3 +615,22 @@
 - 메인 워크스테이션(RTX5080Desktop-HC, RTX 5080 16GB) 이관 작업 요청서 작성 및 전 리포트 하단 기록 완료:
   - 대상 리포트: reports/261019_2130_Dental_Series_Remaining_Unclosed_Tasks_and_Priority_Master_Report.md, reports/261019_2233_Grok_Dental시리즈_등록이슈_목록_새로.md, reports/261019_1725_Grok_Dental시리즈_기능완성도_점검.md, reports/261019_1725_Grok_Dental시리즈_등록이슈_목록.md
   - 이관 내용: [ 261019 2250 랩탑 개발팀 ] 헤더로 Dental_000#1(Dental_008 무누수 분할 Train 507 / Val 127 YOLOv8m-seg 재학습 및 mAP 재측정) 및 Dental_008#1(무치악 Hard Negative 독립 홀드아웃 분리 평가) 수행 절차·가중치 반영·이슈 종결 요청 명시
+
+## 2026-10-20
+
+- 메인 워크스테이션(RTX5080Desktop-HC, Ryzen 9 9900X / RTX 5080 16GB / 64GB RAM) 이관 과업(Dental_000#1 [P0] 및 Dental_008#1 [P1]) 전 과정 수행 및 최종 종결 완료:
+  - 1. 무누수 데이터셋 재생성 및 무치악 홀드아웃 분리:
+    - DENTEX 634장 매니페스트(reports/dental_008_dentex_manifest.csv, reports_archive/dental_008_dentex_manifest.csv)의 파일명 중복 0건 및 원본 이미지 SHA-256 바이트 해시 중복 0건(Train 507장 / Val 127장) 교차 검증 및 교정 완료
+    - data/yolo_fdi/ 학습셋 내 검증셋(38장) 중복 파일 38장(이미지·라벨) 물리적 제거(Train 462장 / Val 38장, 교집합 0건), dataset.yaml 상대 경로화(path: .) 및 tests/tests_008/test_evaluate.py에 무누수 검증 단위 테스트(test_leak_free_manifest_and_dataset_disjointness) 추가 완료
+    - Dental_008/prepare_yolo_data.py 및 scripts/prepare_v3_dataset.py를 통해 무치악 Hard Negative 75장(edentulous_images/)을 seed=42 기준 학습용 Train 60장(최종 학습셋 567장)과 독립 검증용 Holdout Val 15장(images/edentulous_val, 교집합 0건)으로 엄격 분리 완료
+  - 2. RTX 5080 기반 YOLOv8m-seg 100 에포크 무누수 재학습 및 정량 평가(reports_archive/dental_008_leak_free_val_metrics.json):
+    - 무누수 검증셋(Val 127장, 치아 인스턴스 3,598개) 실측 지표:
+      - Box: Precision 99.06% (0.9906), Recall 99.06% (0.9906), mAP@0.5 99.15% (0.9915), mAP@0.5:0.95 60.37% (0.6037)
+      - Mask: Precision 97.75% (0.9775), Recall 97.75% (0.9775), mAP@0.5 98.55% (0.9855), mAP@0.5:0.95 55.64% (0.5564)
+      - 추론 속도: 7.1 ms/image (140.8 FPS, RTX 5080 기준)
+    - 독립 무치악 홀드아웃(15장, 미학습 이미지) False Positive 억제 평가(scripts/test_on_edentulous.py):
+      - conf=0.25 및 프로덕션 conf=0.20 모두에서 총 오탐지(FP) 3건(edentulous_0072.jpg 1건, edentulous_0078.jpg 2건), 이미지당 평균 0.20 FP/img, 무오탐 이미지 비율 86.67% (13/15장 완전 억제) 달성
+  - 3. 가중치 배포, 매니페스트·README 갱신 및 GitHub 이슈 종결:
+    - 재학습 가중치(Dental_008/weights/best.pt, SHA-256: 88db875aa9ec209731dfce6fa630b4ee4169e3a57b084d585d5aa150263fe9b7)를 로컬 서브모듈 및 Hugging Face Hub(chemahc94/Dental-AI-Models 내 Dental_008_weights_best.pt, Dental_008/yolov8m_best.pt)에 업로드하고 Dental_Panoramic_Reader/weights_manifest.yaml 해시 갱신 완료
+    - Dental_000/README.md 및 Dental_008/README.md의 재학습 대기 문구를 실측 무누수 검증셋 지표 및 독립 무치악 홀드아웃 결과로 교체 완료
+    - GitHub 이슈 Dental_000#1([P0]) 및 Dental_008#1([P1])에 실측 지표를 코멘트로 남긴 후 CLOSED 처리하고 총괄 이슈(Dental_000#12) 체크리스트 갱신 및 이관 리포트 하단 [ 261020 0120 메인 워크스테이션 ] 완료 Walkthrough 기록 완료

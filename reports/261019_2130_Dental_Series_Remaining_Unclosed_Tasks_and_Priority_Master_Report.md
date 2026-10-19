@@ -225,3 +225,49 @@
 1. 재학습된 `best.pt`를 `Dental_008/weights/best.pt`에 복사하고, Hugging Face Hub(`chemahc94/Dental-AI-Models` 내 `Dental_008_weights_best.pt`)에 업로드한 뒤 `Dental_Panoramic_Reader/weights_manifest.yaml`의 `dental_008_seg` `sha256` 해시를 갱신해 주십시오.
 2. `Dental_000/README.md`(20행) 및 `Dental_008/README.md`(29~33행)의 재학습 대기 문구를 실측된 무누수 `mAP` 지표로 교체하고 커밋·푸시해 주십시오.
 3. GitHub 이슈 `Dental_000#1`(및 무치악 홀드아웃 평가 시 `Dental_008#1`)을 `gh issue close`로 닫고, 본 문서 하단에 `# [ yymmdd hhmm 메인 워크스테이션 ]` 서명으로 완료 결과를 남겨 주십시오.
+
+---
+
+# [ 261020 0120 메인 워크스테이션 ] `Dental_000#1` 무누수 507/127 분할 `YOLOv8m-seg` 재학습 및 `Dental_008#1` 독립 무치악 홀드아웃 평가 완료 보고서
+
+- 발신: `메인 워크스테이션` (`RTX5080Desktop-HC` — AMD Ryzen 9 9900X / RTX 5080 16GB / 64GB RAM)
+- 수신: `안현찬` 총괄 및 `랩탑 개발팀` (`RTX4060Laptop-HC`)
+- 종결 이슈:
+  - `[P0] Dental_000#1` (`[CLOSED]` — `Dental_008` 무누수 507/127 분할 데이터셋 재생성, `RTX 5080` 100 에포크 재학습 및 정량 검증 완결)
+  - `[P1] Dental_008#1` (`[CLOSED]` — 무치악 Hard Negative 75장을 `Train 60장` / 독립 검증용 `Holdout Val 15장`으로 분리 및 미학습 홀드아웃 FP 억제율 실측 완결)
+
+## 1. 무누수 데이터셋 재생성 및 바이트 해시 무결성 검증 (Step 1)
+1. [DENTEX 634장 파일명 및 SHA-256 바이트 해시 교차검증]:
+   - `Dental_000/reports_archive/dental_008_dentex_manifest.csv` 및 원본 `xrays/` 634장 전수 SHA-256 해시 대조 결과, 원본 DENTEX 데이터셋 내부에 파일명은 다르나 바이트 해시가 동일한 중복 이미지 쌍이 존재하여 기존 매니페스트 상에서 Train-Val 간 바이트 해시 교집합 2건이 발생함을 적발하였다.
+   - 이에 따라 중복 해시 이미지(`train_181.png`, `train_500.png`)를 `train`으로 이동하고 고유 해시 이미지(`train_0.png`, `train_10.png`)를 `val`로 교체하여 `Train 507장 / Val 127장`의 파일명 교집합 `0건` 및 SHA-256 바이트 해시 교집합 `0건`을 동시에 보장하도록 `reports/dental_008_dentex_manifest.csv`와 `reports_archive/dental_008_dentex_manifest.csv`를 동기화하였다.
+   - 아울러 `Dental_000/data/yolo_fdi/`에서 `val`(38장)과 중복되던 `train` 내부 38장 이미지·라벨을 물리적으로 제거(Train 462장 / Val 38장, 교집합 `0건`)하고 `dataset.yaml`의 UNC 경로를 상대 경로(`path: .`)로 수정하였으며, `tests/tests_008/test_evaluate.py`에 매니페스트 및 데이터셋 무누수 검증 단위 테스트(`test_leak_free_manifest_and_dataset_disjointness`)를 추가하였다.
+2. [무치악 Hard Negative 60/15 홀드아웃 분리 (`Dental_008#1`)]:
+   - `Dental_008/scripts/prepare_v3_dataset.py`를 수정하여 무치악/임플란트 파노라마 75장(`edentulous_images/`, 고유 SHA-256 75장)을 `seed=42` 기준으로 학습용 `Train 60장`(빈 라벨 배경 데이터로 `images/train`에 병합 → 최종 학습셋 `567장`)과 학습에 일절 노출되지 않는 독립 검증용 `Holdout Val 15장`(`images/edentulous_val`, 교집합 `0건`)으로 분리하였다.
+
+## 2. `RTX 5080` 기반 `YOLOv8m-seg` 100 에포크 재학습 및 정량 평가 (Step 2)
+1. [학습 환경 및 하이퍼파라미터]:
+   - 디바이스: `NVIDIA GeForce RTX 5080 16GB` (`device=0`, `AMP=True`)
+   - 모델 및 설정: `yolov8m-seg.pt` 사전학습 가중치 기반 100 Epochs, `imgsz=640`, `batch=16`, `workers=8`, `seed=42`
+   - 최종 생성 가중치: `Dental_008/weights/best.pt` (`52.3 MB`, SHA-256: `88db875aa9ec209731dfce6fa630b4ee4169e3a57b084d585d5aa150263fe9b7`)
+2. [무누수 검증셋(Val 127장, 치아 인스턴스 3,598개) 정량 평가 실측치]:
+   - 산출 근거 아티팩트: `Dental_000/reports_archive/dental_008_leak_free_val_metrics.json`
+
+| 평가 영역 | Precision | Recall | mAP@0.5 | mAP@0.5:0.95 | 추론 속도 (`RTX 5080`, `batch=1`) |
+| :--- | :---: | :---: | :---: | :---: | :---: |
+| `Box` (객체 탐지) | `99.06%` (`0.9906`) | `99.06%` (`0.9906`) | `99.15%` (`0.9915`) | `60.37%` (`0.6037`) | `7.1 ms/img` (`140.8 FPS`) |
+| `Mask` (인스턴스 분할) | `97.75%` (`0.9775`) | `97.75%` (`0.9775`) | `98.55%` (`0.9855`) | `55.64%` (`0.5564`) | 전처리 `0.8ms` / 추론 `3.3ms` / 후처리 `3.0ms` |
+
+3. [독립 무치악 홀드아웃(15장, 미학습 이미지) False Positive 억제 평가 (`Dental_008#1`)]:
+   - `Dental_008/scripts/test_on_edentulous.py`가 학습에 사용되지 않은 독립 홀드아웃 15장(`images/edentulous_val`)만을 대상으로 평가하도록 수정·실행 완료.
+   - 평가 결과 (`conf=0.25` 및 프로덕션 `conf=0.20` 동일):
+     - 총 오탐지(Total False Positives): `3건` (`edentulous_0072.jpg`: 1건, `edentulous_0078.jpg`: 2건, 나머지 13장: 0건)
+     - 이미지당 평균 오탐지(Average FP/image): `0.20 FP/img`
+     - 무오탐 이미지 비율(Zero-FP Image Rate): `86.67%` (`13 / 15장` 완전 억제)
+
+## 3. 가중치 배포, 문서 갱신 및 이슈 종결 (Step 3 & Step 4)
+1. [가중치 및 매니페스트 동기화]:
+   - 신규 `best.pt`를 `Dental_008/weights/best.pt`, `Dental_008/weights/yolov8m_best.pt`, `Dental_008/models/yolov8m_best.pt`에 반영하고 Hugging Face Hub(`chemahc94/Dental-AI-Models` 내 `Dental_008_weights_best.pt` 및 `Dental_008/yolov8m_best.pt`)에 업로드 완료.
+   - `Dental_Panoramic_Reader/weights_manifest.yaml`의 `Dental_008_segmentation` 및 `dental_008_seg` SHA-256 해시를 `88db875aa9ec209731dfce6fa630b4ee4169e3a57b084d585d5aa150263fe9b7`로 갱신 완료.
+2. [README 및 GitHub 이슈 종결]:
+   - `Dental_000/README.md` 및 `Dental_008/README.md`의 `[RTX 5080 무누수 507/127 분할 재학습 대기]` 문구를 위 실측 무누수 검증셋 지표 및 독립 무치악 홀드아웃 결과로 전면 교체 완료.
+   - GitHub 이슈 `Dental_000#1` 및 `Dental_008#1`에 실측 지표를 코멘트로 기록 후 `CLOSED` 처리 완료, 총괄 이슈 `Dental_000#12` 체크리스트 동기화 완료. 이로써 전체 Dental 시리즈의 `[P0]` 오픈 이슈는 `0건`(전수 해결)으로 마감되었다.

@@ -1,0 +1,208 @@
+{
+  "weights_path": "\\\\RTX4060Laptop-HC\\Github\\Dental_008\\weights\\best.pt",
+  "weights_sha256": "88db875aa9ec209731dfce6fa630b4ee4169e3a57b084d585d5aa150263fe9b7",
+  "epochs": 100,
+  "batch": 16,
+  "imgsz": 640,
+  "train_images": 567,
+  "dentex_train_images": 507,
+  "edentulous_train_images": 60,
+  "val_images": 127,
+  "edentulous_holdout_images": 15,
+  "box": {
+    "precision": 0.9906,
+    "recall": 0.9906,
+    "map50": 0.9915,
+    "map50_95": 0.6037
+  },
+  "mask": {
+    "precision": 0.9775,
+    "recall": 0.9775,
+    "map50": 0.9855,
+    "map50_95": 0.5564
+  },
+  "edentulous_holdout_conf025": {
+    "holdout_image_count": 15,
+    "conf_threshold": 0.25,
+    "new_model_path": "C:\\Users\\sg\\.cache\\dentex_dataset\\runs\\segment\\yolov8m_seg_leakfree_v4\\weights\\best.pt",
+    "new_model_sha256": "88db875aa9ec209731dfce6fa630b4ee4169e3a57b084d585d5aa150263fe9b7",
+    "baseline_model_path": null,
+    "baseline_total_fp": null,
+    "baseline_fp_per_image": null,
+    "baseline_zero_fp_images": null,
+    "retrained_total_fp": 3,
+    "retrained_fp_per_image": 0.2,
+    "retrained_zero_fp_images": 13,
+    "retrained_zero_fp_rate_pct": 86.67,
+    "fp_suppression_rate_pct": 0.0,
+    "per_image": [
+      {
+        "filename": "edentulous_0004.jpg",
+        "baseline_fp": null,
+        "retrained_fp": 0
+      },
+      {
+        "filename": "edentulous_0005.jpg",
+        "baseline_fp": null,
+        "retrained_fp": 0
+      },
+      {
+        "filename": "edentulous_0012.jpg",
+        "baseline_fp": null,
+        "retrained_fp": 0
+      },
+      {
+        "filename": "edentulous_0014.jpg",
+        "baseline_fp": null,
+        "retrained_fp": 0
+      },
+      {
+        "filename": "edentulous_0015.jpg",
+        "baseline_fp": null,
+        "retrained_fp": 0
+      },
+      {
+        "filename": "edentulous_0018.jpg",
+        "baseline_fp": null,
+        "retrained_fp": 0
+      },
+      {
+        "filename": "edentulous_0032.jpg",
+        "baseline_fp": null,
+        "retrained_fp": 0
+      },
+      {
+        "filename": "edentulous_0035.jpg",
+        "baseline_fp": null,
+        "retrained_fp": 0
+      },
+      {
+        "filename": "edentulous_0036.jpg",
+        "baseline_fp": null,
+        "retrained_fp": 0
+      },
+      {
+        "filename": "edentulous_0039.jpg",
+        "baseline_fp": null,
+        "retrained_fp": 0
+      },
+      {
+        "filename": "edentulous_0058.jpg",
+        "baseline_fp": null,
+        "retrained_fp": 0
+      },
+      {
+        "filename": "edentulous_0072.jpg",
+        "baseline_fp": null,
+        "retrained_fp": 1
+      },
+      {
+        "filename": "edentulous_0073.jpg",
+        "baseline_fp": null,
+        "retrained_fp": 0
+      },
+      {
+        "filename": "edentulous_0078.jpg",
+        "baseline_fp": null,
+        "retrained_fp": 2
+      },
+      {
+        "filename": "edentulous_0079.jpg",
+        "baseline_fp": null,
+        "retrained_fp": 0
+      }
+    ]
+  },
+  "edentulous_holdout_conf020": {
+    "holdout_image_count": 15,
+    "conf_threshold": 0.2,
+    "new_model_path": "C:\\Users\\sg\\.cache\\dentex_dataset\\runs\\segment\\yolov8m_seg_leakfree_v4\\weights\\best.pt",
+    "new_model_sha256": "88db875aa9ec209731dfce6fa630b4ee4169e3a57b084d585d5aa150263fe9b7",
+    "baseline_model_path": null,
+    "baseline_total_fp": null,
+    "baseline_fp_per_image": null,
+    "baseline_zero_fp_images": null,
+    "retrained_total_fp": 3,
+    "retrained_fp_per_image": 0.2,
+    "retrained_zero_fp_images": 13,
+    "retrained_zero_fp_rate_pct": 86.67,
+    "fp_suppression_rate_pct": 0.0,
+    "per_image": [
+      {
+        "filename": "edentulous_0004.jpg",
+        "baseline_fp": null,
+        "retrained_fp": 0
+      },
+      {
+        "filename": "edentulous_0005.jpg",
+        "baseline_fp": null,
+        "retrained_fp": 0
+      },
+      {
+        "filename": "edentulous_0012.jpg",
+        "baseline_fp": null,
+        "retrained_fp": 0
+      },
+      {
+        "filename": "edentulous_0014.jpg",
+        "baseline_fp": null,
+        "retrained_fp": 0
+      },
+      {
+        "filename": "edentulous_0015.jpg",
+        "baseline_fp": null,
+        "retrained_fp": 0
+      },
+      {
+        "filename": "edentulous_0018.jpg",
+        "baseline_fp": null,
+        "retrained_fp": 0
+      },
+      {
+        "filename": "edentulous_0032.jpg",
+        "baseline_fp": null,
+        "retrained_fp": 0
+      },
+      {
+        "filename": "edentulous_0035.jpg",
+        "baseline_fp": null,
+        "retrained_fp": 0
+      },
+      {
+        "filename": "edentulous_0036.jpg",
+        "baseline_fp": null,
+        "retrained_fp": 0
+      },
+      {
+        "filename": "edentulous_0039.jpg",
+        "baseline_fp": null,
+        "retrained_fp": 0
+      },
+      {
+        "filename": "edentulous_0058.jpg",
+        "baseline_fp": null,
+        "retrained_fp": 0
+      },
+      {
+        "filename": "edentulous_0072.jpg",
+        "baseline_fp": null,
+        "retrained_fp": 1
+      },
+      {
+        "filename": "edentulous_0073.jpg",
+        "baseline_fp": null,
+        "retrained_fp": 0
+      },
+      {
+        "filename": "edentulous_0078.jpg",
+        "baseline_fp": null,
+        "retrained_fp": 2
+      },
+      {
+        "filename": "edentulous_0079.jpg",
+        "baseline_fp": null,
+        "retrained_fp": 0
+      }
+    ]
+  }
+}

@@ -119,6 +119,42 @@ try:
         assert len(labels) == 4
         assert all(int(x) > 0 for x in labels)
 
+    def test_leak_free_manifest_and_dataset_disjointness():
+        import csv
+        import hashlib
+        manifest_candidates = [
+            os.path.join(_root, "reports_archive", "dental_008_dentex_manifest.csv"),
+            os.path.join(_root, "reports", "dental_008_dentex_manifest.csv"),
+        ]
+        manifest_path = next((p for p in manifest_candidates if os.path.exists(p)), None)
+        assert manifest_path is not None, "dental_008_dentex_manifest.csv must exist"
+        train_files, val_files = set(), set()
+        with open(manifest_path, "r", encoding="utf-8") as mf:
+            for row in csv.DictReader(mf):
+                if row["split"].strip() == "train":
+                    train_files.add(row["filename"].strip())
+                elif row["split"].strip() == "val":
+                    val_files.add(row["filename"].strip())
+        assert len(train_files) == 507
+        assert len(val_files) == 127
+        assert len(train_files & val_files) == 0, "Manifest Train and Val filenames must be strictly disjoint"
+
+        yolo_fdi_yaml = os.path.join(_root, "data", "yolo_fdi", "dataset.yaml")
+        if os.path.exists(yolo_fdi_yaml):
+            yaml_text = open(yolo_fdi_yaml, "r", encoding="utf-8").read()
+            assert "rtx4060laptop" not in yaml_text.lower()
+            assert "c:/" not in yaml_text.lower() and "d:/" not in yaml_text.lower()
+
+        yolo_fdi_tr = os.path.join(_root, "data", "yolo_fdi", "images", "train")
+        yolo_fdi_va = os.path.join(_root, "data", "yolo_fdi", "images", "val")
+        if os.path.isdir(yolo_fdi_tr) and os.path.isdir(yolo_fdi_va):
+            tr_names = set(os.listdir(yolo_fdi_tr))
+            va_names = set(os.listdir(yolo_fdi_va))
+            assert len(tr_names & va_names) == 0, "data/yolo_fdi train and val filenames must not overlap"
+            tr_hashes = {hashlib.sha256(open(os.path.join(yolo_fdi_tr, f), "rb").read()).hexdigest() for f in tr_names}
+            va_hashes = {hashlib.sha256(open(os.path.join(yolo_fdi_va, f), "rb").read()).hexdigest() for f in va_names}
+            assert len(tr_hashes & va_hashes) == 0, "data/yolo_fdi train and val SHA-256 hashes must not overlap"
+
     def test_evaluate():
         print("DENTEX E2E 성능 평가 및 시각화 리포트 생성 시작...")
     
@@ -156,7 +192,7 @@ try:
         found_mixed = False
         found_deciduous = False
     
-        os.makedirs('//rtx4060laptop-hc/Users/chema/Github/Dental_Panoramic_Reader/reports_archive/images', exist_ok=True)
+        os.makedirs(os.path.join(_root, 'reports_archive', 'images'), exist_ok=True)
 
         with torch.no_grad():
             num_eval = len(dataset_val)

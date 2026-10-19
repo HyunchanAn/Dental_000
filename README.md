@@ -18,7 +18,7 @@ Dental_000 모듈은 전체 Dental 생태계(000 ~ 015)의 품질 보증(QA)과 
 
 | 모듈 ID | 질환 및 과업명 (Task) | 검증 지표 (Validated Metrics) | 파이프라인 연동 상태 | 최신 모델 아키텍처 및 근거 아티팩트 |
 | :--- | :--- | :---: | :---: | :--- |
-| Dental_008 | 치아 인스턴스 분할 및 FDI 치식 식별 | Box IoU 0.8245 / Mask IoU 0.7965 (10례 검출률 100%, 평균 28.9개) | ACTIVE (YOLOv8m-seg + 2-Stage FDI) | 기존 `data/yolo_fdi` 38장 검증셋 수치(99.2%/98.4%)는 Train-Val 중복 누수로 무효화 처리됨. 무누수 매니페스트(`dental_008_dentex_manifest.csv`, 507/127 분할) 재학습 대기 |
+| Dental_008 | 치아 인스턴스 분할 및 FDI 치식 식별 | Box P 99.1% / R 99.1% / mAP@50 99.2% (mAP@50:95 60.4%) / Mask P 97.8% / R 97.8% / mAP@50 98.6% (mAP@50:95 55.6%) | ACTIVE (YOLOv8m-seg + 2-Stage FDI) | 무누수 분할(`dental_008_dentex_manifest.csv`, Train 507 / Val 127, SHA-256 교집합 0) RTX 5080 100ep 재학습 실측 (`best.pt` `88db875a...`). 독립 무치악 홀드아웃 15장 평균 0.20 FP/img (무오탐 영상 비율 86.7%, 13/15장) |
 | Dental_002 | 치아 우식증 (2-Stage 고해상도 패치) | Recall 94.1% / Precision 83.3% (mAP@50 91.5%) | ACTIVE (512px 치아 패치 추론) | 환자단위 엄격분리 512 패치 모델 (`reports/260917_2120_Dental002_2Stage_Patch_Benchmark_Report.md`) |
 | Dental_012 | 치근단 병소 (음성 배경 증강) | Recall 66.9% / Precision 71.7% (mAP@50 73.7%) | ACTIVE (치근단 Apex 앵커링) | YOLO11s 정상 음영 340장 주입 (`reports/260917_2105_Dental012_Negative_Aug_Benchmark_Report.md`) |
 | Dental_003 | 치조골 소실 (Bone Loss) 계측 | 단위 테스트 검증 (RBL/Staging 기하 연산) | STANDBY (`UNIMPLEMENTED_MODEL`) | 2018 AAP/EFP 치주 병기 산출 엔진 구현 완료, 통합 파이프라인 내 랜드마크 가중치 연동 대기 |
@@ -28,7 +28,7 @@ Dental_000 모듈은 전체 Dental 생태계(000 ~ 015)의 품질 보증(QA)과 
 | Dental_014 | 하악 피질골 골다공증 위험도 스크리닝 | Holdout Test Acc 54.79% / Macro-F1 0.4832 (MCI 베이스라인 민감도 73.1%, 특이도 17.6%) | ACTIVE (`OsteoMAENet` `best.pt`) | ViT-Small (`vit_small_patch16_224`) + 임상 변수(연령/성별) 퓨전 (`reports/260712_1825_Dental014_Osteoporosis_Report.md`) |
 
 > [지표 및 데이터 무결성 가이드]:
-> - `Dental_008`: 과거 표기되었던 Recall 99.2% / Precision 98.4% (mAP50 0.995) 수치는 `data/yolo_fdi/images/val`(38장)이 `images/train`(595장)의 부분집합이었던 데이터 누수(Leakage)로 확인되어 공식 지표에서 폐기하였습니다. 현재 결정론적 무누수 분할 매니페스트(`reports_archive/dental_008_dentex_manifest.csv`, Train 507장 / Val 127장, 교집합 0)가 구축되어 메인 워크스테이션 재학습 후 갱신될 예정입니다.
+> - `Dental_008`: 과거 표기되었던 누수 검증셋(`data/yolo_fdi/images/val` 38장 중복) 기반 수치를 폐기하고, 결정론적 무누수 분할 매니페스트(`reports_archive/dental_008_dentex_manifest.csv`, Train 507장 / Val 127장, 파일명 및 SHA-256 해시 교집합 0건)와 무치악 Hard Negative 홀드아웃 분리(Train 60장 / 독립 Holdout 15장, 교집합 0건) 기준으로 메인 워크스테이션(RTX 5080) 100 에포크 재학습을 완료한 실측치입니다(`reports_archive/dental_008_leak_free_val_metrics.json`).
 > - `Dental_009` 및 `Dental_010`: 독립 학습 가중치를 가진 신경망이 아니라 `Dental_008`이 검출한 치아 BBox/Mask 및 FDI 번호 시퀀스 위에서 동작하는 기하학적 규칙 기반(Rule-based Heuristic) 모듈입니다.
 > - `Dental_014`: 기존 MCI(Mandibular Cortex Index) 기하 휴리스틱 베이스라인(C3 민감도 73.1%, 특이도 17.6%)에서 `OsteoMAENet`(`best.pt`) 실모델 추론(`ACTIVE_INFERENCE`)으로 전환되었습니다.
 

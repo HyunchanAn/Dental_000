@@ -1,4 +1,4 @@
-path: //rtx4060laptop-hc/Users/chema/Github/Dental_000/data/yolo_fdi
+path: .
 train: images/train
 val: images/val
 names:
