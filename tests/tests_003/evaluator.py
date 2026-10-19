@@ -56,5 +56,5 @@ try:
                 return 0.0
             return mean_absolute_error(self.gt_coords, self.pred_coords)
     
-except ImportError:
-    def test_dummy_missing_deps(): pass
+except ImportError as _imp_err:
+    pytest.skip(f"Optional dependency not available: {_imp_err}", allow_module_level=True)

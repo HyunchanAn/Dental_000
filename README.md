@@ -12,22 +12,25 @@ Dental_000 모듈은 전체 Dental 생태계(000 ~ 015)의 품질 보증(QA)과 
 
 ---
 
-## 📊 진단 모듈별 실측 성능 지표 (Diagnostic Performance Metrics, 2026-09 기준)
+## 📊 진단 모듈별 실측 성능 및 구현 상태 (Diagnostic Performance & Implementation Status, 2026-10 기준)
 
-실제 메인 워크스테이션(RTX 5080) 및 로컬 E2E 검증 파이프라인에서 도출된 최신 실측 벤치마크 성적표입니다.
+실제 메인 워크스테이션(RTX 5080) 학습 결과, 모듈별 검증 리포트 및 10례 정량 벤치마크(`reports_archive/10_cases_quantitative_benchmark.json`)에서 도출된 최신 성적표입니다.
 
-| 모듈 ID | 질환 및 과업명 (Task) | 민감도 (Sensitivity / Recall) | 정밀도 (Precision) | 최신 모델 아키텍처 및 튜닝 사양 |
+| 모듈 ID | 질환 및 과업명 (Task) | 검증 지표 (Validated Metrics) | 파이프라인 연동 상태 | 최신 모델 아키텍처 및 근거 아티팩트 |
 | :--- | :--- | :---: | :---: | :--- |
-| Dental_008 | 치아 인스턴스 분할 및 FDI 치식 식별 | 99.2% | 98.4% | YOLOv8m-seg (Tooth 전용 최적화 IoU 0.50, Conf 0.20) |
-| Dental_002 | 치아 우식증 (2-Stage 고해상도 패치) | 94.1% | 83.3% | 환자단위 엄격분리 512 패치 모델 (mAP@50 91.5%) |
-| Dental_012 | 치근단 병소 (음성 배경 증강) | 66.9% | 71.7% | YOLO11s 정상 음영 340장 주입 (mAP@50 73.7%) |
-| Dental_003 | 치조골 소실 (Bone Loss) 계측 | 87.1% | 85.0% | 치조정 윤곽선 마스킹 및 임상 스크리닝 |
-| Dental_009 | 매복 제3대구치 기하학적 난이도 분석 | 90.5% | 88.2% | Winter's Classification & Pell-Gregory 분석 엔진 |
-| Dental_010 | 결손치 (Missing Teeth) 식별 | 92.4% | 88.0% | 동적 정중선(Midline) 기준 갭 비율 휴리스틱 |
-| Dental_013 | 치과 수복물 및 보철물 (Restoration) | 88.5% | 84.2% | 수복물/인레이/크라운 31종 분할 및 분류 (YOLOv8-seg ONNX) |
-| Dental_014 | 하악 피질골 골다공증 위험도 (MOCK) | 73.1% (C3) | 17.6% (특이도) | Mandibular Cortex Index 베이스라인 (MOCK 스크리닝 연동) |
+| Dental_008 | 치아 인스턴스 분할 및 FDI 치식 식별 | Box IoU 0.8245 / Mask IoU 0.7965 (10례 검출률 100%, 평균 28.9개) | ACTIVE (YOLOv8m-seg + 2-Stage FDI) | 기존 `data/yolo_fdi` 38장 검증셋 수치(99.2%/98.4%)는 Train-Val 중복 누수로 무효화 처리됨. 무누수 매니페스트(`dental_008_dentex_manifest.csv`, 507/127 분할) 재학습 대기 |
+| Dental_002 | 치아 우식증 (2-Stage 고해상도 패치) | Recall 94.1% / Precision 83.3% (mAP@50 91.5%) | ACTIVE (512px 치아 패치 추론) | 환자단위 엄격분리 512 패치 모델 (`reports/260917_2120_Dental002_2Stage_Patch_Benchmark_Report.md`) |
+| Dental_012 | 치근단 병소 (음성 배경 증강) | Recall 66.9% / Precision 71.7% (mAP@50 73.7%) | ACTIVE (치근단 Apex 앵커링) | YOLO11s 정상 음영 340장 주입 (`reports/260917_2105_Dental012_Negative_Aug_Benchmark_Report.md`) |
+| Dental_003 | 치조골 소실 (Bone Loss) 계측 | 단위 테스트 검증 (RBL/Staging 기하 연산) | STANDBY (`UNIMPLEMENTED_MODEL`) | 2018 AAP/EFP 치주 병기 산출 엔진 구현 완료, 통합 파이프라인 내 랜드마크 가중치 연동 대기 |
+| Dental_009 | 매복 제3대구치 기하학적 난이도 분석 | 10례 정량 벤치마크 검출률 80.0% (평균 1.30개/증례) | ACTIVE (Rule-based Geometry) | `Dental_008` 치아 윤곽 기반 Winter's Classification & Pell-Gregory 장축 각도 분석 엔진 |
+| Dental_010 | 결손치 (Missing Teeth) 식별 | 10례 정량 벤치마크 검출률 70.0% (확정/유보 분리) | ACTIVE (Rule-based Gap Heuristic) | 독립 딥러닝 모델이 아닌 `Dental_008` FDI 치식 및 동적 정중선(Midline) 기반 인접치 갭 비율 휴리스틱 (`modules/dental_010_heuristic.py`) |
+| Dental_013 | 치과 수복물 및 보철물 (Restoration) | 10례 정량 벤치마크 검출률 100.0% (평균 5.30개/증례) | ACTIVE (YOLOv8-seg + Contour) | 치아 ROI 크롭 기반 4대 임상 범주(`Inlay/Onlay`, `Crown/Bridge`, `Implant`, `Endodontic (RCT)`) 분류 (`clinical_criteria_v1.json`) |
+| Dental_014 | 하악 피질골 골다공증 위험도 스크리닝 | Holdout Test Acc 54.79% / Macro-F1 0.4832 (MCI 베이스라인 민감도 73.1%, 특이도 17.6%) | ACTIVE (`OsteoMAENet` `best.pt`) | ViT-Small (`vit_small_patch16_224`) + 임상 변수(연령/성별) 퓨전 (`reports/260712_1825_Dental014_Osteoporosis_Report.md`) |
 
-> [지표 가이드]: 객체 탐지 및 분할 모듈(008, 002, 012, 003, 009, 013)은 진음성(TN) 면적 정의가 불분명하여 특이도 대신 임상적 유효성을 대변하는 정밀도(Precision)로 산출되었습니다. 영상 전체 분류 모듈인 014는 특이도(Specificity)를 직접 기재하였으며 실시간 파이프라인에서는 MOCK 스크리닝 모드로 제공됩니다.
+> [지표 및 데이터 무결성 가이드]:
+> - `Dental_008`: 과거 표기되었던 Recall 99.2% / Precision 98.4% (mAP50 0.995) 수치는 `data/yolo_fdi/images/val`(38장)이 `images/train`(595장)의 부분집합이었던 데이터 누수(Leakage)로 확인되어 공식 지표에서 폐기하였습니다. 현재 결정론적 무누수 분할 매니페스트(`reports_archive/dental_008_dentex_manifest.csv`, Train 507장 / Val 127장, 교집합 0)가 구축되어 메인 워크스테이션 재학습 후 갱신될 예정입니다.
+> - `Dental_009` 및 `Dental_010`: 독립 학습 가중치를 가진 신경망이 아니라 `Dental_008`이 검출한 치아 BBox/Mask 및 FDI 번호 시퀀스 위에서 동작하는 기하학적 규칙 기반(Rule-based Heuristic) 모듈입니다.
+> - `Dental_014`: 기존 MCI(Mandibular Cortex Index) 기하 휴리스틱 베이스라인(C3 민감도 73.1%, 특이도 17.6%)에서 `OsteoMAENet`(`best.pt`) 실모델 추론(`ACTIVE_INFERENCE`)으로 전환되었습니다.
 
 ---
 

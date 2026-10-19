@@ -68,22 +68,19 @@ try:
     
     
     def test_apply_institutional_proxy():
-        try:
-            url = "https://link.springer.com/article/10.1007/s00221-020-05833-2"
-            prefix = "https://ezproxy.snu.ac.kr"
-            expected = "https://link-springer-com.ezproxy.snu.ac.kr/article/10.1007/s00221-020-05833-2"
-            result = _apply_institutional_proxy(url, prefix)
-            assert result == expected
-    
-            # Test empty values
-            assert _apply_institutional_proxy("", prefix) == ""
-            assert _apply_institutional_proxy(url, "") == url
-    
-            # Test already proxied or no dot domain
-            url_no_dot = "https://localhost/test"
-            assert _apply_institutional_proxy(url_no_dot, prefix) == "https://localhost.ezproxy.snu.ac.kr/test"
-    
-        except Exception:
-            pass
-except ImportError:
-    def test_dummy_missing_deps(): pass
+        url = "https://link.springer.com/article/10.1007/s00221-020-05833-2"
+        prefix = "https://ezproxy.snu.ac.kr"
+        expected = "https://link-springer-com.ezproxy.snu.ac.kr/article/10.1007/s00221-020-05833-2"
+        result = _apply_institutional_proxy(url, prefix)
+        assert result == expected
+
+        # Test empty values
+        assert _apply_institutional_proxy("", prefix) == ""
+        assert _apply_institutional_proxy(url, "") == url
+
+        # Test already proxied or no dot domain
+        url_no_dot = "https://localhost/test"
+        assert _apply_institutional_proxy(url_no_dot, prefix) == "https://localhost.ezproxy.snu.ac.kr/test"
+
+except ImportError as _imp_err:
+    pytest.skip(f"Optional dependency not available: {_imp_err}", allow_module_level=True)

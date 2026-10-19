@@ -22,12 +22,15 @@ jobs:
     steps:
     - name: Checkout caller code
       uses: actions/checkout@v4
+      with:
+        submodules: recursive
 
     - name: Checkout Central Tests (Dental_000)
       uses: actions/checkout@v4
       with:
         repository: HyunchanAn/Dental_000
         path: Dental_000
+        submodules: recursive
 
     - name: Set up Python ${{ inputs.python_version }}
       uses: actions/setup-python@v5

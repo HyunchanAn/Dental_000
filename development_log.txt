@@ -601,4 +601,15 @@
 - Dental_ 시리즈 18개 저장소 전체 미종결(Unclosed) 태스크 및 우선순위 마스터 보고서 작성 완료:
   - 생성 보고서: reports/261019_2130_Dental_Series_Remaining_Unclosed_Tasks_and_Priority_Master_Report.md
   - 수록 내용: GitHub 원격 오픈 이슈 49건(+총괄 #12), 로컬 미종결 기획·감사 스레드 3건(260917_1635, 260928_0036, 260928_0312), 서브모듈 내부 미체크(- [ ]) 백로그 14건 등 총 66개 미종결 과업을 우선순위(P0 6건, P1 23건, P2 25건, P3 12건) 및 수행 주체(랩탑 개발팀 / 메인 워크스테이션 / 안현찬 총괄)별로 분류하여 정리 완료
+- 랩탑 개발팀 즉시 수행 가능 P0·P1 핵심 과업 6건(5건 완전 종결 + 1건 문서 정정) 이행 및 원격 반영 완료:
+  - 1. Dental_Panoramic_Reader#5 ([P0] 가중치 셋업 경로 붕괴 복구, [CLOSED], 커밋 a55b5d5):
+    - 공개 HuggingFace 저장소 실재 파일 전수 대조 기반 weights_manifest.yaml(13개 가중치 엔트리) 신설 및 setup_env.py(ensure_weight_file), app.py, core/interfaces 연동 완료
+  - 2. Dental_Panoramic_Reader#6 ([P1] 형제 폴더 import 및 FDI=0 침묵 폴백 제거, [CLOSED], 커밋 a55b5d5, 6990f66):
+    - core/interfaces/dental_002.py, 003.py, 004.py, 008.py 및 core/pipeline.py에서 ../../../Dental_00X 참조 전수 제거(잔여 0건), ImportError 침묵 제거, 시퀀스 매칭 실패 시 FDI_UNAVAILABLE 상태 전파 및 서브모듈 Git SHA(imageMetadata.moduleVersions) 기록 구현
+  - 3. Dental_Panoramic_Reader#9 ([P1] API 게이트웨이 하드닝, [CLOSED], 커밋 a55b5d5):
+    - api_server.py 기본 127.0.0.1 바인딩(ALLOW_EXTERNAL_ACCESS=true 옵션화), ALLOWED_ORIGINS 화이트리스트(allow_credentials=False), 30MB·50M 픽셀 제한(HTTP 413), DPR_API_TOKEN 인증 및 request_id 일반화 에러 응답 적용
+  - 4. Dental_000#2 ([P0] 중앙 테스트 스위트 예외 삼킴 제거 및 CI 서브모듈 체크아웃, [CLOSED]):
+    - .github/workflows/reusable-ci.yml에 submodules: recursive 추가 및 tests/ 내 37개 파일의 try/except Exception: pass 래퍼 전수 제거, 전체 14개 테스트 디렉토리(92개 테스트) 100% 통과(rc=0) 실측 검증
+  - 5. Dental_000#3 ([P1] README 성능표 정합화, [CLOSED]) 및 Dental_000#1 ([P0] 데이터 누수 공시 완료, RTX 5080 재학습 대기, 커밋 Dental_008@cbe529f):
+    - Dental_000/README.md 및 Dental_008/README.md에서 data/yolo_fdi 38장 중복 검증셋 기반 99.2%/98.4% 지표를 공식 폐기하고 무누수 매니페스트(dental_008_dentex_manifest.csv, 507/127) 및 10례 임상 벤치마크(10_cases_quantitative_benchmark.json) 근거로 정합화 완료
 

@@ -49,5 +49,5 @@ try:
             url = await metadata_resolver.resolve_publisher_url(session, "10.1234/test")
             assert url == "http://publisher.com/pdf"
     
-except ImportError:
-    def test_dummy_missing_deps(): pass
+except ImportError as _imp_err:
+    pytest.skip(f"Optional dependency not available: {_imp_err}", allow_module_level=True)

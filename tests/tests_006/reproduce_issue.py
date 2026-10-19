@@ -29,5 +29,5 @@ try:
             # but let's capture it here if we can modify the extractor to return raw on failure or similar.
             # For now, rely on stdout capture.
     
-except ImportError:
-    def test_dummy_missing_deps(): pass
+except ImportError as _imp_err:
+    pytest.skip(f"Optional dependency not available: {_imp_err}", allow_module_level=True)

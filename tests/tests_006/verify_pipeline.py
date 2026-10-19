@@ -90,5 +90,5 @@ try:
             print("Verification PARTIAL: Some services are offline (Expected if Docker is not running).")
         print("=" * 50)
     
-except ImportError:
-    def test_dummy_missing_deps(): pass
+except ImportError as _imp_err:
+    pytest.skip(f"Optional dependency not available: {_imp_err}", allow_module_level=True)

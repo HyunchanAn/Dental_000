@@ -152,3 +152,29 @@
 10. `- [ ] 합성 데이터(Synthetic Data)를 활용한 End-to-End 통합 파이프라인 테스트 작성`
 11. `- [ ] Semantic Versioning (SemVer) 준수 및 CHANGELOG.md 관리 자동화`
 12. `- [ ] 의료 도메인 Model Card 및 RoB 평가 정확도/신뢰성 검증 리포트 작성`
+
+---
+
+# [ 261019 2225 랩탑 개발팀 ] P0·P1 즉시 수행 가능 과업(5건 종결 + 1건 문서 정정) 이행 완료 Walkthrough
+
+## 1. 이행 요약
+본 마스터 보고서 수립 직후 `랩탑 개발팀`(`RTX4060Laptop-HC`)이 단독으로 즉시 완결 가능한 `[P0]` 및 `[P1]` 최우선 엔지니어링·문서 과업 6건을 선정하여 구현·검증·원격 푸시 및 GitHub 이슈 종결(Close)을 완료하였다.
+
+## 2. 완결 및 종결된 과업 상세
+1. `[P0] Dental_Panoramic_Reader#5` (`[CLOSED]`, 커밋 `a55b5d5`):
+   - `weights_manifest.yaml` 단일 매니페스트 신설 및 `setup_env.py`(`ensure_weight_file`), `app.py`, `core/interfaces/dental_002.py`, `dental_008.py` 연동 완료.
+2. `[P0] Dental_000#2` (`[CLOSED]`):
+   - `.github/workflows/reusable-ci.yml`에 `submodules: recursive` 추가 완료.
+   - `Dental_000/tests/` 내 37개 파일의 `try: ... except Exception: pass` 및 `def test_dummy_missing_deps(): pass` 예외 삼킴 래퍼를 전수 제거하고 전체 14개 테스트 디렉토리(92개 단위·통합 테스트) 100% 통과(`rc=0`) 검증 완료.
+3. `[P0] Dental_000#1` (문서 정정 및 무누수 매니페스트 공시 완료, RTX 5080 재학습 대기, 커밋 `Dental_008@cbe529f`):
+   - `Dental_000/README.md` 및 `Dental_008/README.md`에서 누수 검증셋(38장 중복) 기반 `99.2%/98.4%` (`mAP50 0.995`) 지표를 공식 폐기하고 무누수 매니페스트(`reports_archive/dental_008_dentex_manifest.csv`, Train 507 / Val 127, 교집합 0) 및 10례 임상 벤치마크(`10_cases_quantitative_benchmark.json`) 근거로 교체 완료.
+4. `[P1] Dental_000#3` (`[CLOSED]`):
+   - `Dental_000/README.md` 성능표의 `Dental_003`(`STANDBY`), `Dental_009`(규칙 기반 기하 분석), `Dental_010`(동적 정중선 갭 휴리스틱), `Dental_013`(4대 임상 범주 매핑), `Dental_014`(`OsteoMAENet` 실추론) 설명 및 지표를 실제 구현과 100% 정합화 완료.
+5. `[P1] Dental_Panoramic_Reader#6` (`[CLOSED]`, 커밋 `a55b5d5`, `6990f66`):
+   - `core/interfaces/` 및 `core/pipeline.py`의 외부 형제 폴더(`../../../Dental_00X`) 참조를 전수 제거하고, `Dental_008` 번호 매칭 실패 시 `FDI_UNAVAILABLE` 상태 전파 및 서브모듈 Git SHA(`imageMetadata.moduleVersions`) 기록 구현 완료.
+6. `[P1] Dental_Panoramic_Reader#9` (`[CLOSED]`, 커밋 `a55b5d5`):
+   - `api_server.py` 기본 `127.0.0.1` 바인딩(`ALLOW_EXTERNAL_ACCESS=true` 옵션화), `ALLOWED_ORIGINS` 화이트리스트(`allow_credentials=False`), 업로드 크기 30MB·50M 픽셀 제한, 선택적 API 토큰(`DPR_API_TOKEN`) 검증 및 `request_id` 기반 일반화 에러 응답 적용 완료.
+
+## 3. 잔여 통계 갱신
+- GitHub 원격 오픈 이슈: 기존 49건 → 44건 (추가 5건 `CLOSED`: `Dental_Panoramic_Reader#5`, `#6`, `#9`, `Dental_000#2`, `#3`)
+- `[P0]` 원격 오픈 이슈는 `Dental_000#1`(RTX 5080 무누수 분할 재학습 대기) 단 1건만 남았으며, 코딩·CI·셋업 영역의 `[P0]` 이슈는 전수 해소되었다.

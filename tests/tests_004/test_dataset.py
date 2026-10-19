@@ -3,7 +3,7 @@ try:
     import sys
     import os
     _root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
-    _module_path = os.path.join(_root, 'modules', 'Dental_004')
+    _module_path = os.path.join(_root, 'modules', 'Dental_004', 'src')
     if _module_path not in sys.path:
         sys.path.insert(0, _module_path)
         
@@ -41,65 +41,59 @@ try:
         return [str(tufts_root), str(dentex_root)]
     
     def test_dataset_loading(mock_dataset_dir):
-        try:
-            """
-            媛???곗씠?곗뀑 寃쎈줈濡쒕????대?吏 寃쎈줈瑜??쒕?濡?寃?됲븯??
-            Train/Val ?ㅽ뵆由우씠 ?쇱젙??鍮꾩쑉(90/10)濡??곸슜?섎뒗吏 寃利앺빀?덈떎.
-            """
-            # 珥?6???대?吏 議댁옱
-            dataset_train = PanoDataset(root_dirs=mock_dataset_dir, patch_size=128, mode='train')
-            dataset_val = PanoDataset(root_dirs=mock_dataset_dir, patch_size=128, mode='val')
-        
-            # 6 * 0.9 = 5.4 -> 5媛?(train)
-            # 6 - 5 = 1媛?(val)
-            assert len(dataset_train) == 5
-            assert len(dataset_val) == 1
+        """
+        媛???곗씠?곗뀑 寃쎈줈濡쒕????대?吏 寃쎈줈瑜??쒕?濡?寃?됲븯??
+        Train/Val ?ㅽ뵆由우씠 ?쇱젙??鍮꾩쑉(90/10)濡??곸슜?섎뒗吏 寃利앺빀?덈떎.
+        """
+        # 珥?6???대?吏 議댁옱
+        dataset_train = PanoDataset(root_dirs=mock_dataset_dir, patch_size=128, mode='train')
+        dataset_val = PanoDataset(root_dirs=mock_dataset_dir, patch_size=128, mode='val')
     
-        except Exception:
-            pass
+        # 6 * 0.9 = 5.4 -> 5媛?(train)
+        # 6 - 5 = 1媛?(val)
+        assert len(dataset_train) == 5
+        assert len(dataset_val) == 1
+
     def test_dataset_item_generation(mock_dataset_dir):
-        try:
-            """
-            PanoDataset?먯꽌 媛쒕퀎 ?곗씠?곕? 濡쒕뱶?섍퀬, ?대?吏 媛怨?crop, resize, noise) 泥섎━媛 
-            嫄곗퀜吏????뚮쭪? ?먯꽌 洹쒓꺽('lr', 'hr')?쇰줈 諛섑솚?섎뒗吏 寃利앺빀?덈떎.
-            """
-            patch_size = 128
-            upscale = 2
-        
-            dataset = PanoDataset(
-                root_dirs=mock_dataset_dir, 
-                patch_size=patch_size, 
-                upscale=upscale,
-                mode='train', 
-                noise_level=0.01
-            )
-        
-            # 泥?踰덉㎏ ?섑뵆 濡쒕뱶
-            sample = dataset[0]
-        
-            assert 'lr' in sample
-            assert 'hr' in sample
-        
-            lr_tensor = sample['lr']
-            hr_tensor = sample['hr']
-        
-            # ?먯꽌 ???寃利?
-            assert isinstance(lr_tensor, torch.Tensor)
-            assert isinstance(hr_tensor, torch.Tensor)
-        
-            # ?먯꽌 shape 寃利?
-            # hr shape: (1, patch_size, patch_size) -> (1, 128, 128)
-            # lr shape: (1, patch_size/upscale, patch_size/upscale) -> (1, 64, 64)
-            assert hr_tensor.shape == (1, patch_size, patch_size)
-            assert lr_tensor.shape == (1, patch_size // upscale, patch_size // upscale)
-        
-            # ?먯꽌 媛?踰붿쐞 寃利?[0, 1]
-            assert hr_tensor.min() >= 0.0
-            assert hr_tensor.max() <= 1.0
-            assert lr_tensor.min() >= 0.0
-            assert lr_tensor.max() <= 1.0
+        """
+        PanoDataset?먯꽌 媛쒕퀎 ?곗씠?곕? 濡쒕뱶?섍퀬, ?대?吏 媛怨?crop, resize, noise) 泥섎━媛 
+        嫄곗퀜吏????뚮쭪? ?먯꽌 洹쒓꺽('lr', 'hr')?쇰줈 諛섑솚?섎뒗吏 寃利앺빀?덈떎.
+        """
+        patch_size = 128
+        upscale = 2
     
-        except Exception:
-            pass
-except ImportError:
-    def test_dummy_missing_deps(): pass
+        dataset = PanoDataset(
+            root_dirs=mock_dataset_dir, 
+            patch_size=patch_size, 
+            upscale=upscale,
+            mode='train', 
+            noise_level=0.01
+        )
+    
+        # 泥?踰덉㎏ ?섑뵆 濡쒕뱶
+        sample = dataset[0]
+    
+        assert 'lr' in sample
+        assert 'hr' in sample
+    
+        lr_tensor = sample['lr']
+        hr_tensor = sample['hr']
+    
+        # ?먯꽌 ???寃利?
+        assert isinstance(lr_tensor, torch.Tensor)
+        assert isinstance(hr_tensor, torch.Tensor)
+    
+        # ?먯꽌 shape 寃利?
+        # hr shape: (1, patch_size, patch_size) -> (1, 128, 128)
+        # lr shape: (1, patch_size/upscale, patch_size/upscale) -> (1, 64, 64)
+        assert hr_tensor.shape == (1, patch_size, patch_size)
+        assert lr_tensor.shape == (1, patch_size // upscale, patch_size // upscale)
+    
+        # ?먯꽌 媛?踰붿쐞 寃利?[0, 1]
+        assert hr_tensor.min() >= 0.0
+        assert hr_tensor.max() <= 1.0
+        assert lr_tensor.min() >= 0.0
+        assert lr_tensor.max() <= 1.0
+
+except ImportError as _imp_err:
+    pytest.skip(f"Optional dependency not available: {_imp_err}", allow_module_level=True)

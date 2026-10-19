@@ -15,34 +15,25 @@ try:
     from utils.geometry import calculate_distance, calculate_rbl
     
     def test_calculate_distance():
-        try:
-            assert math.isclose(calculate_distance((0, 0), (3, 4)), 5.0)
-    
-        except Exception:
-            pass
+        assert math.isclose(calculate_distance((0, 0), (3, 4)), 5.0)
+
     def test_calculate_rbl_normal():
-        try:
-            # CEJ(0, 10), Crest(0, 12), Apex(0, 20)
-            # Root: 10, Bone Loss: 2 => RBL = 20%
-            rbl = calculate_rbl((0, 10), (0, 12), (0, 20))
-            assert math.isclose(rbl, 20.0)
-    
-        except Exception:
-            pass
+        # CEJ(0, 10), Crest(0, 12), Apex(0, 20)
+        # Root: 10, Bone Loss: 2 => RBL = 20%
+        rbl = calculate_rbl((0, 10), (0, 12), (0, 20))
+        assert math.isclose(rbl, 20.0)
+
     def test_calculate_rbl_clamped():
-        try:
-            # CEJ(0, 10), Crest(0, 8), Apex(0, 20)
-            # Crest is coronal to CEJ => RBL = 0.0%
-            rbl = calculate_rbl((0, 10), (0, 8), (0, 20))
-            assert rbl == 0.0
-    
-        except Exception:
-            pass
+        # CEJ(0, 10), Crest(0, 8), Apex(0, 20)
+        # Crest is coronal to CEJ => RBL = 0.0%
+        rbl = calculate_rbl((0, 10), (0, 8), (0, 20))
+        assert rbl == 0.0
+
     if __name__ == "__main__":
         test_calculate_distance()
         test_calculate_rbl_normal()
         test_calculate_rbl_clamped()
         print("Geometry tests passed.")
     
-except ImportError:
-    def test_dummy_missing_deps(): pass
+except ImportError as _imp_err:
+    pytest.skip(f"Optional dependency not available: {_imp_err}", allow_module_level=True)

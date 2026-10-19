@@ -6,12 +6,9 @@ try:
     from ultralytics import YOLO
     
     def test_dummy():
-        try:
-            assert True
-    
-    
-        except Exception:
-            pass
+        assert True
+
+
     import os
     ROOT_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
     sys.path.append(os.path.join(ROOT_DIR, 'modules', 'Dental_008', 'src'))
@@ -139,5 +136,5 @@ try:
     if __name__ == "__main__":
         main()
     
-except ImportError:
-    def test_dummy_missing_deps(): pass
+except ImportError as _imp_err:
+    pytest.skip(f"Optional dependency not available: {_imp_err}", allow_module_level=True)

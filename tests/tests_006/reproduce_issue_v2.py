@@ -21,5 +21,5 @@ try:
     except Exception as e:
         print(f"Error: {e}")
     
-except ImportError:
-    def test_dummy_missing_deps(): pass
+except ImportError as _imp_err:
+    pytest.skip(f"Optional dependency not available: {_imp_err}", allow_module_level=True)
