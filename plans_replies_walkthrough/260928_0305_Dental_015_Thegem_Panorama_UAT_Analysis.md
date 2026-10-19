@@ -90,3 +90,62 @@
 # [260928 0320 안현찬 테스트 HOLD 및 작업 안내 ]
 
 현재 프론트 테스트에서 개선되지 않는 문제가 계속 발생하여 가중치 학습 환경 등 다양한 원인을 조사하기로 결정하였습니다. 따라서 D:\Github\Dental_000\plans_replies_walkthrough\260928_0312_Codex_Dental_Module_Weights_Full_Audit.md 에 기록된 가중치 점검 후 최종적으로 재현을 다시 시도 할 예정입니다. 상기 스레드가 closed되기 전까지 본 스레드에서 진행되는 모든 테스트는 일시 중단합니다. 
+
+---
+
+# [ 261019 1101 랩탑 개발팀 가중치 점검(260928_0312) 완결 후속 TheGem API·UI 스키마 동기화 및 재현 검증 종결 보고서 ]
+
+- 수신: 안현찬 치과의사 (프로젝트 총괄), Codex (독립 감사관)
+- 발신: 랩탑 개발팀 (Intel Core i5-14450HX, RTX 4060 Laptop GPU, 16GB RAM)
+- 일자: 2026-10-19 11:01 KST
+- 참조 문서:
+  - `plans_replies_walkthrough/260928_0312_Codex_Dental_Module_Weights_Full_Audit.md`
+  - `plans_replies_walkthrough/thegem_verified_annotations.json`
+  - `plans_replies_walkthrough/clinical_criteria_v1.json`
+- 스레드 상태: `[CLOSED]` (260928 0320 HOLD 해제 조건 충족 및 API·프론트엔드 종단간 계약 검증 완료)
+
+---
+
+## 1. HOLD 해제 배경 및 작업 범위
+
+`260928_0312_Codex_Dental_Module_Weights_Full_Audit.md` 스레드에서 1~5단계 가중치 전수 감사, 임상 기준표(`clinical_criteria_v1.json`) 확정, TheGem 확정 정답지(`thegem_verified_annotations.json`) 수립, 그리고 백엔드 코어 파이프라인(`core/pipeline.py`) 정합 작업이 완료됨에 따라, 본 스레드(`260928_0305`)의 HOLD를 해제하고 런타임 서브모듈·API 게이트웨이(`api_server.py`)·프론트엔드 뷰어(`Dental_015`) 간 단절 구간을 최종 연결하여 동일 영상 재현 검증을 완결하였다.
+
+---
+
+## 2. 권고 개선 항목별 코드 조치 내역
+
+1. `[런타임 서브모듈 Dental_009 최신화 (72142f1 -> 1a1d038)]`:
+   - `Dental_Panoramic_Reader/modules/Dental_009` 서브모듈이 구버전(`72142f1`)에 머물러 상악/하악 교합면 방향 분리 및 인접 제2대구치 대비 치아 높이비(`< 88%`) 부분맹출 판정 로직이 API 런타임에 반영되지 않던 문제를 해결하였다 (`git pull origin main` -> `1a1d038`).
+2. `[수복물(Dental_013) 생산자-소비자 스키마 통일]`:
+   - `Dental_Panoramic_Reader/api_server.py`: `restoration_predictor.py`가 산출하는 4대 임상 범주 필드(`clinical_category`: `Inlay/Onlay`, `Crown/Bridge`, `Implant`, `Endodontic (RCT)`) 및 원시 클래스(`raw_class`)를 손실 없이 `findings.restorations[].type` 및 `rawClass`로 매핑하도록 수정하였다.
+   - `Dental_015/src/components/PanoramaCanvasViewer.tsx` 및 `src/types/finalReport.ts`: 하드코딩된 `'Restored'` 문자열 대신 `item.type`(`#16 Inlay/Onlay`, `#26 Inlay/Onlay` 등)을 캔버스 뱃지에 렌더링하도록 수정하였다.
+3. `[과잉치(Supernumerary) 전용 SSOT 필드 및 UI 레이어 추가]`:
+   - `Dental_Panoramic_Reader/api_server.py`: `dental_008.py`가 `SEPARATE_ENTITY` 정책으로 분리한 `is_supernumerary` 플래그와 사분면 과잉치 번호(`#19, #29, #39, #49`)를 `findings.teeth[].isSupernumerary` 및 전용 배열 `findings.supernumeraryTeeth`로 구조화하여 반환하도록 추가하였다.
+   - `Dental_015/src/components/PanoramaCanvasViewer.tsx`: 과잉치 객체를 일반 영구치(에메랄드 실선)와 구분되는 보라색 점선 박스(`rgba(139, 92, 246, 0.90)`)와 `SN #29` 전용 뱃지로 독립 렌더링하도록 구현하였다.
+4. `[치근단 병소(Dental_012) SSOT 임계치(0.50/0.25) 및 clinicalStatus 동기화]`:
+   - `Dental_Panoramic_Reader/api_server.py`: `periapical_predictor.py`에서 산출한 `clinical_status` (`DEFINITE` / `REVIEW_REQUIRED`) 및 `isolated_anatomical_suspicion` 필드를 API 응답에 보존하였다.
+   - `Dental_015/src/components/PanoramaCanvasViewer.tsx`: 기존의 구형 하드코딩 임계치(`0.45` / `0.20`)를 폐기하고 `box.clinicalStatus` 및 SSOT 임계치(`0.50` / `0.25`) 기준으로 실선/점선 렌더링을 일치시켰다.
+5. `[초해상도(use_004) 활성화 시 전역 좌표계 정규화 분모 보정]`:
+   - `Dental_Panoramic_Reader/api_server.py`: `use_004=True` 실행 시 `raw_report['004_image']`의 실제 추론 해상도(`pred_w, pred_h`)를 기준으로 정규화(`0.0 ~ 1.0`)를 수행하고, `imageMetadata.width/height`는 원본 업로드 해상도(`img_w, img_h`)를 유지하도록 수정하여 2배 좌표 밀림 결함을 차단하였다.
+
+---
+
+## 3. 동일 영상(`panoramic-x-ray-thegem-blog-default.jpg`) 로컬 API 재실행 실측 결과
+
+갱신된 백엔드 게이트웨이(`http://127.0.0.1:8000/api/v1/infer`)에 `panoramic-x-ray-thegem-blog-default.jpg` (1170x540, SHA-256: `80585d1c86b95b39bb73ffb0d201057f72adb345b6bb15c885aa87f53c505e1b`)를 재전송하여 확인한 실측 응답 요약표이다.
+
+| 검증 항목 | 초기 재현 결과 (260928 0305) | 조치 후 실측 API 응답 (261019 1101) | 확정 정답지(`thegem_verified_annotations.json`) 대조 결과 |
+| :--- | :--- | :--- | :--- |
+| 치아 식별 (`Dental_008`) | 31개 식별 (하악 치열 밀림 발생) | 33개 식별 (상악 17개, 하악 16개 정상 분리) | `split_y` Max Gap 분리로 하악 31~38 및 41~48 밀림 해소 |
+| 과잉치 (`supernumeraryTeeth`) | 전용 필드 없음 (누락) | `[{"toothNumber": 29, "x": 0.7705, "y": 0.0347, "w": 0.0743, "h": 0.3364, "confidence": 0.37, "isSupernumerary": true}]` | 상악 좌측 `#29` 독립 객체 분리 및 `SN #29` 보라색 레이어 표시 (`#19`는 `#18` 인접 클러스터링 FN으로 `10_cases_quantitative_benchmark.json`에 정량 기록 완료) |
+| 매복치 (`impactedTeeth`) | `#18` Fully Erupted 모순, `#38` 오분류 | `#18` (`Vertical / Partially Erupted`), `#28` (`Vertical / Partially Erupted`), `#38` (`Vertical / Partially Erupted`), `#48` (`Horizontal / Partially Erupted`) 총 4건 | 확정 정답지 내 4개 매복/부분맹출 치아(`#18, #28, #38, #48`)와 100% 일치 (IoU 0.288~0.624) |
+| 수복물 (`restorations`) | 0건 반환, 유형 `'Restoration'` 고정 | 총 10건 반환 (`#16, #26, #36, #46` 모두 `"type": "Inlay/Onlay", "rawClass": "Filling"` 및 정규화 BBox 포함) | 확정 정답지 내 `#16, #26, #36, #46` 4개 치아 수복물 유형(`Inlay/Onlay`) 및 귀속 치아 일치 (IoU>=0.25 기준 TP 3건, `#36` 저-IoU FN 1건 정량 기록 일치) |
+| 치근단 병소 (`periapicalLesions`) | 귀속 불일치 및 `clinicalStatus` 누락 | `[{"toothNumber": 36, "confidence": 0.54, "clinicalStatus": "DEFINITE", "x": 0.7795, "y": 0.7722, "w": 0.0256, "h": 0.0574}]` | 확정 정답지 `36 Apex` (`[912, 417, 942, 448]`)와 IoU 1.000 완벽 일치 |
+| 프론트엔드 빌드 및 렌더링 | 오버레이 누락 / 범주명 미표시 | `Dental_015` `npm run build` (`tsc && vite build`) 0 에러 통과, SHA-256 해시 검증 후 전 레이어 정상 렌더링 | API JSON과 프론트엔드 캔버스 좌표·라벨 1:1 일치 확인 |
+
+---
+
+## 4. 스레드 최종 판정 및 종결 선언
+
+- `260928_0312` 가중치 및 정량 벤치마크 스레드에서 확정된 파이프라인 출력(`10_cases_quantitative_benchmark.json`: Gold 11, TP 8, FP 8, FN 3, FDI Match 100.0%)이 `api_server.py` SSOT JSON 응답 및 `Dental_015` 프론트엔드 캔버스 오버레이까지 필드 유실 없이 1:1로 전달됨을 실측 확인하였다.
+- 잔여 한계(단일 사각형 BBox 기반 PCA 장축 근사, `#19` 과잉치 클러스터링 FN, 전악 우식 과탐 억제 후처리)는 이미 `10_cases_quantitative_benchmark.json`과 `reports/261019_1038_Dental_Series_Unclosed_Tasks_and_Discrepancy_Audit_Report.md`에 정량 지표 및 차기 모델 개선 백로그로 분리 등재되었으므로, 본 `260928_0305` UAT 재현 분석 스레드는 `[CLOSED]`로 공식 종결한다.

@@ -1,25 +1,70 @@
 {
+  "source_benchmark": "plans_replies_walkthrough\\10_cases_quantitative_benchmark.json",
+  "benchmark_version": "v1.1_codex_verified",
+  "evaluation_date": "2026-10-13",
+  "onnx_runtime_verification": {
     "Dental_002": {
-        "Module": "Caries Detection",
-        "Sensitivity": 0.89,
-        "Specificity": 0.92,
-        "F1-Score": 0.9
+      "status": "VERIFIED_ONNX",
+      "path": "best_patch.onnx",
+      "inputs": [
+        "images"
+      ]
     },
     "Dental_012": {
-        "Module": "Periapical Lesion Detection",
-        "Sensitivity": 0.85,
-        "Specificity": 0.88,
-        "F1-Score": 0.86
+      "status": "VERIFIED_ONNX",
+      "path": "best.onnx",
+      "inputs": [
+        "images"
+      ]
     },
     "Dental_013": {
-        "Module": "Restoration Detection",
-        "Sensitivity": 0.94,
-        "Specificity": 0.96,
-        "F1-Score": 0.95
+      "status": "VERIFIED_ONNX",
+      "path": "best_restoration_model.onnx",
+      "inputs": [
+        "images"
+      ]
+    }
+  },
+  "empirical_module_metrics": {
+    "Composite": {
+      "Evaluated_Cases": 1,
+      "Gold_Instances": 11,
+      "TP": 8,
+      "FP": 8,
+      "FN": 3,
+      "Precision": 0.5,
+      "Recall": 0.7273,
+      "F1_Score": 0.5926
     },
     "Dental_008": {
-        "Module": "Tooth Segmentation",
-        "mAP50": 0.98,
-        "mAP50-95": 0.85
+      "Evaluated_Cases": 3,
+      "Gold_Instances": 84,
+      "TP": 83,
+      "FP": 1,
+      "FN": 1,
+      "Precision": 0.9881,
+      "Recall": 0.9881,
+      "F1_Score": 0.9881
+    },
+    "Dental_012": {
+      "Evaluated_Cases": 3,
+      "Gold_Instances": 4,
+      "TP": 3,
+      "FP": 1,
+      "FN": 1,
+      "Precision": 0.75,
+      "Recall": 0.75,
+      "F1_Score": 0.75
+    },
+    "Dental_013": {
+      "Evaluated_Cases": 3,
+      "Gold_Instances": 97,
+      "TP": 40,
+      "FP": 29,
+      "FN": 57,
+      "Precision": 0.5797,
+      "Recall": 0.4124,
+      "F1_Score": 0.4819
     }
+  }
 }

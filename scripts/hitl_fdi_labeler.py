@@ -7,7 +7,10 @@ from PIL import Image
 
 st.set_page_config(page_title="FDI HiTL Labeler", layout="wide")
 
-DATA_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data")
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+DATA_DIR = os.path.join(BASE_DIR, "data")
+if not os.path.exists(DATA_DIR):
+    DATA_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data")
 EDGE_CASES_PATH = os.path.join(DATA_DIR, "edge_cases_fdi.json")
 CORRECTED_LABELS_PATH = os.path.join(DATA_DIR, "corrected_fdi_labels.json")
 
@@ -65,12 +68,16 @@ col1, col2, col3 = st.columns([1, 2, 1])
 with col1:
     st.button("⬅️ 이전", on_click=prev_image, use_container_width=True)
 with col2:
-    st.write(f"**진행 상황**: {idx + 1} / {len(edge_cases)} (치아 개수: {case['tooth_count']}개, 파일: {case['file_name']})")
+    st.write(f"[진행 상황]: {idx + 1} / {len(edge_cases)} (치아 개수: {case['tooth_count']}개, 파일: {case['file_name']})")
 with col3:
     st.button("다음 ➡️", on_click=next_image, use_container_width=True)
 
 # Image and Box rendering
 img_path = case['image_path']
+if not os.path.exists(img_path):
+    alt_img_path = os.path.join(BASE_DIR, "..", "Dental_015", "example_panorama", f"case_008_dentex_1_{case['file_name']}")
+    if os.path.exists(alt_img_path):
+        img_path = alt_img_path
 try:
     img = Image.open(img_path).convert("RGB")
 except Exception:
@@ -93,12 +100,16 @@ except ImportError:
 
 @st.cache_resource
 def load_yolo_model():
-    # 008 모듈의 YOLOv8-seg 가중치 올바른 경로
-    model_path = r"C:\Users\chema\Github\Dental_008\yolov8m-seg.pt"
-    if os.path.exists(model_path):
-        return YOLO(model_path)
-    else:
-        st.warning(f"YOLO 모델을 찾을 수 없습니다: {model_path}")
+    # 008 모듈의 정규 치아 분할 YOLOv8-seg 가중치 경로 탐색
+    candidate_paths = [
+        os.path.abspath(os.path.join(BASE_DIR, "..", "Dental_008", "weights", "yolov8m_best.pt")),
+        os.path.abspath(os.path.join(BASE_DIR, "..", "Dental_Panoramic_Reader", "modules", "Dental_008", "models", "yolov8m_best.pt")),
+        os.path.abspath(os.path.join(BASE_DIR, "submodules", "Dental_008", "weights", "yolov8m_best.pt")),
+    ]
+    for model_path in candidate_paths:
+        if os.path.exists(model_path):
+            return YOLO(model_path)
+    st.warning(f"YOLO 치아 분할 모델을 찾을 수 없습니다: {candidate_paths[0]}")
     return None
 
 yolo_model = load_yolo_model()
@@ -116,41 +127,45 @@ def calculate_iou(box1, box2):
     box2Area = w2 * h2
     return interArea / float(box1Area + box2Area - interArea)
 
+def extract_annotation_polygon(ann):
+    seg = ann.get("segmentation")
+    if isinstance(seg, list) and len(seg) > 0 and len(seg[0]) >= 6:
+        pts = np.array(seg[0], dtype=np.float32).reshape(-1, 2)
+        return pts
+    return None
+
+masks = []
 if yolo_model:
-    results = yolo_model(img, verbose=False)
-    masks = results[0].masks.xy if results[0].masks else []
+    results = yolo_model(img, verbose=False, conf=0.20, iou=0.50)
+    masks = results[0].masks.xy if (results and results[0].masks is not None) else []
+
+for i, ann in enumerate(current_annotations):
+    ann_box = ann['bbox'] # [x, y, w, h]
+    fdi = ann['fdi']
     
-    for i, ann in enumerate(current_annotations):
-        ann_box = ann['bbox'] # [x, y, w, h]
-        fdi = ann['fdi']
-        
-        # 가장 많이 겹치는 YOLO 마스크 찾기
-        best_iou = 0
-        best_poly = None
-        for poly in masks:
-            if len(poly) > 0:
-                px, py = poly[:, 0], poly[:, 1]
-                p_box = [np.min(px), np.min(py), np.max(px)-np.min(px), np.max(py)-np.min(py)]
-                iou = calculate_iou(ann_box, p_box)
-                if iou > best_iou:
-                    best_iou = iou
-                    best_poly = poly
-        
-        if best_poly is not None and best_iou > 0.1:
-            poly_patch = patches.Polygon(best_poly, closed=True, facecolor='cyan', edgecolor='cyan', linewidth=1.5, alpha=0.2)
-            ax.add_patch(poly_patch)
-            cx, cy = np.mean(best_poly[:, 0]), np.mean(best_poly[:, 1])
-            ax.text(cx, cy, f"ID:{i}\nFDI:{fdi}", color='black', fontsize=8, weight='bold', ha='center', va='center', bbox=dict(facecolor='white', alpha=0.8, edgecolor='none', pad=2, boxstyle='round,pad=0.2'))
-        else:
-            x, y, w, h = ann_box
-            rect = patches.Rectangle((x, y), w, h, linewidth=1.5, edgecolor='cyan', facecolor='cyan', alpha=0.2)
-            ax.add_patch(rect)
-            ax.text(x + w/2, y + h/2, f"ID:{i}\nFDI:{fdi}", color='black', fontsize=8, weight='bold', ha='center', va='center', bbox=dict(facecolor='white', alpha=0.8, edgecolor='none', pad=2, boxstyle='round,pad=0.2'))
-else:
-    # 모델을 불러올 수 없는 경우 기존 방식(BBox) 적용
-    for i, ann in enumerate(current_annotations):
-        x, y, w, h = ann['bbox']
-        fdi = ann['fdi']
+    # 1순위: 가장 많이 겹치는 YOLOv8-seg 실시간 추론 마스크 찾기
+    best_iou = 0.0
+    best_poly = None
+    for poly in masks:
+        if len(poly) >= 3:
+            px, py = poly[:, 0], poly[:, 1]
+            p_box = [float(np.min(px)), float(np.min(py)), float(np.max(px) - np.min(px)), float(np.max(py) - np.min(py))]
+            iou = calculate_iou(ann_box, p_box)
+            if iou > best_iou:
+                best_iou = iou
+                best_poly = poly
+
+    # 2순위: 어노테이션 내 원본 segmentation 폴리곤 활용
+    if best_poly is None or best_iou <= 0.1:
+        best_poly = extract_annotation_polygon(ann)
+
+    if best_poly is not None and len(best_poly) >= 3:
+        poly_patch = patches.Polygon(best_poly, closed=True, facecolor='cyan', edgecolor='cyan', linewidth=1.5, alpha=0.25)
+        ax.add_patch(poly_patch)
+        cx, cy = float(np.mean(best_poly[:, 0])), float(np.mean(best_poly[:, 1]))
+        ax.text(cx, cy, f"ID:{i}\nFDI:{fdi}", color='black', fontsize=8, weight='bold', ha='center', va='center', bbox=dict(facecolor='white', alpha=0.8, edgecolor='none', pad=2, boxstyle='round,pad=0.2'))
+    else:
+        x, y, w, h = ann_box
         rect = patches.Rectangle((x, y), w, h, linewidth=1.5, edgecolor='cyan', facecolor='cyan', alpha=0.2)
         ax.add_patch(rect)
         ax.text(x + w/2, y + h/2, f"ID:{i}\nFDI:{fdi}", color='black', fontsize=8, weight='bold', ha='center', va='center', bbox=dict(facecolor='white', alpha=0.8, edgecolor='none', pad=2, boxstyle='round,pad=0.2'))
@@ -170,11 +185,14 @@ with col_form:
         for i, ann in enumerate(current_annotations):
             # Selectbox might be better than number input for categorical FDI
             new_fdi = st.number_input(f"ID {i}의 올바른 FDI 번호", value=int(ann['fdi']), min_value=11, max_value=85, step=1, key=f"fdi_{i}")
-            new_annotations.append({
+            entry = {
                 "id": ann["id"],
                 "fdi": new_fdi,
                 "bbox": ann['bbox']
-            })
+            }
+            if "segmentation" in ann:
+                entry["segmentation"] = ann["segmentation"]
+            new_annotations.append(entry)
             
         submitted = st.form_submit_button("💾 현재 라벨 저장 및 다음", use_container_width=True)
         if submitted:

@@ -1,4 +1,4 @@
-﻿# [ 랩탑 개발팀 260917 1335 전체 시스템 무결성 감사 및 불일치 결함 개선 종합 계획서 ]
+# [ 랩탑 개발팀 260917 1335 전체 시스템 무결성 감사 및 불일치 결함 개선 종합 계획서 ]
 
 본 계획서는 `Dental_000` 총괄 리포지토리 및 파노라마 진단 스택, 프론트엔드 플랫폼(`Dental_015`), 독립 서브 제품군(001, 005, 006, 007) 전반에 걸쳐 식별된 코드 완성도 결함, 문서-코드 불일치(Drift), 그리고 치과의사 전문의의 임상 UAT 피드백을 근본적으로 해결하기 위한 종합 엔지니어링 실행 계획입니다.
 
@@ -774,3 +774,47 @@ Ultralytics `YOLO.predict(source=patch, imgsz=512)` 엔진은 원본 이미지(�
 
 [판정 결과]:
 전체 18개 저장소 모두 non-main 브랜치 잔여가 정확히 0건이며, 전역 생태계가 `origin/main` 단일 브랜치 체계로 100% 일원화 완료되었습니다.
+
+
+---
+
+# [ 261019 1223 잔여 엔지니어링 과제 전수 조치 및 최종 종결 보고 (Walkthrough) ]
+
+- 작성 일시: 2026-10-19 12:23:00 KST
+- 작성 주체: 안현찬 (Hyunchan An)
+- 문서 상태: [CLOSED] (프로그래밍적 잔여 과업 100% 해결 및 통합 테스트 검증 완료)
+
+## 1. 조치 배경 및 목표
+본 문서(`260917_1335_System_Integrity_and_Discrepancy_Remediation_Plan.md`)의 선행 감사에서 보류되거나 후속 과제로 남아 있던 3대 프로그래밍 항목(`Dental_014` 실제 가중치 서빙 연동 및 `MOCK_SCREENING` 제거, `Dental_013` ONNX 31클래스 메타데이터 공식 대조, `tests_011~014` 15줄 더미 테스트의 실질 계약 테스트 전환)을 전수 해결하고 문서를 최종 종결(`[CLOSED]`) 처리함.
+
+## 2. 세부 엔지니어링 조치 내역
+
+### 2.1 `Dental_014` (`OsteoMAENet`) 실제 가중치 배치 및 백엔드 파이프라인 직결
+- 결함 원인:
+  1. `Dental_014/src/dental_014/inference.py`의 `OsteoporosisInferencer.__init__`에서 `OsteoMAENet(in_channels=3, out_channels=3, num_classes=3)` 호출 시 정의되지 않은 키워드 인자 `out_channels=3`로 인해 `TypeError`가 발생하고, `OsteoporosisPredictorWrapper`가 예외를 삼켜 항상 `MOCK_SCREENING`으로 폴백되던 구조적 결함 확인.
+  2. `Dental_Panoramic_Reader/modules/Dental_014/models/best.pt` 경로에 가중치 파일이 배치되지 않아 `GET /api/v1/health`에서 `MOCK` 상태가 유지됨.
+- 해결 조치:
+  1. 로컬 HuggingFace 캐시 스냅샷(`models--chemahc94--Dental_014/snapshots/bebb0937a65ecedd5f902ea9d4c72058fa4a124f/best.pt`, 450,579,274 bytes)을 `Dental_Panoramic_Reader/modules/Dental_014/models/best.pt` 및 `Dental_014/models/best.pt`에 물리적으로 배치.
+  2. `Dental_014/src/dental_014/inference.py` (독립 저장소 및 서브모듈 양측)에서 `out_channels=3` 인자를 제거하여 `OsteoMAENet(in_channels=3, num_classes=3)`가 정상 초기화되도록 수정.
+  3. `Dental_Panoramic_Reader/core/pipeline.py`에 `014` 모델(`OsteoporosisPredictorWrapper`)을 등록 및 실행하여 `result_report['014_osteoporosis']`를 산출하고, `api_server.py`의 `format_to_ssot_report` 및 `/api/v1/health`에서 `ACTIVE_INFERENCE` / `ONLINE` (`best.pt`, `v1.0 (OsteoMAENet)`) 상태를 반환하도록 직결 완료.
+
+### 2.2 `Dental_013` (`best_restoration_model.onnx`) 31클래스 메타데이터 공식 대조 검증
+- 조치 내용:
+  - `onnxruntime.InferenceSession`의 `get_modelmeta().custom_metadata_map['names']`를 통해 `best_restoration_model.onnx` 내부에 직렬화된 31개 원본 클래스 사전을 직접 추출하여 `RestorationPredictorWrapper.raw_class_names`와 전수 대조.
+  - 인덱스 `0: Caries`부터 `30: Primary teeth`까지 31개 클래스 명칭과 순서가 100% 일치함을 확인하고, 이를 `tests/tests_013/test_predict.py`의 상시 자동화 검증 테스트로 고정.
+
+### 2.3 `Dental_000/tests/tests_011~014` 더미 스텁 테스트의 실질 계약 테스트 전환
+- 조치 내용:
+  - 기존 `except Exception: pass`로 예외를 무시하던 17줄짜리 스텁 파일 4개를 실제 아키텍처 및 데이터 계약 검증 테스트로 전면 교체:
+    1. `tests/tests_011/test_model.py`: `AgeRegressionModel` 순전파 출력 텐서 형상 `(B,)` 및 역전파 그래디언트 흐름 검증.
+    2. `tests/tests_012/test_prepare_data.py`: `convert_to_yolo` 정규화 수식 검증 및 `PeriapicalPredictorWrapper._match_fdi`의 상·하악 치근단(Apex) 앵커링 및 해부학적 격리(`isolated_anatomical_suspicion`) 계약 검증.
+    3. `tests/tests_013/test_predict.py`: `best_restoration_model.onnx` 31클래스 메타데이터와 `RestorationPredictorWrapper.raw_class_names`의 100% 일치 단언 및 SSOT 4대 수복물 범주 매핑 검증.
+    4. `tests/tests_014/test_imports.py`: `OsteoMAENet` 멀티태스크 순전파(`mask=False` / `mask=True`) 및 `OsteoporosisPredictorWrapper` 실가중치 추론 계약(`ONLINE_INFERENCE`, 확률 합 1.0) 검증.
+
+## 3. 테스트 실행 증적 (`pytest`)
+- 실행 명령: `pytest tests/tests_011 tests/tests_012 tests/tests_013 tests/tests_014 -v`
+- 결과 요약: 총 8개 테스트 항목 100% 통과 (`8 passed in 8.71s`).
+
+## 4. 최종 판정
+- 본 계획서 및 감사 스레드에 포함된 모든 프로그래밍적 시정 과업이 완수되었으므로 본 문서를 `[CLOSED]` 처리함.
+
