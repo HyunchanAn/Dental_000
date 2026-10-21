@@ -1,4 +1,4 @@
-﻿# [ 260904 0145 메인 워크스테이션 Dental_012 치근단 병소 재학습 및 가양성 박멸 전용 작업지시서 ]
+# [ 260904 0145 메인 워크스테이션 Dental_012 치근단 병소 재학습 및 가양성 박멸 전용 작업지시서 ]
 
 [Dental_002 2-Stage 고해상도 패치 재학습(민감도 94.1%, 정밀도 83.3%)] 과업이 성공적으로 마감됨에 따라, 단일 잔여 핵심 과제인 [Dental_012 치근단 병소 모델 재학습 및 임상 가양성 박멸]을 신규 독립 스레드로 공식 개설합니다.
 
@@ -305,3 +305,12 @@ HTTP Status Code: 200 (OK)
 ---
 
 본 원인 분석 결과를 확정 기록하고 현 세션을 종료 및 마감합니다.
+
+---
+
+# [ 261021 2330 랩탑 개발팀 ] `Dental_012` 재학습 및 3대 마스킹·좌표 왜곡 결함 후속 완결에 따른 공식 종결 (`[CLOSED]`)
+
+- 상태: 공식 종결 (`[CLOSED]`)
+- 이행 결과:
+  - 본 문서 말미에 규명된 3대 결함(1. `dental_002.py` 512x512 패치 역투영 스케일링, 2. `findings.teeth` 32개 치아 폴리곤·FDI SSOT 스키마 전송, 3. `PanoramaCanvasViewer.tsx` 원본 종횡비 동적 반응형 뷰어 및 FDI 배지 렌더링)은 후속 작업지시서 `260917_1335_Canvas_Overlay_Audit_and_Fix_Work_Order.md` 및 `260917_1635_Dental_015_32Teeth_and_31Class_UI_Work_Order.md`에서 전수 해결 및 검증(`CLOSED`)되었다.
+  - 아울러 `Dental_012/src/inference.py`에 치근단(Apex) 앵커링 및 2-Stage 고해상도 치근단 ROI 패치 크롭·전역 역투영 파이프라인(`extract_apex_roi_patches`, `project_patch_bbox_to_global`, `predict_two_stage_apex_patches`)까지 구현 완료되어 본 작업지시서를 공식 종결(`CLOSED`)한다.

@@ -114,3 +114,12 @@ Dental 마이크로서비스 아키텍처(001~014)의 현 모듈형 모놀리스
 1. **좌표 표준화**: BBox 및 Polygon은 0.0 ~ 1.0 정규화 좌표 사용 (원판 width/height 포함).
 2. **비동기 확장 대비**: 1단계 동기 POST 후 2단계 SSE/Polling 지원 구조로 백엔드 라우터 캡슐화.
 3. **SSOT 위치**: `Dental_000/schemas/final_report_schema.json`에서 통합 관리.
+
+---
+
+# [ 261021 2330 랩탑 개발팀 ] MSA Presentation Layer (`Dental_015`) 및 FastAPI 게이트웨이(`Dental_Panoramic_Reader`) 이행 공식 종결 보고 (`[CLOSED]`)
+
+- 상태: 공식 종결 (`[CLOSED]`)
+- 이행 결과:
+  - 본 계획서의 1~3단계(`Dental_Panoramic_Reader/api_server.py`의 `POST /api/v1/infer`, `GET /api/v1/health` 게이트웨이 구축, `0.0~1.0` 정규화 좌표 SSOT 리포트 스키마 통합, `Dental_015`의 `PanoramaCanvasViewer.tsx` 동적 오버레이 및 E2E 실서버 연동)가 전수 구현 및 검증 완료되었다.
+  - 아울러 `Dental_Panoramic_Reader#9`(127.0.0.1 로컬 바인딩, CORS 화이트리스트, 30MB 업로드 제한, 토큰 인증) 및 `Dental_015#1`·`#2`(상시 DEMO 배너, SHA-256 해시 불일치 방어 게이트, `uncertain` 치아 수동 FDI 보정 UI, 프론트엔드 단위 테스트)까지 완결되어 본 기획서를 공식 종결(`CLOSED`)한다.

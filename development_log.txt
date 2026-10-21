@@ -677,4 +677,15 @@
     - Dental_Core#3 (커밋 0202d4b): scripts/tools/gitleaks.exe(7.7MB)·egg-info·__pycache__·구형 일괄 패치 스크립트(scripts/01~03) 전수 제거 및 pytest 10건 통과 확인
     - Dental_Panoramic_Reader#8, #10 (커밋 bdd196e): app.py BoneLossPredictorWrapper 'cuda' 하드코딩을 Dental_Core get_device()로 교체, core/interfaces/dental_002.py의 중복 apply_clahe를 Dental_Core 호출로 일원화, 전용 Streamlit 포트 8500(.streamlit/config.toml) 설정 및 진입점 아키텍처 문서화
     - Dental_000#11 및 #12: README.md 거버넌스·릴리스 판정 섹션(v1.0 QA Verified / UAT Ready) 신설 및 미종결 기획·감사 문서 3건(260917_1635, 260928_0036, 260928_0312) 공식 종결([CLOSED]) 선언, 18개 전 저장소 서브모듈 최신화 후 잔여 오픈 이슈 0건 달성
+- 랩탑 개발팀 자율 고도화 과업 4건 완수 및 18개 전 저장소 방치 기획서·작업지시서 전수 점검·종결([CLOSED]) 완료:
+  - 1. Dental_014 하악 피질골 형태학적 특징 융합(Morphological Fusion) 및 XAI 히트맵 오버레이 실구현 완료:
+    - src/dental_014/inference.py에 MorphologyAnalyzer 실연동(_extract_cortical_mask), ViT 확률 + 기하학적 선험 확률 앙상블(_fuse_morphology_and_logits), Spatial Attention + 입력 그라디언트 Saliency 결합 히트맵(_compute_xai_heatmap) 구현 및 app.py 4-튜플 언패킹 버그 수정, 단위 테스트(tests/test_inference_and_xai.py) 추가 완료
+  - 2. Grok 감사 리포트 상단 요약표 상태 일괄 갱신:
+    - reports/261019_2233_Grok_Dental시리즈_등록이슈_목록_새로.md 상단 집계(열린 이슈 0건) 및 1장 우선순위 표 전 항목을 해결(닫힘)으로 갱신하고, reports/261019_1725_Grok_Dental시리즈_기능완성도_점검.md 상단에 전수 종결([CLOSED]) 안내 반영
+  - 3. Dental_Panoramic_Reader 내 Dental_Core 심화 통합:
+    - core/model_manager.py(get_onnx_providers), core/pipeline.py(get_logger), modules/osteoporosis_predictor.py(morphology_features 전파) 연동 및 pytest 검증 완료
+  - 4. Dental_012 2-Stage 치근단(Apex) 고해상도 패치 크롭 및 전역 역투영 파이프라인 선제 구축:
+    - src/inference.py에 extract_apex_roi_patches, project_patch_bbox_to_global, PeriapicalPredictor.predict_two_stage_apex_patches 및 단위 테스트(tests/test_inference.py) 추가 완료
+  - 5. 18개 전 저장소 방치 기획서·작업서 전수 스캔 및 기구현 문서 10건 공식 종결([CLOSED]) 처리:
+    - Dental_000/plans_replies_walkthrough/(260721_0353, 260825_1006, 260903_1656, 260903_2310, 260904_0145), Dental_000/reports/260903_1645_Code reviews.md, Dental_001/docs/(implementation_plan.md, 250928_2336_memo.txt), Dental_006/(docs/PROJECT_PLAN.md Phase 2, reference_materials/memo_251013_1044_planning.txt) 하단에 공식 종결([CLOSED]) 선언 추가 완료
 
