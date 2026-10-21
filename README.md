@@ -1,4 +1,4 @@
-![Status](https://img.shields.io/badge/Status-v1.0%20Release-brightgreen) ![Python](https://img.shields.io/badge/Python-3.12%2B-blue) ![Backend](https://img.shields.io/badge/Backend-YOLOv8-red) ![UI](https://img.shields.io/badge/UI-Streamlit%20%7C%20React-orange) ![CI/CD Pipeline](https://img.shields.io/badge/CI%2FCD%20Pipeline-passing-brightgreen?logo=github)
+![Status](https://img.shields.io/badge/Status-v1.0%20QA%20Verified%20%28UAT%20Ready%29-brightgreen) ![Python](https://img.shields.io/badge/Python-3.12%2B-blue) ![Backend](https://img.shields.io/badge/Backend-YOLOv8-red) ![UI](https://img.shields.io/badge/UI-Streamlit%20%7C%20React-orange) ![CI/CD Pipeline](https://img.shields.io/badge/CI%2FCD%20Pipeline-passing-brightgreen?logo=github)
 
 # Dental_000: Centralized QA & Test Repository
 
@@ -31,6 +31,16 @@ Dental_000 모듈은 전체 Dental 생태계(000 ~ 015)의 품질 보증(QA)과 
 > - `Dental_008`: 과거 표기되었던 누수 검증셋(`data/yolo_fdi/images/val` 38장 중복) 기반 수치를 폐기하고, 결정론적 무누수 분할 매니페스트(`reports_archive/dental_008_dentex_manifest.csv`, Train 507장 / Val 127장, 파일명 및 SHA-256 해시 교집합 0건)와 무치악 Hard Negative 홀드아웃 분리(Train 60장 / 독립 Holdout 15장, 교집합 0건) 기준으로 메인 워크스테이션(RTX 5080) 100 에포크 재학습을 완료한 실측치입니다(`reports_archive/dental_008_leak_free_val_metrics.json`).
 > - `Dental_009` 및 `Dental_010`: 독립 학습 가중치를 가진 신경망이 아니라 `Dental_008`이 검출한 치아 BBox/Mask 및 FDI 번호 시퀀스 위에서 동작하는 기하학적 규칙 기반(Rule-based Heuristic) 모듈입니다.
 > - `Dental_014`: 기존 MCI(Mandibular Cortex Index) 기하 휴리스틱 베이스라인(C3 민감도 73.1%, 특이도 17.6%)에서 `OsteoMAENet`(`best.pt`) 실모델 추론(`ACTIVE_INFERENCE`)으로 전환되었습니다.
+
+### 거버넌스 및 릴리스 판정 현황 (Governance & Release Status)
+- 기술 및 정량 감사 상태: `[PASS — ALL P0/P1/P2 ISSUES RESOLVED]`
+  - `260928_0312` 가중치 전수 감사에서 제기되었던 `Dental_008` 검증셋 누수(38/38 중복) 및 무치악 Hard Negative 분리는 메인 워크스테이션(`RTX 5080`)의 무누수 507/127 분할 100 에포크 재학습과 독립 홀드아웃(15장) 평가로 완전 해소되어 `[CLOSED]` 처리되었습니다.
+  - `10_cases_quantitative_benchmark.json`과 보고서 간의 TheGem 세부 IoU 추적성(`#36`, `#29` 미달 후보 IoU 보존) 및 중앙 테스트 스위트 예외 삼킴 제거(`Dental_000#2`)가 모두 완결되었습니다.
+- 모듈별 운영 등급 구분:
+  - `ACTIVE` (통합 서빙 가동): `Dental_002`, `008`, `009`, `010`, `011`, `012`, `013`
+  - `ACTIVE (Screening Reference)`: `Dental_014` (`OsteoMAENet` 실추론 연동, 특이도 한계로 인해 확정 진단이 아닌 임상 스크리닝 참고 지표로만 표출)
+  - `STANDBY`: `Dental_003` (기하 RBL 연산 검증 완료, 정밀 CEJ/Apex 랜드마크 어노테이션 확보 전까지 통합 리포트 수치 출력 보류)
+- 임상 체어사이드 UAT (`260917_1635`, `260928_0036`): 기술적 Fail-Closed 해시 가드, 레터박스 종횡비 보존, `uncertain` 치아 수동 FDI 보정 UI 구현이 모두 완료되어 `v1.0 QA Verified (UAT Ready)` 상태로 오너(안현찬 치과의사)의 체어사이드 상시 검수 체제로 운영됩니다.
 
 ---
 

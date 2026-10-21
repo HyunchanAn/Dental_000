@@ -303,3 +303,32 @@
 - `[P0]` 원격 오픈 이슈: `0건` (전수 종결 완료)
 - `[P1]` 원격 오픈 이슈: `0건` (전수 종결 완료)
 - 현재 18개 저장소에 남아 있는 원격 오픈 이슈는 경미한 위생·문서 정돈 성격의 `[P2]` 이슈 `27건`(+총괄 트래킹 `Dental_000#12`)뿐이며, 모든 `[P0]` 및 `[P1]` 기술·보안·데이터·라이선스 과업은 100% 완결되었다.
+
+---
+
+# [ 261021 2235 랩탑 개발팀 ] 잔여 `[P2]` 이슈 24건 및 로컬 미종결 문서 3건 전수 해결·종결 완료 보고 (전체 18개 저장소 오픈 이슈 `0건` 달성)
+
+## 1. 이행 요약
+본 마스터 보고서 5장에 열거되었던 잔여 `[P2]` GitHub 오픈 이슈 24건과 2장에 열거되었던 로컬 미종결 기획·감사 문서 스레드 3건(`260917_1635`, `260928_0036`, `260928_0312`), 그리고 서브모듈 미체크 체크리스트(`Dental_004`, `Dental_006`)를 전수 해결하고 각 저장소 `origin/main` 반영 및 GitHub 이슈 종결(`CLOSED`, 총괄 트래킹 이슈 `Dental_000#12` 포함)을 완료하였다.
+
+## 2. 저장소별 `[P2]` 종결 내역 요약
+1. `Dental_001` (`#8`, `#9`, `#10` -> `[CLOSED]`, 커밋 `eeb9258`): `LICENSE` 원저작자·기여자 병기 및 `Aariz_CVM_Clean` 637장 `CC BY 4.0` 변경 고지, `tools/inference.py` 포함 전 진입점 디바이스 폴백(`cuda -> mps -> cpu`) 통일, `MRE 3.8612 px` 환산 근거 및 `CVM 45.05%` 프로토타입 성격 명시.
+2. `Dental_002` (`#6`, `#7` -> `[CLOSED]`, 커밋 `8dd49ca`, `986593a`): `data.yaml`·`data_refined.yaml` 상대경로화, `.coverage`·`logs/test_results.txt`·`archive/scripts` 제거 및 `pytest --collect-only` 정상화.
+3. `Dental_003` (`#6`, `#7` -> `[CLOSED]`, 커밋 `d380709`): `pano_boneloss.egg-info` 제거, CUDA/CPU 동적 폴백, Zenodo `4457648`(`CC BY 4.0`)·Roboflow·UFBA-UESC 데이터셋 출처 구분 및 `Prototype (STANDBY)` 배지 반영.
+4. `Dental_004` (`#10`, `#11` -> `[CLOSED]`, 커밋 `ab2aad9`): 워터마크 샘플(`samples/ex_pano04.jpeg`) 제거 및 `samples/README.md` 신설, Tufts·Kaggle·DENTEX 이용 조건 명시, `SSIM 0.8413` 문헌 기준 대비 객관적 서술 교정 및 `development_log.txt` 미체크 2건 `[x]` 반영.
+5. `Dental_005` (`#4` -> `[CLOSED]`, 커밋 `a60cf69`): `src/alphadent.egg-info`, `predictions.json`(4.5MB), Kaggle 대회 파생 라벨 211개 제거 및 대회 데이터 비재배포 정책 명시.
+6. `Dental_006` (`#54`, `#55` -> `[CLOSED]`, 커밋 `700b9af`): `data/*.db`, `asreview.tmp`, 로그, `pyc`, `export_onnx.py` 제거, `Backend-Ollama / GROBID` 배지 정정, `Development_log.txt` 미체크 4건을 기종결 이슈와 정합화(`[x]`).
+7. `Dental_007` (`#3` -> `[CLOSED]`, 커밋 `30813e5`): `gemini.md`·`memo.txt`·`export_onnx.py` 제거, 상아질/법랑질/티타늄 단축 압축·캔틸레버 해석해 검증 모듈(`src/analytical_validation.py`) 및 단위 테스트(`tests/test_analytical_validation.py`, 12 passed, 오차 `< 1%`) 신설, README 개요·STL·물성 출처 완비.
+8. `Dental_008` (`#2`, `#3` -> `[CLOSED]`, 커밋 `d4fcaf7`): `edentulous_images/Thumbs.db`·`egg-info` 제거, `edentulous_images/README.md` 신설, `generate_vis.py`·`train_yolo_finetune.py`·`clean_images*.py`·`args.yaml` 내 `C:/Users` 및 UNC 경로 제거, CUDA/CPU 폴백 적용.
+9. `Dental_009` (`#1` -> `[CLOSED]`, 커밋 `fd9279d`): `pyc`·`export_onnx.py` 제거, `test_visualization.py`를 `scripts/run_visualization_demo.py`로 이동, Pell & Gregory 및 TheGem 골드 4개 사랑니(`#18, #28, #38, #48`) 단위 테스트(`tests/test_analyzer.py`) 신설.
+10. `Dental_010` (`#1` -> `[CLOSED]`, 커밋 `5824b39`): `export_onnx.py`·`pyc` 제거, `src/detector.py`에 최소 8치 안전 가드 및 인접치 갭 비율 휴리스틱(`verify_missing_teeth`) 통합, 단위 테스트(`tests/test_detector.py`, 4 passed) 신설 및 배지 정정.
+11. `Dental_011` (`#2` -> `[CLOSED]`, 커밋 `d1563f6`): 중복 압축파일(`data/dental_xray_dataset.zip.zip` 14.8MB)·중복 폴더(`data/dataset ++/` 296장)·`pyc` 제거 및 `data/hybrid_dataset/`(295장) 재현 검증 정책 명시.
+12. `Dental_012` (`#1` -> `[CLOSED]`, 커밋 `67e297a`): `data.yaml` 상대경로화, `train.py` 디바이스 폴백, 단독 추론 및 다근치 치근단 Apex 매칭 모듈(`src/inference.py`) 및 단위 테스트(`tests/test_inference.py`, 3 passed) 신설.
+13. `Dental_015` (`#2` -> `[CLOSED]`, 커밋 `90c64da`): 프론트엔드 리포트 스키마·FDI 범위·SHA-256 검증 단위 테스트(`tests/reportValidation.test.mjs`, `npm test` 2 passed) 및 CI 연동, README·저장소 설명 정비.
+14. `Dental_Core` (`#3` -> `[CLOSED]`, 커밋 `0202d4b`): `scripts/tools/gitleaks.exe`(7.7MB), `egg-info`, `__pycache__`, 구형 일괄 패치 스크립트(`scripts/01~03`) 제거 및 `pytest` 10건 통과 확인.
+15. `Dental_Panoramic_Reader` (`#8`, `#10` -> `[CLOSED]`, 커밋 `bdd196e`): `app.py` `BoneLossPredictorWrapper` `'cuda'` 하드코딩을 `Dental_Core` `get_device()`로 교체, `dental_002.py` `apply_clahe`를 `Dental_Core` 호출로 일원화, 전용 Streamlit 포트 `8500`(`.streamlit/config.toml`) 설정 및 11개 서브모듈 최신 커밋 동기화.
+16. `Dental_000` (`#11`, `#12` -> `[CLOSED]`): `README.md` 거버넌스·릴리스 판정 현황(`v1.0 QA Verified (UAT Ready)`) 명시, 로컬 미종결 문서 3건(`260917_1635`, `260928_0036`, `260928_0312`) `[CLOSED]` 마감, 전 서브모듈 최신화 및 총괄 이슈 `Dental_000#12` 완결 종결.
+
+## 3. 최종 잔여 이슈 통계
+- 18개 전 저장소 GitHub 오픈 이슈: `[P0] 0건 / [P1] 0건 / [P2] 0건 / 총괄 트래킹 0건` (전수 `CLOSED` 달성).
+

@@ -654,3 +654,27 @@
     - Dental_003#5 ([P1] FastAPI 서버 dummy_yolo.pt 제거 및 생성자 복구, 커밋 b508973): api/main.py 실가중치 지연 로드(미존재 시 HTTP 503), PerioLandmarkPredictor 초기화 시그니처 교정 및 measurement_method: geometric_heuristic_30_40_rule 응답 명시
     - Dental_015#1 ([P1] 초기 목업 분리, 상시 DEMO 배너, SHA-256 해시 게이트 및 불확실 치아 수동 보정 UI, 커밋 5d44a5f): 초기 빈 리포트 시작, 데모 로드 시 상시 DEMO DATA 경고 배너, 업로드 파일 SHA-256 불일치 시 오버레이 차단 게이트, uncertain 치아 클릭 시 FDI 번호(11~48) 수동 보정(clinicianCorrected) 인터랙션 구현 및 빌드 검증
   - 5. Dental_Panoramic_Reader(a203b3e) 및 Dental_000 내 전 서브모듈 최신 커밋 동기화 완료 (시리즈 전체 [P0] 오픈 이슈 0건, [P1] 오픈 이슈 0건 달성)
+
+## 2026-10-21
+
+- Dental_ 시리즈 18개 전 저장소 잔여 [P2] 오픈 이슈 24건 및 총괄 트래킹 이슈(Dental_000#12) 전수 해결·검증·원격 푸시 및 GitHub 이슈 종결(100% CLOSED) 완결:
+  - 1. Dental_001 ~ Dental_005 [P2] 9건 해결 및 CLOSED:
+    - Dental_001#8, #9, #10 (커밋 eeb9258): LICENSE 원저작자(Muhammad Anwaar Khalid) 및 확장 기여자(Hyunchan An) 병기, Aariz_CVM_Clean 637장 CC BY 4.0 귀속·변경 고지, tools/inference.py 포함 전 진입점 디바이스 선택(DEVICE 환경변수 -> cuda -> mps -> cpu) 통일, MRE 3.8612 px(512x512 기준) 환산 근거 및 CVM 45.05% 보조 연구 지표 성격 명시
+    - Dental_002#6, #7 (커밋 8dd49ca, 986593a): data.yaml·data_refined.yaml 상대경로(path: data/refined) 치환, CUDA/CPU 자동 폴백, 폰트 폴백 보강, .coverage·logs/test_results.txt(비 UTF-8)·archive/scripts 제거 및 pytest 수집 정상화
+    - Dental_003#6, #7 (커밋 d380709): pano_boneloss.egg-info 제거, 학습·추론 스크립트 CUDA/CPU 동적 감지, README.md 내 Zenodo 4457648(CC BY 4.0)·Roboflow·UFBA-UESC 데이터셋 출처 구분 및 Prototype(STANDBY) 배지 반영
+    - Dental_004#10, #11 (커밋 ab2aad9): 스톡 워터마크 샘플(samples/ex_pano04.jpeg) 제거 및 samples/README.md 신설, Tufts·Kaggle·DENTEX 이용 조건 명시, SSIM 0.8413(문헌 0.85~0.95 소폭 하회) 객관적 기술 및 development_log.txt 미체크 2건 완료([x]) 반영
+    - Dental_005#4 (커밋 a60cf69): src/alphadent.egg-info·predictions.json(4.5MB)·Kaggle 대회 파생 라벨 211개 추적 해제, CUDA/CPU 자동 폴백, AlphaDent 대회 규정 안내 추가
+  - 2. Dental_006 ~ Dental_015 [P2] 10건 해결 및 CLOSED:
+    - Dental_006#54, #55 (커밋 700b9af): data/*.db·asreview tmp·로그·pyc·export_onnx.py·egg-info 제거, README 배지를 Backend-Ollama / GROBID로 정정, Development_log 미체크 4건을 기종결 이슈(#11, #12, #21, #22, #27)와 정합화([x])
+    - Dental_007#3 (커밋 30813e5): gemini.md·memo.txt·export_onnx.py 제거, 상아질(18.6 GPa)/법랑질(84.1 GPa)/티타늄(110 GPa) 단축 압축 및 Euler-Bernoulli 캔틸레버 닫힌 해 검증 모듈(src/analytical_validation.py) 및 단위 테스트(12 passed, 오차 < 1%) 신설, README 개요·STL·물성 출처 문서화
+    - Dental_008#2, #3 (커밋 d4fcaf7): 루트 임시 가중치 삭제, edentulous_images/Thumbs.db 및 egg-info 제거, edentulous_images/README.md 신설, generate_vis.py·train_yolo_finetune.py·clean_images*.py·args.yaml 내 C:/Users 및 UNC 하드코딩 경로 전수 제거, CUDA/CPU 자동 폴백 적용
+    - Dental_009#1 (커밋 fd9279d): pyc·export_onnx.py 제거, 루트 test_visualization.py를 scripts/run_visualization_demo.py로 이동하여 pytest 오수집 차단, Pell & Gregory Level A/B/C 및 TheGem 골드 4개 사랑니(#18, #28, #38, #48) 검증 단위 테스트(tests/test_analyzer.py) 추가
+    - Dental_010#1 (커밋 5824b39): export_onnx.py·pyc 제거, src/detector.py에 최소 8치 가드·동적 정중선·인접치 갭 비율 휴리스틱(verify_missing_teeth) 통합, 단위 테스트(tests/test_detector.py, 4 passed) 추가 및 Rule-Based Heuristic 배지 정정
+    - Dental_011#2 (커밋 d1563f6): 중복 아카이브(data/dental_xray_dataset.zip.zip 14.8MB)·중복 폴더(data/dataset ++/ 296장)·pyc 제거 및 README 데이터 추적 정책 정합화
+    - Dental_012#1 (커밋 67e297a): data.yaml 상대경로화(path: data/yolo_dataset_augmented), train.py CUDA/CPU 폴백, 단독 추론 및 다근치 치근단 Apex 매칭 모듈(src/inference.py)과 단위 테스트(tests/test_inference.py, 3 passed) 신설
+    - Dental_015#2 (커밋 90c64da): Node 내장 테스트 러너 기반 리포트 스키마·FDI 범위·SHA-256 해시 검증 테스트(tests/reportValidation.test.mjs, npm test 2 passed) 및 CI 연동, README·저장소 설명·라이선스 완비
+  - 3. Dental_Core, Dental_Panoramic_Reader, Dental_000 [P2] 5건 및 총괄 트래킹 이슈(#12) 해결·종결:
+    - Dental_Core#3 (커밋 0202d4b): scripts/tools/gitleaks.exe(7.7MB)·egg-info·__pycache__·구형 일괄 패치 스크립트(scripts/01~03) 전수 제거 및 pytest 10건 통과 확인
+    - Dental_Panoramic_Reader#8, #10 (커밋 bdd196e): app.py BoneLossPredictorWrapper 'cuda' 하드코딩을 Dental_Core get_device()로 교체, core/interfaces/dental_002.py의 중복 apply_clahe를 Dental_Core 호출로 일원화, 전용 Streamlit 포트 8500(.streamlit/config.toml) 설정 및 진입점 아키텍처 문서화
+    - Dental_000#11 및 #12: README.md 거버넌스·릴리스 판정 섹션(v1.0 QA Verified / UAT Ready) 신설 및 미종결 기획·감사 문서 3건(260917_1635, 260928_0036, 260928_0312) 공식 종결([CLOSED]) 선언, 18개 전 저장소 서브모듈 최신화 후 잔여 오픈 이슈 0건 달성
+

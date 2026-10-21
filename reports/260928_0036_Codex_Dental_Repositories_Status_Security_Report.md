@@ -481,3 +481,14 @@ Codex가 강조한 바와 같이, 기술적 가드 구축 이후의 최종 해�
 | `Dental_Panoramic_Reader` | `aace2d2` | 100% clean | 인터페이스 불확실성 플래그 바인딩 및 서브모듈 clean |
 | `Dental_001`~`007`, `009`~`014`, `Dental_Core` | 최신 HEAD | 100% clean | requirements.txt Dental_Core.git@main 동기화 |
 | `Dental_000` | 작업 완료 후 푸시 대기 | - | 보고서 및 단일 개발일지 갱신 |
+
+---
+
+# [ 261021 2225 랩탑 개발팀 ] 불확실 치아(`uncertain`) 수동 FDI 보정 UI 구현(`Dental_015#1`) 및 `Dental_008` 무누수 재학습 완결에 따른 본 조사 보고서 스레드 공식 종결 (`[CLOSED]`)
+
+- 작성 주체: `랩탑 개발팀` (`RTX4060Laptop-HC`)
+- 문서 최종 상태: `[CLOSED — ALL ITEMS RESOLVED]`
+- 종결 요약:
+  1. 본 보고서 2절에서 자문·후속 과제로 남겨 두었던 `uncertain` 치아 수동 FDI 보정 인터페이스는 `Dental_015`(`5d44a5f`, `Dental_015#1` `[CLOSED]`)에서 황색 불확실성 경고 표시 및 임상가 원클릭 FDI 번호(`11`~`48`) 수동 변경(`clinicianCorrected: true`) UI로 구현 완료되었다.
+  2. `#45`/`#46` 영구 결손 및 `#47` 근심 치조골 흡수 상태 반영, 그리고 `Dental_008` 무누수 507/127 분할 `YOLOv8m-seg` 100 에포크 재학습(`Box mAP@0.5 99.15%`, `Mask mAP@0.5 98.55%`)까지 모두 완결되었으므로 본 보고서 스레드를 `[CLOSED]`로 공식 마감한다.
+
