@@ -17,3 +17,11 @@ runs/
 yolov8m_seg_scratch/
 data/caries_patches/
 data/caries_patches_split/
+
+# Local web-collected / manual test images (excluded from public Git tracking)
+Test_pano/
+tests/tests_panoramic_reader/test_images_PANO/
+tests/tests_002/test_images/
+tests/tests_004/test_images_260608/
+tests/tests_001/test_image_cephalo/
+tests/tests_009_010/result_integration.jpg

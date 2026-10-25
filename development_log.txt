@@ -578,3 +578,4 @@
 2026-10-25
 - 18개 전 저장소 완결 기획서·리포트·아카이브 문서(`[CLOSED]` / `[PASS]` 완결) 전수 점검 및 공식 종결 명시 완료.
 - 18개 전 저장소 `development_log.txt` 단일 표준 양식(`YYYY-MM-DD` 날짜 헤더 및 하이픈 불릿, 내용 무생략 100% 보존, 클린 UTF-8) 통일 완료.
+- 웹 수집 수동 테스트 파노라마·세팔로 이미지(`Dental_000` 내 `Test_pano/`, `tests/tests_panoramic_reader/test_images_PANO/`, `tests/tests_002/test_images/`, `tests/tests_004/test_images_260608/`, `tests/tests_001/test_image_cephalo/`, `tests/tests_009_010/result_integration.jpg` 총 46개, `Dental_004` 내 `samples/*.jpeg` 4개, `Dental_008` 내 `edentulous_images/*.jpg`·`*.gif` 76개)를 로컬 디스크에 보존하면서 공개 Git 추적에서 전면 제외(`git rm --cached` 및 `.gitignore` 등록) 완료.
