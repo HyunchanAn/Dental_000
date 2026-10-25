@@ -43,4 +43,4 @@ jobs:
 - 상태: 공식 종결 (`[CLOSED]`)
 - 이행 결과:
   - `Dental_000/.github/workflows/reusable-ci.yml` 마스터 재사용 워크플로우를 구축하고 18개 시리즈 저장소 전체의 CI 파이프라인과 연동 완료하였다.
-  - `Dental_000#2` 및 `Dental_000#5` 조치 과정에서 `actions/checkout@v4`에 `submodules: recursive`를 적용하고, 예외 삼킴(`try/except Exception: pass`) 래퍼 전수 제거 및 `scripts/check_repo_hygiene.py`(1024KB 초과 파일 및 금지 아티팩트 자동 차단 게이트)를 통합하여 본 기획안의 Phase 1~4 전 단계를 100% 완수하였다.
+  - `Dental_000#2` 및 `Dental_000#5` 조치 과정에서 `actions/checkout@v4`에 `submodules: recursive`를 적용하고, 예외 삼킴(`try/except Exception: pass`) 래퍼 전수 제거 및 `scripts/check_repo_hygiene.py`(1024KB 초과 파일 및 금지 아티팩트 자동 차단 게이트)를 통합하여 본 기획안의 Phase 1~4 전 단계를 100% 완수하였다 (`[CLOSED]` / `[PASS]` 완결).

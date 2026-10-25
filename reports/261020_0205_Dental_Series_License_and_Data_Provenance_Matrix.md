@@ -49,3 +49,10 @@
   11. `chemahc94/Dental_005_Model`
 - 조치 사항:
   - 기존 `'More Information Needed'` 빈 템플릿 상태였던 모델 카드(`README.md`)의 YAML Frontmatter에 `license: cc-by-nc-sa-4.0` (또는 해당 데이터셋 라이선스) 및 `tags`를 명시하고, 본문에 학습 아키텍처, 원본 데이터셋 출처·라이선스, 비영리 연구 전용 제한 고지를 일괄 반영한다.
+
+---
+
+# [ 261025 1455 랩탑 개발팀 ] 18개 전 저장소 LICENSE 및 데이터 출처·HF 모델 카드 정비 완결 및 공식 종결 (`[CLOSED]` / `[PASS]`)
+
+- 상태: 공식 종결 (`[CLOSED]` / `[PASS]` 완결)
+- 이행 결과: 본 매트릭스에 정의된 18개 전 GitHub 저장소의 `LICENSE` 파일, `README.md` 데이터셋 출처·라이선스 고지 및 Hugging Face Hub 11개 모델 저장소의 모델 카드 정비가 100% 완료되었으므로 본 SSOT 문서를 `[CLOSED]` / `[PASS]` 완결로 공식 종결한다.

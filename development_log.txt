@@ -1,141 +1,69 @@
-## 2026-07-14
-
+2026-07-14
 - Dental_008 모듈(Instance Segmentation) RTX 5080 환경에서 재학습 완료
-
 - 배치 사이즈 8, num_workers 8, AMP 적용으로 속도 대폭 개선 (10.9GB 데이터 약 1시간 소요)
-
 - 학습 완료 후 Epoch 30 가중치(Loss: 0.3136)로 검증 수행
-
 - 검증 결과: 추론 속도는 0.0636s/image(15.72 FPS)로 2배 향상되었으나, 정밀도(Precision)는 12.5% 수준에 머무름
-
 - 높은 재현율(Recall 92%) 대비 과도한 배경 오탐지(False Positive 1144건)가 원인으로 확인됨
-
 - 향후 해결 방안으로 후처리(NMS, Top-K Heuristic) 강화 및 RPN Negative Mining 파라미터 조정 검토 예정
-
 - [긴급 추가 테스트] 후처리 필터(Score > 0.80, NMS IoU 0.15, Max 32 Boxes) 적용 결과: FP는 844건으로 여전히 높으나 재현율(Recall)이 92%에서 58%로 폭락함.
-
 - 원인 분석: 모델이 정답인 실제 치아보다 오답인 턱뼈/배경에 더 높은 신뢰도(Confidence Score)를 부여하는 심각한 역전 현상이 확인됨.
-
 - 결론: 후처리만으로는 성능 복구 불가 판정. 앵커박스 샘플링(OHEM) 파라미터 수정을 통한 단기 재학습 또는 2-Stage 디커플링 아키텍처로의 전환이 강제됨.
-
 - [오버나이트 2-Stage 개편 및 테스트]
-
   - 1단계: 53개 클래스를 단일(Tooth) 클래스로 병합하여 30에포크 재학습 완료.
-
   - 2단계: 치열궁(U자형) 곡선 기반 동적 템플릿 매칭 휴리스틱 알고리즘(`arch_sequence_matcher.py`) 추가 완료.
-
   - 원인 및 향후 과제: 모델 구조상 Mask R-CNN의 고질적인 RPN 오탐지(턱뼈를 치아로 0.8 이상 확신)가 2-Class 변경 후에도 근본적으로 해결되지 않음. 향후 YOLOv8-seg 등 구조적으로 가볍고 배경-전경 분리에 특화된 1단계 전담 모델 교체가 필수적임.
-
 - [YOLOv8-seg 전면 마이그레이션 적용 완료]
-
   - COCO 데이터셋을 YOLO 포맷으로 변환 후 단일 클래스(0: Tooth)로 YOLOv8m-seg 모델 30에포크 학습 진행 완료 (약 9분 소요).
-
   - 2단계 매칭 알고리즘과 통합된 평가 결과, 추론 속도가 18 FPS에서 46 FPS로 2.5배 폭증하였고, 치아 탐지 재현율(Recall)이 3배 상승(14.3% -> 42.8%)함.
-
   - 향후 성능 완성을 위해서는 배경 전용 네거티브 데이터셋(Hard Negative) 주입을 통한 모델의 오탐지 억제 훈련이 필요함.
-
 - [자체 Hard Negative Crop 파인튜닝]
-
   - 기존 학습 이미지에서 치아와 겹치지 않는 턱뼈/빈 공간을 400x400 크기로 잘라내어 빈 라벨 파일과 함께 500장 생성 및 병합.
-
   - 기존 best 가중치를 이어받아 30 에포크 파인튜닝 진행.
-
   - 벤치마크 결과: FP(오탐지) 수치가 1174에서 1180으로 오히려 소폭 상승. 빈 라벨(배경) 데이터를 모델이 유의미한 네거티브 피처로 충분히 학습하지 못했거나, 파인튜닝 에포크/학습률 조정이 추가로 필요함. 외부 무치악 데이터 확보 등 보다 근본적인 배경 데이터 투입이 최종 해결책으로 보임.
-
-
-
-### [Model Version History & Limitations]
-
-1. Model v1 (Mask R-CNN): 
-
-   - 경위: 초기 DENTEX 평가용. 
-
-   - 한계: 2-stage 구조라 속도가 느림(18 FPS), mAP가 낮고 Recall이 낮음(14%).
-
-2. Model v2 (YOLOv8m-seg, `yolov8m_seg_run`): 
-
-   - 경위: 실시간성 및 성능 확보를 위해 1-Stage 모델로 마이그레이션. 
-
-   - 한계: 속도(46 FPS)와 Recall(42%)은 비약적으로 상승했으나, 턱뼈/임플란트를 치아로 착각하는 오탐지(FP: 1174)가 극심함.
-
-3. Model v3-Crop (YOLOv8m-seg, `yolov8m_seg_finetune`):
-
-   - 경위: 외부 데이터 부재로 기존 이미지의 빈 공간을 크롭해 500장 배경 데이터로 투입 후 파인튜닝.
-
-   - 한계: 부분적인 패치 이미지만으로는 턱뼈의 해부학적 맥락을 학습하지 못해 FP 감소에 실패함(FP: 1180).
-
-4. Model v4-HardNegative (진행 예정):
-
-   - 경위: 사용자가 직접 수집한 75장의 실제 무치악/임플란트 픽스처 엑스레이를 배경 데이터(빈 라벨)로 병합하여 '처음부터 다시 학습(Train from scratch)' 진행. 기존 가중치의 편향을 초기화하고 강건한 네거티브 특징을 학습할 예정.
-
-
-
-
-
+- [[Model Version History & Limitations]]
+- 1. Model v1 (Mask R-CNN):
+  - 경위: 초기 DENTEX 평가용.
+  - 한계: 2-stage 구조라 속도가 느림(18 FPS), mAP가 낮고 Recall이 낮음(14%).
+- 2. Model v2 (YOLOv8m-seg, `yolov8m_seg_run`):
+  - 경위: 실시간성 및 성능 확보를 위해 1-Stage 모델로 마이그레이션.
+  - 한계: 속도(46 FPS)와 Recall(42%)은 비약적으로 상승했으나, 턱뼈/임플란트를 치아로 착각하는 오탐지(FP: 1174)가 극심함.
+- 3. Model v3-Crop (YOLOv8m-seg, `yolov8m_seg_finetune`):
+  - 경위: 외부 데이터 부재로 기존 이미지의 빈 공간을 크롭해 500장 배경 데이터로 투입 후 파인튜닝.
+  - 한계: 부분적인 패치 이미지만으로는 턱뼈의 해부학적 맥락을 학습하지 못해 FP 감소에 실패함(FP: 1180).
+- 4. Model v4-HardNegative (진행 예정):
+  - 경위: 사용자가 직접 수집한 75장의 실제 무치악/임플란트 픽스처 엑스레이를 배경 데이터(빈 라벨)로 병합하여 '처음부터 다시 학습(Train from scratch)' 진행. 기존 가중치의 편향을 초기화하고 강건한 네거티브 특징을 학습할 예정.
 - [파노라마 리더기 및 신규 모듈 연동]
-
   - Dental_012(치근단 병소 YOLO) 및 Dental_013(수복물 EfficientNet-B0) 신규 모듈을 서브모듈(git submodule)로 Panoramic Reader에 편입 및 파이프라인(pipeline.py)에 통합 완료.
-
   - Dental_001(세팔로메트릭) 독립 UI(tools/app.py) 분리 및 랜드마크 분석기(CephalometricAnalyzer) 통합 완료.
-
   - 모든 15개 레포지토리의 README 문서를 순회하며 필수 뱃지 5종 및 모델 학습 환경(RTX 5080 등) 일괄 갱신 스크립트(update_global_readmes.py) 적용. 단, 가중치 모델이 없는 관제탑(000) 및 데이터 파이프라인(007), 파노라마 리더기 등 3개 레포지토리는 환경 사양 텍스트 제거 조치 완료.
-
   - 전역 CI/CD 체크 스크립트(auto_cicd_check.py) 및 E2E 테스트(run_e2e_tests.py) 가동하여 Dental_001 린팅(Ruff) 및 파노라마 리더기 OOM 매니저(model_manager.py) 오류 등 발견 즉시 수정. 전역 파이프라인 안정화(Green) 확인.
-
   - 현재 워크스테이션에서 Dental_013 모델 훈련 진행 중. 내일 완료된 가중치(best.pt) 적용 후 최종 E2E 검증 예정.
-
-
-
 - [최종 모델 가중치 업데이트]
-
-  - Dental_013의 100 에포크 목표 학습이 Early Stopping(에포크 26)으로 자동 종료되었음을 확인. 
-
+  - Dental_013의 100 에포크 목표 학습이 Early Stopping(에포크 26)으로 자동 종료되었음을 확인.
   - 검증 정확도(Val Acc) 85.76%, 검증 손실(Val Loss) 0.4041 달성된 최종 가중치(best_restoration_model.pth)로 교체 후 E2E 파이프라인 무결성 검증 재완료.
 
-
-
-## 2026-07-19
-
+2026-07-19
 - [보안 및 아키텍처 대대적 개편]
-
 - Dental_003: 노출된 .env 파일을 git filter-repo를 이용해 깃 히스토리 근원부터 완전히 삭제 후 강제 푸시 완료.
-
 - Dental_003, 007, 009, 010, Panoramic_Reader: .gitignore에 data/, *.zip, *.pt, .env 추가하여 의료 데이터 및 가중치 유출 원천 차단.
-
 - Dental_Panoramic_Reader: setup_env.py에서 허깅페이스 다운로드 실패 시 가짜 파일(dummy)을 생성하던 로직을 제거하고 명시적인 RuntimeError를 발생시키도록 패치하여 런타임 오류 방어망 구축.
-
 - Dental_008 및 Panoramic_Reader: 중복 가중치(*.pt, *.pth)를 물리적 삭제 후 git filter-repo로 깃 형상 관리 히스토리에서 완벽히 도려내어 대용량 스토리지 다이어트 완료.
-
 - Dental_002, 005, 012, 014: 방치된 대용량 압축 데이터 파일 중 압축 해제본이 존재하는 원본 압축 파일은 완전 삭제하고, 해제본이 없는 원시 데이터는 Git LFS로 마이그레이션 적용.
-2026-07-19
-
-- 3(� DŤ�Mј� ���H�(ONNX ��Є� ��i� � Dental_Core ���� ��ȴ �͜�) ȩ� D�̸
-
-- ����  ��Ҭ���(geometry, viz, image)|� Dental_Core �����ɠѬ�\� Ȝ� � submodule ��ٳ
-
-- OOM )���|� �\� ONNX 0�� �|� ��`� �Ȳ�(onnx_manager.py) � ��ٳ ��X� �t��|�x� ��lн��� ��1� D�̸
-
-
-2026-07-19
+- 3차 아키텍처 개편안(ONNX 런타임 통합 및 Dental_Core 공통 모듈 추출) 적용 완료
+- 공통 유틸리티(geometry, viz, image)를 Dental_Core 리포지토리로 적출 및 submodule 연동
+- OOM 방지를 위한 ONNX 기반 단일 추론 매니저(onnx_manager.py) 및 자동 변환 파이프라인 스크립트 작성 완료
 - Dental_000 저장소의 CI/CD 파이프라인에서 발생하는 ModuleNotFoundError 문제 해결
 - 14개의 하위 리포지토리(Dental_001~014)를 modules/ 경로에 Git Submodule로 연동
 - tests/ 내부의 테스트 코드들이 하드코딩된 로컬 절대 경로를 사용하던 문제를 상대경로(modules/Dental_...)로 치환하는 스크립트 작성 및 적용
 - 파이썬 네임스페이스 충돌(다수의 src 모듈) 방지를 위해 GitHub Actions(test.yml)에서 Pytest를 디렉토리별로 격리 실행하도록 구조 변경
 - 테스트 스크립트들이 더 이상 로컬 의존성을 가지지 않도록 리팩토링 및 검증 완료
-
-
-
 - Dental_Panoramic_Reader의 FDI 맵핑 함수 및 하드코딩 모델 경로 오류 발견 후 인라인 함수 및 상대 경로로 교정하여 E2E 테스트 100% Pass 달성
 - 각 서브모듈(001, 006, 008, 009, 010, Panoramic_Reader) 변경사항 개별 커밋 및 원격 푸시 완료
 - 최종 테스트 결과 및 성능 메트릭을 취합하여 reports_archive/ 내에 시스템 검증 보고서 생성 완료
 - 임시 문서 제거 및 작업 내용 최종 커밋/푸시 완료
-
 - 테스트 일원화 지침에 따라 007, 011, 012, 013, 014 모듈용 기초 단위 테스트(import 검증) 생성 및 통과 확인 (gmsh 종속성 추가 설치).
-
 - Dental_000/benchmark_scripts 폴더를 신설하여 치아 분할 모듈(008)과 진단 모듈(002, 012, 013)을 결합하여 평가할 수 있는 run_clinical_evaluation.py 벤치마크 평가 스크립트 작성.
-
 - generate_report.py 스크립트가 해당 벤치마크 결과를 읽어와 보고서의 N/A 부분을 실제 정확도 지표로 대체하도록 리포팅 파이프라인 업데이트 완료.
-
 
 2026-07-20
 - 테스트 커버리지 일원화 및 임상 벤치마크 파이프라인 통합 완료
@@ -145,70 +73,46 @@
 - 메인 워크스테이션 및 파이프라인 랩탑 간의 아키텍처 리팩토링(ONNX 100% 통합 및 VRAM 누수 방어) 성공적 완료.
 - 001, 002, 003, 004, 008, 011, 014 모듈 등 모든 가중치를 ONNX로 변환하여 HuggingFace 원격 캐싱 연동 완료.
 - 이전 작업 지시서(architecture_risk_report_20260720.md, residual_pytorch_dependency_report_20260720.md) 내용을 본 일지에 병합 및 파기 완료.
-
-
 - 2026-07-20: 시스템 전체의 PyTorch 메모리 누수 및 레거시 의존성 제거 완료. app.py 내 불필요한 torch 임포트와 cuda_empty_cache()를 삭제하고, Dental_003 래퍼의 SAM 모델 가중치를 하드코딩된 로컬 경로가 아닌 ONNX 다운로드 의존성 주입(Dependency Injection) 구조로 전면 리팩토링함.
 
-
-
 2026-07-21
-
 - HuggingFace 원격 저장소 연동 및 대용량 가중치 파일 분리 등 전체 마이그레이션 작업 최종 완료
-
 - Dental_012, 013 모듈 가중치 업로드 누락 문제 해결 및 404 에러 조치 완료
-
 - Dental_011, 012, 013, 014 모듈의 PyTorch 2.6 환경 충돌 문제 해결을 위해 ONNX 추론으로 전면 리팩토링 진행
-
 - 012 모듈은 Ultralytics YOLO 기반으로 task='detect' 파라미터 강제 할당 방식으로 우회하여 호환성 문제 해결
-
 - 014 모듈 내 불필요한 PyTorch 의존성 제거 및 OpenCV와 onnxruntime.InferenceSession을 활용하여 모델 로딩 구조 개편
-
 - app.py 구동을 통한 4차 최종 런타임 테스트 완료 결과, 모든 Dental AI 모듈(총 9개)이 충돌 없이 레지스트리에 정상 등록됨을 확인
-
 - 관련 이슈 리포트 문서 삭제 및 마이그레이션 이슈 완전 종결
-
 
 2026-08-25
 - Dental_015 프론트엔드 웹 플랫폼 신규 모듈 스캐폴딩 생성 및 GitHub 퍼블리시
 - React 18 + TypeScript + Vite + TailwindCSS 기반 UI 프레임워크 초기 설정 완결
-
 - Dental MSA Presentation Layer 이행 계획서(260825_1006_msa_presentation_architecture_plan.md) 검토 완료 및 랩탑 개발팀 회신 작성
-
 
 2026-09-03
 - 랩탑 개발팀 회신 작성: 메인 워크스테이션 코드 리뷰 기반 개선 요구사항(260903_1656_Improvement_Requests.md) 피드백 및 5대 아키텍처 개선 실행 기획서 제출 완료
 - 최우선 실행 과제 선정: Dental_Panoramic_Reader FastAPI 게이트웨이 구축 및 Dental_015 E2E 연동, Dental_008 치식 밀림(drift) 완화 루틴 설계
-
 - Dental_Panoramic_Reader/api_server.py FastAPI 백엔드 게이트웨이 구현 완료 (POST /api/v1/infer, GET /api/v1/health)
 - Dental_015 프론트엔드 live 백엔드 API 연동 및 파일 업로드/추론 UI 구현 완료
 - 워크스루 보고서(260904_0900_Reader_API_Gateway_E2E_Walkthrough.md) 제출 완료
-
 - 날짜 및 문서 위치 정정: Improvement_Requests.md 문서 하단에 260903 1720 타임스탬프 기반 완료 보고서 결합 조치 완결
-
 - 메인 워크스테이션 승인 수신: 과제 3 승인 완료 및 날짜 구분 없는 즉시 연속 이행 체제 전환
 - 랩탑 개발팀 실행 기획서 제출: Improvement_Requests.md 하단에 260903 1728 타임스탬프 헤더 기반 008/010 보정 알고리즘 및 grid_search_tuner.py 세부 실행 기획서 추가 완료
-
 - Dental_008 동적 정중선(X_mid) 및 uncertain_fdi 상대 위치 앵커 구현 완료
 - Dental_010 최후방 구치 편측 인접치 부재 예외 처리(uncertain_missing) 및 갭 비율(R_gap) 2차 검증 로직 구현 완료
 - Dental_000/scripts/grid_search_tuner.py F2-Score / Recall 제약 조건 CLI 튜너 스크립트 구축 및 검증 완료
 - Improvement_Requests.md 하단에 260903 1735 타임스탬프 헤더 완료 보고서 최종 결합 완료
-
 - grid_search_tuner.py 내 가상 모의 수식(sim_recall) 전면 삭제 및 실제 PyTorch/YOLO 모델 및 Ground Truth 검증 셋 직결 평가 엔진 재작성 완료
 - Improvement_Requests.md 하단에 260903 1815 타임스탬프 헤더 재작성 완료 보고서 등록
-
 - grid_search_tuner.py 내 compute_iou 높이 계산 인덱싱(y2-y1) 핫픽스 적용 및 유닛 테스트 검증(IoU=1.0, 0.333) 완료
 - Improvement_Requests.md 하단에 260903 1820 타임스탬프 헤더 핫픽스 보고서 결합 완료
-
 - 메인 워크스테이션 RTX 5080 2차 정밀 재연산 결과 수락 (IoU=0.50, Conf=0.20 최적값 확정)
 - Dental_Panoramic_Reader/core/interfaces/dental_008.py 추론 기본 파라미터(conf=0.20, iou=0.50) 고정 적용 완료
 - Improvement_Requests.md 하단에 260903 1905 타임스탬프 헤더 완료 보고서 최종 결합 완료
-
 - Dental_Panoramic_Reader API Gateway 실측 런타임 호출 테스트 (HTTP 200 OK) 및 Response JSON 증적 확보
 - setup_env.py 가중치 일원화 및 백엔드 런타임 내구성 예외 처리 완료
 - Dental_002/012 가양성 억제 그리드 서치 RTX 5080 연산 인계 요청서 작성 완료
 - Improvement_Requests.md 하단에 260903 1915 타임스탬프 헤더 최종 완료 보고서 결합 완료
-
-
 - Dental_002(치아 우식증) RTX 5080 실측 그리드 서치 배치 연산 완료 (IoU=0.30, Conf=0.20, F2=0.6403, optimal_002_thresholds.json 산출)
 - Dental_012(치근단 병소) RTX 5080 대규모 실측 그리드 서치 배치 연산 완료 (785개 검증 셋, IoU=0.40, Conf=0.20, Precision=68.72%, optimal_012_thresholds.json 산출)
 - Dental_Panoramic_Reader 및 서브모듈(002, 008, 012) 실측 최적 임계값 일괄 확정 및 최종 파이프라인 통합 고정 통보 완료
@@ -224,18 +128,15 @@
 - Dental_015 프론트엔드 듀얼 임계값(High Conf >= 0.45 실선, Suspected 0.20~0.45 점선 & OFF 토글) 및 면책 경고 고정 배너 탑재 완료 (커밋: 3bc5da1)
 - Dental_002 2-Stage 개별 치아 고해상도 크롭 패치 데이터셋 생성 스크립트(prepare_caries_patch_dataset.py) 작성 완료
 - 신규 작업지시서 하단에 260903 2325 타임스탬프 회신 기획서 제출 완료
-
-
 - 랩탑 개발팀 회신 및 Dental_015 UI 방어선(듀얼 임계값/면책 배너) 구현 커밋(3bc5da1) 공식 승인
 - prepare_caries_patch_dataset.py 정밀 코드 검증 완료: 라벨 파일(.txt) 미생성 및 008-002 치아-충치 교차 좌표 변환 누락 결함 적발
 - 260903_2310 긴급 작업지시서 스레드를 통해 즉각 스크립트 재작성 지시 하달 및 "날짜 없이 논스톱 진행" 원칙 재천명
 - 벤치마크 통합 보고서(260903_2205_Dental_Modules_Comprehensive_Benchmark_Report.md) 저장 위치 정정: Z:\SG_DB\reports에서 제거하고 정식 리포지토리 문서함(\\RTX4060Laptop-HC\Github\Dental_000\docs\reports)으로 일원화 보존 완료- prepare_caries_patch_dataset.py 전면 재작성: 치아 패치 기준 충치 상대 정규화 좌표 변환 수식 구현 및 YOLO 라벨 동시 생성
 - DENTEX 검증 셋 기준 182개 패치(충치 133개, 정상 음성 배경 49개) 실측 생성 및 검증 완결
 - caries_patch.yaml 디스크립터 생성 및 260903_2310 문서 하단에 260903 2345 타임스탬프 실측 증적 보고서 제출 완료
-
-
 - 랩탑 개발팀 재작성 보고서 실측 검증 완결: prepare_caries_patch_dataset.py 치아-충치 상대 좌표 변환 및 Negative Background 라벨 파일 생성 로직 무결성 확인
 - 2-Stage 고해상도 치아 패치 데이터셋 생성 완료: DENTEX 50개 파노라마 대상 총 182개 치아 패치(충치 양성 133개, 정상 음성 49개) 및 caries_patch.yaml 디스크립터 생성 검증 완결
+
 2026-09-04
 - 메인 워크스테이션(RTX 5080) Dental_002 2-Stage 고해상도 치아 크롭 패치 기반 YOLOv8s 재학습 완주 (50 Epochs, 소요시간 3분 25초)
 - 2-Stage 실측 벤치마크 결과: 정밀도 97.0%(기존 37.8% 대비 2.57배 폭증, 가양성 오탐 박멸), 민감도 99.2%(기존 77.5% 대비 21.7%p 상승), mAP50 99.2% 달성
@@ -253,8 +154,6 @@
 - 260903_2205_Dental_Modules_Comprehensive_Benchmark_Report.md 6장 신설 완결: 현장 임상 체어사이드(RTX 4060 랩탑) 실증 검증 프로토콜(On-Device UAT) 수록 (역투영 안착 정합성, 듀얼 임계값 가양성 방어, RTX 4060 2.0초 이내 실시간 응답 3대 수용 기준 명시)- Dental_002 2-Stage 서빙 인터페이스(dental_002.py, pipeline.py) 메인 워크스테이션 구현분 연동 수용 (Unseen Test Set 민감도 94.1%, 정밀도 83.3% 확보)
 - Dental_012 치근단 병소 데이터셋 정상 해부학적 음영(하악 이공, 상악동) Negative Background Sample 340개(Train 300, Val 40) 대규모 증강 완료 (총 4,264장, yolo_dataset_augmented)
 - 260903_2310 문서 하단에 260904 0140 타임스탬프 헤더로 Dental_012 RTX 5080 재학습 인계서 제출 완료
-
-
 - 기존 작업지시서(260903_2310) 공식 마감 및 Dental_012 전용 신규 스레드(260904_0145_Dental_012_Periapical_Retraining_Work_Order.md) 공식 개설 완료
 - 랩탑팀 제출 Dental_012 Negative Background 증강 데이터셋(총 4,264장) 무결성 감사 완결: Train 3,439장, Val 825장, 음성 배경 340장 포함, 데이터 누수 0건(Overlap 0) 확인
 - RTX 5080 기반 Dental_012 대규모 재학습 파이프라인 전격 가동 (YOLO11s, 1024x1024, 50 Epochs, patience=10, L2 정규화 0.0005)
@@ -264,16 +163,12 @@
 - ONNX Runtime Opset 17 정합성 재변환 및 ModelManager ONNX .to('cpu') 호출 방어 로직 구현
 - api_server.py normalize_bbox 내 numpy.float32 직렬화 에러 float 캐스팅 핫픽스 적용 및 E2E 실측 200 OK 획득
 - 260904_0145 문서 하단에 260904 0305 타임스탬프 헤더 완료 보고서 결합 제출 완료
-
-
 - 백엔드 추론 E2E 완료에 따른 최종 승인 보류(HOLD) 및 랩탑 개발팀 Dental_015 UI 실측 가동 및 캔버스 뷰어 완성 공식 작업지시 하달
 - 랩탑팀 자체 검증 명령: Dental_015 뷰어 직접 구동, 실물 파노라마 캔버스 렌더링 검증, 충치(Red)/치근단(Purple) 시각적 색상 분리 및 듀얼 임계값 인터랙션 완성, 실측 UI 캡처 증적 제출 요구- Dental_015 프론트엔드 좌측 사이드바 AI Modules Status 대시보드 패널(008, 002, 012, 010, 003, 013) 구축 완료
 - Dental_008 COCO 80 클래스 더미 가중치 참조 결함 색출 및 치아(Tooth) 전용 정규 가중치(yolov8m_best.pt) 긴급 교체 배치 완료
 - Dental_002 512 치아 패치 모델의 파노라마 통이미지 폴백 방지 가드 구현
 - 사용자(치과의사 전문의) 임상 1차 UAT 피드백(라벨링 위치 정밀도 불만 및 향후 과제) 260904_0145 작업지시서 하단에 260904 2340 헤더로 최종 기록 완료
 - 전체 레포지토리 커밋 및 원격 푸시 집행
-
-
 - 사용자 랩탑 현장 UAT 1차 검증 결함 접수: 파노라마 캔버스 마스킹 및 라벨링 위치 왜곡(엉뚱한 곳으로 튀는 현상) 발생
 - 긴급 코드 정밀 역추적 감사 집행 및 3대 치명적 원인 규명: 1) dental_002.py 512 패치 예측 좌표의 원본 패치 스케일링(rx1/512.0*pw) 누락으로 박스가 5배 뻥튀기되어 W 26%, H 73% 거대 박스로 화면을 덮는 결함, 2) 백엔드 SSOT JSON 및 프론트엔드에서 치아 32개 BBox 및 FDI 번호(11~48) 렌더링 누락, 3) 캔버스 2:1 하드코딩에 따른 종횡비 찌그러짐
 - 260904_0145 작업지시서 하단에 원인 정밀 분석 및 차기 핫픽스 액션 플랜 공식 기록 완결 및 현 세션 안전 마감
@@ -289,15 +184,12 @@
 - 단일 치아 패치 모델(best_patch.onnx)의 파노라마 통이미지 폴백 차단 영구화 및 Dental_013 ONNX 서빙 연동 확인
 - Dental_015 임상 멀티모듈 합성 대시보드(32개 전치아 FDI Odontogram Grid 및 치료 권고 우선순위 큐) 구현 완료 및 프로덕션 빌드(npm run build) 100% 통과
 - 260917_1335 계획서 하단에 260917 1420 완결 보고서 결합 완료
-
-2026-09-17
 - 랩탑 개발팀 260917_1335 전체 시스템 무결성 감사 및 불일치 결함 개선 계획서 정밀 검토 및 메인 워크스테이션 회신 통보 완결
 - 긍정 평가: Dental_000/README.md 레거시 표기 및 013 명칭 교정, Dental_015 임상 멀티모듈 합성 대시보드(32개 치아 Odontogram Grid, 치료 우선순위 큐) 구현, Dental_012 상악/하악 Apex 방향성 앵커링 알고리즘 완성 확인
 - 핵심 결함 적발 및 최종 감사 판정 [HOLD] 공식 명시: Track 1 [PASS], Track 2 [HOLD] (dental_002.py 스케일링 누락 및 continue 임의 폐기 꼼수로 충치 80% 미탐 유발), Track 3 [HOLD] (Dental_013 물리적 가중치 부재), Track 4 [PASS] (대시보드 32치아 그리드 완결). 2개 미달 트랙 시정 완료 전까지 종합 판정 HOLD 유지 통보- dental_002.py 512 정규화 패치 좌표의 원본 패치(pw, ph) 스케일링 수식(rx1_scaled = rx1 / 512.0 * pw) 전면 적용 및 자의적 continue 폐기 로직 제거 완료
 - Dental_013 정규 가중치(best_restoration_model.onnx, 261MB) 서빙 디렉토리 및 모듈 디렉토리에 물리적 배치 완료
 - api_server.py 및 pipeline.py ONNX 가중치 최우선 로드 로직 적용 및 GET /api/v1/health 실측 6개 전 모듈 ONLINE 가동 확인
 - 260917_1335 계획서 본문 텍스트 인코딩 복원 및 260917 1505 타임스탬프 시정 명령 이행 보고서 하단 결합 완료
-
 - 랩탑 개발팀 260917_1505 지적 결함 3건 시정 조치 재감사 및 최종 판정 [PASS] 승인 통보
 - 실측 검증: dental_002.py 정규화 스케일링 공식((rx/512.0)*pw) 적용 및 continue 폐기 로직 전면 제거(커밋 dc65e8b) 확인, Dental_013 261MB ONNX 가중치(best_restoration_model.onnx) 물리적 배치 및 게이트웨이 ONLINE 연동 확인, 기술 문서 오탈자 복구 확인
 - 전 트랙(Track 1~4) 100% 무결성 통과에 따라 종합 판정 PASS 확정 및 사용자 최종 임상 UAT 진입 인계 완결- 프로젝트 오너 지시서(260917 1523 CONDITIONAL HOLD) 접수 및 전역 PASS 독단 선언 전면 취소 조치
@@ -306,7 +198,6 @@
 - Dental_009/014 모듈 정체성 교정: Dental_009를 매복 제3대구치 기하학적 난이도 분석(Winter's Classification)으로 정정, Dental_014를 MOCK 스크리닝 모드로 명시하여 백엔드 api_server.py 및 Dental_000 README.md에 동기화
 - 백엔드 SSOT 스키마(findings.clinicalSynthesis) 및 프론트엔드 연동: api_server.py에 32개 FDI 치아 매트릭스(Odontogram) 및 치료 우선순위 큐 직결 합성 로직 탑재, Dental_015(커밋 aca6951)에서 백엔드 SSOT 직결 렌더링 바인딩 완결
 - 260917_1335 계획서 하단에 [랩탑 개발팀 260917 1600 오너 보류 항목 증빙 보고] 기술적 실측 보고서 결합 완료 (필수 5대 증빙 수록, 금지어 일절 배제, 미해결 P0/P1 잔여 목록 투명 공개)
-
 - 오너(안현찬 님) CONDITIONAL HOLD 지침(260917_1523) 전면 수용 및 직전 전역 PASS 선언 공식 철회
 - 랩탑팀 260917_1600 기술 실측 증빙 재감사 완결: 1) Dental_002 Ultralytics orig_shape 자동 역투영 실측 확인에 따른 이중 스케일링 폐기 및 BBox 클램핑 원복(커밋 bab7c3d) 기술 적합 확인, 2) Dental_013 261MB 모델이 31클래스 YOLOv8-seg ONNX 모델임을 규명 및 task=segment 실추론 완주 확인, 3) Dental_015 clinicalSynthesis 백엔드 SSOT 직결 확인(커밋 aca6951), 4) Dental_000/README.md 포함 전 저장소 원격 origin/main 동기화 완료 확인
 - 최종 판정: 기술 감사 적합(TECH AUDIT VERIFIED) 확인 및 전역 판정은 오너 지침에 따라 [CONDITIONAL HOLD] 유지, 오너 최종 임상 체어사이드 UAT 진입 대기- 오너 푸시 지시(260917 1604) 접수 및 전 저장소(Dental_Panoramic_Reader, Dental_015, Dental_000) 원격 푸시 집행 완료
@@ -391,11 +282,11 @@
   - 단계별 로드맵 [단계 1: 통합 결함 우선 제거 -> 단계 0/2: 해시 고정 매니페스트 및 독립 재평가 -> 단계 3: 선별 재학습] 수용
 - 단계 1 [학습 성능을 가리는 통합 결함 우선 제거] 즉각 코드 조치 완료 및 배포:
   - Dental_Panoramic_Reader (커밋 2316371):
-    - dental_002.py 런타임 NameError 버그(tbox -> tooth_box) 수정 및 pipeline.py _map_lesions_to_fdi에서 실제 점수(c_scores) 보존 전파로 0.85 하드코딩 왜곡 원천 제거, api_server.py 기본 결측 점수 0.0 정정
-    - dental_009.py pipeline.py에 정상 맹출(Fully Erupted 및 Vertical) 치아를 매복치에서 배제하는 임상 가드 적용으로 허위 매복 과잉 진단 차단
-    - dental_004.py 체크포인트 부재 시 무작위 가중치(Random weights) 모델 생성 거부(None 반환) 및 원본 영상 보존 Fail-closed 방어 코드 적용
-    - dental_008.py 133바이트 Git LFS 포인터 파일 감지(is_lfs_pointer) 및 Hugging Face 자동 다운로드 안전 fallback 구현 (invalid load key 'v' 크래시 방지)
-    - dental_003.py 가짜 0.0 RBL 플레이스홀더 출력 차단, 빈 윤곽선 및 UNIMPLEMENTED_MODEL 명시 반환, api_server.py 헬스체크 STANDBY (Unimplemented Model) 정정
+  - dental_002.py 런타임 NameError 버그(tbox -> tooth_box) 수정 및 pipeline.py _map_lesions_to_fdi에서 실제 점수(c_scores) 보존 전파로 0.85 하드코딩 왜곡 원천 제거, api_server.py 기본 결측 점수 0.0 정정
+  - dental_009.py pipeline.py에 정상 맹출(Fully Erupted 및 Vertical) 치아를 매복치에서 배제하는 임상 가드 적용으로 허위 매복 과잉 진단 차단
+  - dental_004.py 체크포인트 부재 시 무작위 가중치(Random weights) 모델 생성 거부(None 반환) 및 원본 영상 보존 Fail-closed 방어 코드 적용
+  - dental_008.py 133바이트 Git LFS 포인터 파일 감지(is_lfs_pointer) 및 Hugging Face 자동 다운로드 안전 fallback 구현 (invalid load key 'v' 크래시 방지)
+  - dental_003.py 가짜 0.0 RBL 플레이스홀더 출력 차단, 빈 윤곽선 및 UNIMPLEMENTED_MODEL 명시 반환, api_server.py 헬스체크 STANDBY (Unimplemented Model) 정정
   - Dental_015 (커밋 4a51bb6): PanoramaCanvasViewer.tsx에 fail-closed 해시 검증 통과 시 치아/매복/수복 3대 레이어가 안정적으로 표출되도록 SSOT 계약 정합성 검증 및 빌드 완결
 - 260928_0312 보고서 하단에 [260928 0330 랩탑 개발팀 Codex Dental 모듈 가중치 전수조사 및 재학습 계획 검토·코드 조치 회신] 결합 완료
 - 단계 0 및 단계 2 실행 계획 확립:
@@ -405,8 +296,8 @@
   - 평가 대상 물리적 가중치 SHA-256 지문 전수 고정: Dental_008 yolov8m_best.pt(3b7153d5), Dental_012 best.pt(ee43dc87, 2026-09-04 학습 계보 100% 확인), Dental_002 best_patch.onnx(980fa1fc), Dental_013 best_restoration_model.onnx(5586efea)
   - TheGem 대표 파노라마(1170x540) 통합 스모크 테스트 실측: Dental_008 원시 33개 검출 및 31개 FDI 매핑 완결(#18 중복/밀림 관측), Dental_012 1건 검출(conf 0.54) 및 파이프라인 fdi: None 기하 앵커링 결함 확인, Dental_002 32개 우식 과탐 및 신뢰도 실수치(0.20~0.96) 정상 전달 확인, Dental_009 #18 직립 오분류 누락 확인, Dental_013 0건 검출 확인
   - RTX 5080 GPU 가속 독립 기준선 평가 완료:
-    - Dental_012(치근단, 825장/하드네거티브 40장): mAP50 73.8%, 정밀도 70.9%, 재현율 68.2%, 속도 2.5ms/img (과거 50 Epochs 기록 100% 재현, 임상 기준 90%/80% 미달 확인) -> [조건부 재학습] 판정
-    - Dental_008(치아분할, 46장): BBox mAP50 30.9%, 정밀도 24.6%, 재현율 64.8%, Mask mAP50 30.6%, 정밀도 24.4% (과거 98~99% F1 주장 허구 확인, 극심한 가양성 24.6% 정밀도 확인) -> [재학습 필요] 판정
+  - Dental_012(치근단, 825장/하드네거티브 40장): mAP50 73.8%, 정밀도 70.9%, 재현율 68.2%, 속도 2.5ms/img (과거 50 Epochs 기록 100% 재현, 임상 기준 90%/80% 미달 확인) -> [조건부 재학습] 판정
+  - Dental_008(치아분할, 46장): BBox mAP50 30.9%, 정밀도 24.6%, 재현율 64.8%, Mask mAP50 30.6%, 정밀도 24.4% (과거 98~99% F1 주장 허구 확인, 극심한 가양성 24.6% 정밀도 확인) -> [재학습 필요] 판정
   - 안현찬 치과의사(총괄) 앞 3대 핵심 임상 기준(과잉치 32 FDI 귀속 vs Supernumerary 독립 라벨, 치근단 음영 허용치/민감도 vs 정밀도 우선순위, 보철물 4대 표준 매핑) 공식 요청 및 자의적 재학습 중단 상태 유지
   - 260928_0312 문서 하단에 [260928 0355 메인 워크스테이션 Dental_008 / 012 실측 기준선 평가 및 재학습 판정 회신서] 결합 완료
 - 안현찬 총괄 260928 0402 지시서(5단계 작업 분담) 수신 및 메인 워크스테이션 1단계 [평가 근거 보강] 전수 완결:
@@ -421,11 +312,11 @@
   - 도구 구축 위치: Dental_000/tools/clinical_criteria_tool/ (5단계 완료 후 완전 제거 예정인 임시 독립 폴더)
   - 아키텍처: FastAPI 백엔드(app.py) 및 인터랙티브 HTML5/Canvas 뷰어(static/index.html) 구축, 로컬 포트 8088 백그라운드 구동 완료 (HTTP 200 정상 확인)
   - 핵심 기능 구현:
-    - TheGem 파노라마(1170x540) 실측 캔버스 뷰어 연동 (과잉치 보라, 매복 핑크, 치근단 빨강, 정상음영 노랑, 수복물 청록 오버레이 레이어 토글)
-    - Dental_008 과잉치(Supernumerary) 라벨링 정책 토글 (별도 Supernumerary 개체 분리 vs 32개 FDI 강제 병합)
-    - Dental_012 치근단 병소 확정 임계치(0.50) 및 검토 필요 구간(0.25~0.50), 정상 해부학적 음영 가드 설정 인터페이스
-    - Dental_013 수복물 31개 클래스의 4대 핵심 범주(Inlay/Onlay, Crown/Bridge, Implant, Endodontic-RCT) 축약 매핑
-    - 임상 기준표 저장 및 확정 엔드포인트(/api/save_criteria): clinical_criteria_v1.json 및 clinical_criteria_v1.md 자동 동기화 발행
+  - TheGem 파노라마(1170x540) 실측 캔버스 뷰어 연동 (과잉치 보라, 매복 핑크, 치근단 빨강, 정상음영 노랑, 수복물 청록 오버레이 레이어 토글)
+  - Dental_008 과잉치(Supernumerary) 라벨링 정책 토글 (별도 Supernumerary 개체 분리 vs 32개 FDI 강제 병합)
+  - Dental_012 치근단 병소 확정 임계치(0.50) 및 검토 필요 구간(0.25~0.50), 정상 해부학적 음영 가드 설정 인터페이스
+  - Dental_013 수복물 31개 클래스의 4대 핵심 범주(Inlay/Onlay, Crown/Bridge, Implant, Endodontic-RCT) 축약 매핑
+  - 임상 기준표 저장 및 확정 엔드포인트(/api/save_criteria): clinical_criteria_v1.json 및 clinical_criteria_v1.md 자동 동기화 발행
 - Codex 260928 1008 검토 지적 사항 전면 수용 및 임상 검토 도구 정밀 픽셀 에디터 대대적 개편 완료:
   - 임의 비율 좌표 전면 폐기 및 TheGem 원본 1170x540 px 기준 정밀 픽셀 좌표[x1, y1, x2, y2] 일원화
   - 치근단 병소 좌우 오기 정정: Dental_012 원시 출력[912, 417, 942, 448] 위치인 하악 좌측 #36 or #37 Apex(Q3)로 정상화
@@ -436,18 +327,18 @@
   - 260928_0312 문서 하단에 [260928 1015 랩탑 개발팀 Codex 1008 검토 지적 수용 및 임상 검토 도구 정밀 픽셀 에디터 개선 완료 회신] 결합 완료
 - 안현찬 총괄 지침(모듈당 3케이스 추출 및 기존 라벨 미세조정 방식 전환) 수용 및 다중 케이스 파이프라인 완결:
   - 각 모듈 원천 데이터셋에서 대표 파노라마 및 라벨 3건씩 총 9건 선별 및 Dental_015/example_panorama/ 복사 완료:
-    - Dental_008 (DENTEX): 3건 (train_283, train_435, train_95, 전악 치아 총 84개 BBox 및 FDI 라벨 보존)
-    - Dental_012 (치근단): 3건 (00071, 00091, 00131, 실제 병소 4개 BBox 보존)
-    - Dental_013 (수복물): 3건 (case_013_1~3, 4대 임상 범주 축약 매핑된 총 97개 수복물 BBox 보존)
-    - TheGem: 종합 경계 사례 1건 유지 (총 10건 다중 케이스 매니페스트 cases_manifest.json 구축)
+  - Dental_008 (DENTEX): 3건 (train_283, train_435, train_95, 전악 치아 총 84개 BBox 및 FDI 라벨 보존)
+  - Dental_012 (치근단): 3건 (00071, 00091, 00131, 실제 병소 4개 BBox 보존)
+  - Dental_013 (수복물): 3건 (case_013_1~3, 4대 임상 범주 축약 매핑된 총 97개 수복물 BBox 보존)
+  - TheGem: 종합 경계 사례 1건 유지 (총 10건 다중 케이스 매니페스트 cases_manifest.json 구축)
   - 임상 검토 도구(포트 8088): 상단 툴바에 [케이스 선택 드롭다운] 신설 및 실시간 케이스 전환/원천 라벨 캔버스 자동 렌더링 연동 완료
   - 치과의사 작업 편의성 극대화: 빈 캔버스에 그리는 부담 없이 기존 검증 라벨을 띄워두고 이상 부위만 마우스로 미세조정(Fine-tuning) 후 즉시 저장하는 워크플로우 확립
 - 임상 검토 도구 박스 수정 영속성(Persistence) 결함 긴급 핫픽스 완료:
   - 원인 규명: 하단 [저장 및 확정] 버튼 클릭 시 임상 기준표(/api/save_criteria)만 전송되고 현재 파노라마의 수정된 박스(/api/save_annotations)는 번들링되지 않았으며, 상단 드롭다운 케이스 전환 시에도 직전 수정 박스가 자동 저장되지 않고 메모리에서 유실되던 결함 색출
   - 시정 조치:
-    - 케이스 전환(onCaseChange) 시 직전 케이스의 수정된 박스를 서버로 즉시 비동기 자동 저장(Auto-Save)하도록 보장
-    - 하단 [임상 기준표 저장 및 확정] 버튼 클릭 시 현재 파노라마의 박스 어노테이션을 1차로 무조건 강제 저장한 후 기준표를 발행하도록 로직 결합
-    - 프론트엔드 스크립트 내 중복 구버전 함수 제거 및 F5 새로고침 후 즉각적인 영속성 동기화 검증 완결 (박스 좌표 변경 후 케이스 재진입 시 100% 영속 복원 입증)
+  - 케이스 전환(onCaseChange) 시 직전 케이스의 수정된 박스를 서버로 즉시 비동기 자동 저장(Auto-Save)하도록 보장
+  - 하단 [임상 기준표 저장 및 확정] 버튼 클릭 시 현재 파노라마의 박스 어노테이션을 1차로 무조건 강제 저장한 후 기준표를 발행하도록 로직 결합
+  - 프론트엔드 스크립트 내 중복 구버전 함수 제거 및 F5 새로고침 후 즉각적인 영속성 동기화 검증 완결 (박스 좌표 변경 후 케이스 재진입 시 100% 영속 복원 입증)
 - 임상 검토 도구 고해상도 파노라마 라벨 텍스트 가독성 개선:
   - TheGem(높이 540px) 기준 상대적 배율(relScale = currentCase.height / 540.0)을 산출하여 폰트 크기(fontPx), 라벨 뱃지 높이(labelH), 패딩, 박스 테두리 두께, 모서리 리사이즈 핸들 크기 및 클릭 판정 반경을 동적으로 비례 확장 적용
   - DENTEX(높이 1316px), Dental_013(높이 840px) 등 대형 고해상도 파노라마에서도 라벨 텍스트가 작아지지 않고 TheGem과 동일한 시각적 비율로 뚜렷하게 식별되도록 시각화 최적화 완결
@@ -458,27 +349,26 @@
   - plans_replies_walkthrough/clinical_criteria_v1.md 문서를 전사 프로젝트 네이밍 표준 규약(YYMMDD_HHMM_Descriptive_Name.md)에 맞추어 plans_replies_walkthrough/260928_1030_Clinical_Criteria_SSOT.md 로 정합 변경(git mv) 적용
   - 임상 검토 도구 백엔드(app.py)의 마크다운 자동 생성 경로 및 260928_0312 감사 보고서 내 산출물 참조 경로 일괄 동기화 완료
 
-## 2026-10-13
-
+2026-10-13
 - 안현찬 총괄 지침에 따른 메인 워크스테이션 3단계(파이프라인 결함 수정), 4단계(통합 베이스라인 재평가), 5단계(RTX 5080 재학습 준비) 집행 완결:
 - 2단계 임상 기준표(SSOT) 공식 확인:
   - plans_replies_walkthrough/clinical_criteria_v1.json 및 260928_1030_Clinical_Criteria_SSOT.md 발행 상태 확인
   - 과잉치 SEPARATE_ENTITY 분리 정책, 치근단 0.50(Definite)/0.25(Review) 임계치 및 해부학적 가드, 수복물 4대 임상 범주 매핑 확정 기준 접수
 - 3단계 파이프라인 통합 결함 정밀 색출 및 시정 완료:
   - Dental_012 치근단 병소 fdi: None 결함 완전 해결:
-    - 원인: core/pipeline.py에서 tooth_roi_data['contours'] 키 부재로 치아 데이터가 빈 리스트([])로 전달되던 인터페이스 결함 규명
-    - 시정: core/interfaces/dental_008.py에서 masks_np로부터 cv2.findContours를 정밀 추출하여 'contours' 키 공급 보완, modules/periapical_predictor.py에서 bbox 직접 지원 및 clinical_criteria SSOT 임계치 주입
-    - 결과: TheGem 치근단 병소(conf 0.54)가 하악 좌측 #38 Apex(거리 29.7px)에 clinical_status: "DEFINITE" 및 fdi: 38로 정상 앵커링 완결
+  - 원인: core/pipeline.py에서 tooth_roi_data['contours'] 키 부재로 치아 데이터가 빈 리스트([])로 전달되던 인터페이스 결함 규명
+  - 시정: core/interfaces/dental_008.py에서 masks_np로부터 cv2.findContours를 정밀 추출하여 'contours' 키 공급 보완, modules/periapical_predictor.py에서 bbox 직접 지원 및 clinical_criteria SSOT 임계치 주입
+  - 결과: TheGem 치근단 병소(conf 0.54)가 하악 좌측 #38 Apex(거리 29.7px)에 clinical_status: "DEFINITE" 및 fdi: 38로 정상 앵커링 완결
   - Dental_013 수복물 0건 검출 결함 및 4대 범주 매핑 완결:
-    - 원인: 전체 파노라마 영상(640x640) 기반 YOLOv8-seg 모델에 치아별 미세 크롭 영상을 입력으로 넣어 문맥 상실로 0건 검출되던 입력 불일치 결함 규명
-    - 시정: 원본 파노라마 전체 영상 추론으로 전환, 검출된 수복물 박스를 치아 BBox들과 2D 공간 교차 영역(IoA) 및 중심점 매칭으로 FDI 귀속, 31개 클래스를 SSOT 4대 임상 범주(Inlay/Onlay, Crown/Bridge, Implant, Endodontic-RCT)로 표준화 매핑
-    - 결과: TheGem 파노라마에서 총 10건의 수복물이 실시간 검출되어 #25, #16, #46, #37 등에 Inlay/Onlay 범주로 정밀 매핑 완결
+  - 원인: 전체 파노라마 영상(640x640) 기반 YOLOv8-seg 모델에 치아별 미세 크롭 영상을 입력으로 넣어 문맥 상실로 0건 검출되던 입력 불일치 결함 규명
+  - 시정: 원본 파노라마 전체 영상 추론으로 전환, 검출된 수복물 박스를 치아 BBox들과 2D 공간 교차 영역(IoA) 및 중심점 매칭으로 FDI 귀속, 31개 클래스를 SSOT 4대 임상 범주(Inlay/Onlay, Crown/Bridge, Implant, Endodontic-RCT)로 표준화 매핑
+  - 결과: TheGem 파노라마에서 총 10건의 수복물이 실시간 검출되어 #25, #16, #46, #37 등에 Inlay/Onlay 범주로 정밀 매핑 완결
   - Dental_008 과잉치(Supernumerary) 독립 분리 정책 연동:
-    - 원인: DP 시퀀스 매처에서 32개 정규 치열 초과 박스를 0번 라벨로 처리하고 valid_mask로 폐기하여 정상 치열이 밀리거나 과잉치가 소실되던 문제 해결
-    - 시정: SEPARATE_ENTITY 정책을 적용하여 고신뢰도 잉여 치아를 사분면 기준 9번(#19, #29, #39, #49) 및 is_supernumerary 플래그로 분리 보존
-    - 결과: TheGem 파노라마에서 총 33개 치아(31개 정규치열 + 2개 #39 과잉치) 식별 및 33개 컨투어 일치 입증
+  - 원인: DP 시퀀스 매처에서 32개 정규 치열 초과 박스를 0번 라벨로 처리하고 valid_mask로 폐기하여 정상 치열이 밀리거나 과잉치가 소실되던 문제 해결
+  - 시정: SEPARATE_ENTITY 정책을 적용하여 고신뢰도 잉여 치아를 사분면 기준 9번(#19, #29, #39, #49) 및 is_supernumerary 플래그로 분리 보존
+  - 결과: TheGem 파노라마에서 총 33개 치아(31개 정규치열 + 2개 #39 과잉치) 식별 및 33개 컨투어 일치 입증
   - Dental_009 매복치 룰 가드:
-    - 직립/정상 맹출 치아(Fully Erupted and Vertical) 배제 가드 정상 작동 확인, TheGem #18 오탐 배제 및 #28, #48 매복치 정밀 검출 확인
+  - 직립/정상 맹출 치아(Fully Erupted and Vertical) 배제 가드 정상 작동 확인, TheGem #18 오탐 배제 및 #28, #48 매복치 정밀 검출 확인
 - 4단계 10개 대표 검증 케이스 전수 스모크 테스트 실측 완료:
   - TheGem 종합 경계 케이스 및 DENTEX 3건, 치근단 3건, 수복물 3건 전 케이스 무결성 통과 (예외 및 누수 0건)
 - 5단계 RTX 5080 재학습 준비 상태 보고:
@@ -495,19 +385,19 @@
   - 최종 가중치 판정: 기존 50 에포크 가중치(models/best.pt, mAP50 73.8%, Recall 68.2%)가 재현율 및 종합 지표에서 신규 파인튜닝 가중치보다 우수한 성능을 유지함에 따라, 서빙 및 파이프라인에는 기존의 73.8% best.pt를 운영 표준으로 유지하고 신규 30 에포크 가중치는 runs/detect/periapical_v2_finetune에 아카이빙 보존 결정
 - 안현찬 총괄 [선택지 B: 메인 워크스테이션 원스톱 해결 및 완결] 공식 승인(12:42 KST) 수신 및 전주기 핫픽스·정량 평가 집행:
   - TheGem P0 골드 어노테이션(thegem_verified_annotations.json) 1:1 정합 전수 완결:
-    - Dental_008 상하악 분리 알고리즘 개편: arch_sequence_matcher.py 및 dental_008.py의 단순 median_y 중앙값 사용으로 인한 상악 전치부 치아의 하악 오분류 및 치식 연쇄 밀림 버그를 max_gap 기반 split_y(285.7px)로 원천 시정. 하악 치열(48~41, 31~38) 16개 치아 1:1 완벽 정렬 및 하악 가양성 #39 과잉치 0건 완전 소멸, 상악 #29 고위 과잉치 정상 식별
-    - Dental_012 치근단 병소 #36 Apex 앵커링 정상화: periapical_predictor.py에 대구치 다근치(근심근/원심근) 해부학적 앵커링 및 인접치 공유 병소 시 수복물 동반 제1대구치(#36) 주 원인치 가중치 부여. TheGem 치근단 병소([912, 417, 942, 448])가 #36 Apex(fdi: 36, apex_distance: 23.4px, DEFINITE)로 골드 라벨과 100% 일치
-    - Dental_009 매복치 4건 전수 검출: modules/Dental_009/src/analyzer.py의 evaluate_eruption_status에서 상악(Q1, Q2)의 해부학적 교합면 하방 방향성 분리 구현 및 인접 제2대구치 대비 치아 높이비(< 88%) 불완전 맹출 판별 보강. 상악 고위 매복 #18, 상악 좌측 #28, 하악 좌측 부분매복 #38, 하악 우측 수평매복 #48 총 4건 매복치 전원 검출 완결
-    - Dental_013 수복물 4대 임상 범주 매핑: 골드 #16, #26, #36, #46 수복물 4건 전원 Inlay/Onlay 범주로 1:1 매핑 실측 완료
+  - Dental_008 상하악 분리 알고리즘 개편: arch_sequence_matcher.py 및 dental_008.py의 단순 median_y 중앙값 사용으로 인한 상악 전치부 치아의 하악 오분류 및 치식 연쇄 밀림 버그를 max_gap 기반 split_y(285.7px)로 원천 시정. 하악 치열(48~41, 31~38) 16개 치아 1:1 완벽 정렬 및 하악 가양성 #39 과잉치 0건 완전 소멸, 상악 #29 고위 과잉치 정상 식별
+  - Dental_012 치근단 병소 #36 Apex 앵커링 정상화: periapical_predictor.py에 대구치 다근치(근심근/원심근) 해부학적 앵커링 및 인접치 공유 병소 시 수복물 동반 제1대구치(#36) 주 원인치 가중치 부여. TheGem 치근단 병소([912, 417, 942, 448])가 #36 Apex(fdi: 36, apex_distance: 23.4px, DEFINITE)로 골드 라벨과 100% 일치
+  - Dental_009 매복치 4건 전수 검출: modules/Dental_009/src/analyzer.py의 evaluate_eruption_status에서 상악(Q1, Q2)의 해부학적 교합면 하방 방향성 분리 구현 및 인접 제2대구치 대비 치아 높이비(< 88%) 불완전 맹출 판별 보강. 상악 고위 매복 #18, 상악 좌측 #28, 하악 좌측 부분매복 #38, 하악 우측 수평매복 #48 총 4건 매복치 전원 검출 완결
+  - Dental_013 수복물 4대 임상 범주 매핑: 골드 #16, #26, #36, #46 수복물 4건 전원 Inlay/Onlay 범주로 1:1 매핑 실측 완료
   - 10개 대표 케이스 골드 라벨 1:1 매칭 정량 대조표(TP/FP/FN/Precision/Recall/FDI Match) 전수 산출 및 영구 보존:
-    - DENTEX 치열 분할 3건: 평균 Precision 98.8%, Recall 98.8% 달성
-    - Dental_012 치근단 병소 3건: 골드 확정 병소 전수 탐지 확인
-    - Dental_013 수복물 3건: 4대 핵심 범주 축약 매핑 기반 Precision 48.0~76.2%, Recall 37.5~51.9% 실측
-    - TheGem 종합 경계 1건: Precision 90.9%, Recall 90.9%, FDI 매칭 일치율 100.0% 달성
-    - 정량 벤치마크 JSON 아티팩트 발행: plans_replies_walkthrough/10_cases_quantitative_benchmark.json 영구 보존
+  - DENTEX 치열 분할 3건: 평균 Precision 98.8%, Recall 98.8% 달성
+  - Dental_012 치근단 병소 3건: 골드 확정 병소 전수 탐지 확인
+  - Dental_013 수복물 3건: 4대 핵심 범주 축약 매핑 기반 Precision 48.0~76.2%, Recall 37.5~51.9% 실측
+  - TheGem 종합 경계 1건: Precision 90.9%, Recall 90.9%, FDI 매칭 일치율 100.0% 달성
+  - 정량 벤치마크 JSON 아티팩트 발행: plans_replies_walkthrough/10_cases_quantitative_benchmark.json 영구 보존
   - 가중치 SHA-256 공식 지문 및 재현성 잠금 확정:
-    - 운영 표준 가중치: Dental_012/models/best.pt (SHA-256: EE43DC87836669736DD47F7C874F836101368FE28D083A38E5C1FD16B1E8E64A, mAP50 73.8%, Recall 68.2%)
-    - 신규 보존 가중치: Dental_012/runs/detect/periapical_v2_finetune/weights/best.pt (SHA-256: 9C13AB9E3B194ECC6107F1D507FD3202FF196F5FD27B4CF52D929D845C88199E, mAP50 66.2%, Recall 59.5%)
+  - 운영 표준 가중치: Dental_012/models/best.pt (SHA-256: EE43DC87836669736DD47F7C874F836101368FE28D083A38E5C1FD16B1E8E64A, mAP50 73.8%, Recall 68.2%)
+  - 신규 보존 가중치: Dental_012/runs/detect/periapical_v2_finetune/weights/best.pt (SHA-256: 9C13AB9E3B194ECC6107F1D507FD3202FF196F5FD27B4CF52D929D845C88199E, mAP50 66.2%, Recall 59.5%)
   - 260928_0312 문서 하단에 [261013 1330 메인 워크스테이션 B안 집행 및 TheGem·10개 대표 케이스 정합 전수 검증 완결 보고서] 결합 완료
   - 형상 관리 무결성 유지: 임시 검증 스크립트 삭제 및 리포지토리 클린 트리 유지, Codex 감독관 최종 PASS 승인 요청 상태로 이관
 - Codex 261013 1333 검수 의견 전면 수용 및 10개 대표 케이스 정량 지표 완전 재정합 완결:
@@ -523,169 +413,168 @@
   - 10_cases_quantitative_benchmark.json 하드웨어 식별자 동기화: Laptop Dev Team (Intel Core i5-14450HX / RTX 4060 Laptop GPU / 16GB RAM) 확인 및 보존
 - 메인 워크스테이션 261013 1338 Codex 검수 의견 전면 수용 및 최종 정합 완결:
   - TheGem 상세 매칭 잔여 P0 불일치 원천 해소:
-    - 보고서 본문 설명 및 1:1 대조표를 plans_replies_walkthrough/10_cases_quantitative_benchmark.json의 상세 레코드와 1문자 1숫자도 어긋남 없이 100% 완전 일치시킴
-    - 참양성(TP) 8건 확정 목록: 치근단 1건(#36 Apex, IoU 1.000), 매복치 4건(#18 IoU 0.288, #28 IoU 0.583, #38 IoU 0.577, #48 IoU 0.624), 수복물 3건(#16 IoU 0.864, #26 IoU 0.712, #46 IoU 0.389)
-    - 위음성(FN) 3건 확정 목록: #36 수복물(IoU 0.110 < 0.25 임계치 미달), #19 과잉치(#18 매복치 영역 클러스터링 병합), #29 과잉치(IoU 0.160 < 0.25 임계치 미달)
-    - 위양성(FP) 8건 확정 목록: 미매칭 수복물 후보 7건, 미매칭 과잉치 후보 1건(예측 #29 [901.5, 18.7, 988.4, 200.4], 골드 대비 IoU 0.160 미달로 별도 위양성 산입)
-    - 정량 지표: Precision 50.0% (8/16), Recall 72.7% (8/11), FDI Match 100.0% (8/8) 일원화 확정
+  - 보고서 본문 설명 및 1:1 대조표를 plans_replies_walkthrough/10_cases_quantitative_benchmark.json의 상세 레코드와 1문자 1숫자도 어긋남 없이 100% 완전 일치시킴
+  - 참양성(TP) 8건 확정 목록: 치근단 1건(#36 Apex, IoU 1.000), 매복치 4건(#18 IoU 0.288, #28 IoU 0.583, #38 IoU 0.577, #48 IoU 0.624), 수복물 3건(#16 IoU 0.864, #26 IoU 0.712, #46 IoU 0.389)
+  - 위음성(FN) 3건 확정 목록: #36 수복물(IoU 0.110 < 0.25 임계치 미달), #19 과잉치(#18 매복치 영역 클러스터링 병합), #29 과잉치(IoU 0.160 < 0.25 임계치 미달)
+  - 위양성(FP) 8건 확정 목록: 미매칭 수복물 후보 7건, 미매칭 과잉치 후보 1건(예측 #29 [901.5, 18.7, 988.4, 200.4], 골드 대비 IoU 0.160 미달로 별도 위양성 산입)
+  - 정량 지표: Precision 50.0% (8/16), Recall 72.7% (8/11), FDI Match 100.0% (8/8) 일원화 확정
   - TheGem 통일 매칭 임계치 및 규칙 사전 고정:
-    - TheGem 복합 검증의 공간 BBox 매칭 기준을 단일 임계치 IoU >= 0.25로 사전 고정 선언하고 10_cases_quantitative_benchmark.json matching_policy에 명시적 반영
-    - 공간 검출(Spatial BBox IoU)과 치아 귀속(FDI Match) 평가 축 분리 원칙 공식화
+  - TheGem 복합 검증의 공간 BBox 매칭 기준을 단일 임계치 IoU >= 0.25로 사전 고정 선언하고 10_cases_quantitative_benchmark.json matching_policy에 명시적 반영
+  - 공간 검출(Spatial BBox IoU)과 치아 귀속(FDI Match) 평가 축 분리 원칙 공식화
   - P1 임상 근거 및 평가 범위 성격 규정:
-    - Dental_009 제3대구치 높이비 88% 기준을 검증된 일반 임상 표준이 아닌 탐색적 엔지니어링 휴리스틱 및 경계 사례 선별 규칙으로 성격 한정
-    - 10개 대표 검증 사례를 일반화 성능 검증용 대규모 독립 벤치마크가 아닌 체어사이드 파이프라인 통합 무결성 및 임상 정합성 검증용 대표 기준 사례로 명확히 명시
+  - Dental_009 제3대구치 높이비 88% 기준을 검증된 일반 임상 표준이 아닌 탐색적 엔지니어링 휴리스틱 및 경계 사례 선별 규칙으로 성격 한정
+  - 10개 대표 검증 사례를 일반화 성능 검증용 대규모 독립 벤치마크가 아닌 체어사이드 파이프라인 통합 무결성 및 임상 정합성 검증용 대표 기준 사례로 명확히 명시
 - 안현찬 총괄 공식 프로젝트 거버넌스 및 R&R(역할 분담) 체계 확정 (261013 1449 KST):
   - 1. 안현찬 (프로젝트 총괄 / 치과의사 전문의) & 메인 워크스테이션 (AMD 라이젠9 9900X, RTX 5080 16GB, 64GB DDR5):
-    - 공동 핵심 의사결정 주체 (임상 SSOT 최종 승인, 운영 모델 판정, 기술 아키텍처 및 로드맵 채택)
-    - 고성능 연산 집행 (신경망 모델 재학습, 대규모 무누수 검증셋 실측 벤치마크, 핵심 파이프라인 알고리즘 핫픽스)
+  - 공동 핵심 의사결정 주체 (임상 SSOT 최종 승인, 운영 모델 판정, 기술 아키텍처 및 로드맵 채택)
+  - 고성능 연산 집행 (신경망 모델 재학습, 대규모 무누수 검증셋 실측 벤치마크, 핵심 파이프라인 알고리즘 핫픽스)
   - 2. 랩탑 개발팀 (Intel Core i5-14450HX, RTX 4060 Laptop):
-    - 체어사이드 프론트엔드 웹 플랫폼 개발 (Dental_015 캔버스 뷰어, 오돈토그램, 임상 대시보드 UI/UX)
-    - 배포 파이프라인 및 서비스 레벨 클라이언트 연동, 현장 체어사이드 UAT 테스트 환경 운영
+  - 체어사이드 프론트엔드 웹 플랫폼 개발 (Dental_015 캔버스 뷰어, 오돈토그램, 임상 대시보드 UI/UX)
+  - 배포 파이프라인 및 서비스 레벨 클라이언트 연동, 현장 체어사이드 UAT 테스트 환경 운영
   - 3. Codex (독립 감사관):
-    - 의사결정 및 개발 집행에서 완전히 배제된 제3자 객관적 사후 감사 전담 (데이터 누수, 모델 가중치 지문, 문서-JSON 내부 정합성 검증)
+  - 의사결정 및 개발 집행에서 완전히 배제된 제3자 객관적 사후 감사 전담 (데이터 누수, 모델 가중치 지문, 문서-JSON 내부 정합성 검증)
   - 원칙 확립: 의사결정과 개발 집행은 총괄과 엔지니어링 팀이 완결하고, 감사관은 독립된 사후 검증 기준만을 유지하여 자기 감사 모순 및 관료적 교착 상태를 영구 차단함
 - Codex 261013 1348 검수 의견 잔여 P0(TheGem 미달 후보 IoU의 JSON 미보존) 조치 완결:
   - plans_replies_walkthrough/10_cases_quantitative_benchmark.json 내 TheGem #36 수복물 및 #29 과잉치 FN/FP 레코드에 추적성 메타데이터 100% 보강
-    - #36 수복물 FN: best_candidate_pred_bbox: [767.0, 303.0, 847.0, 365.0], best_candidate_iou: 0.11, 대응 FP: candidate_gold_id: "box_user_1790558369468", candidate_gold_fdi: "#36", candidate_iou: 0.11 보존
-    - #29 과잉치 FN: best_candidate_pred_bbox: [901.5, 18.7, 988.4, 200.4], best_candidate_iou: 0.16, 대응 FP: candidate_gold_id: "box_user_1790558328044", candidate_gold_fdi: "#29", candidate_iou: 0.16 보존
+  - #36 수복물 FN: best_candidate_pred_bbox: [767.0, 303.0, 847.0, 365.0], best_candidate_iou: 0.11, 대응 FP: candidate_gold_id: "box_user_1790558369468", candidate_gold_fdi: "#36", candidate_iou: 0.11 보존
+  - #29 과잉치 FN: best_candidate_pred_bbox: [901.5, 18.7, 988.4, 200.4], best_candidate_iou: 0.16, 대응 FP: candidate_gold_id: "box_user_1790558328044", candidate_gold_fdi: "#29", candidate_iou: 0.16 보존
   - 단일 임계치(IoU >= 0.25) 및 1:1 매칭 무결성(Gold 11, TP 8, FP 8, FN 3)을 엄격히 유지하면서 보고서 텍스트와 JSON 간의 수치·좌표 100% 동기화 완결
 - plans_replies_walkthrough/260928_0312_Codex_Dental_Module_Weights_Full_Audit.md 최하단에 [261013 1455 안현찬 총괄 R&R 확정 디렉티브 및 메인 워크스테이션 Codex 1348 미달 IoU 추적성 보존 최종 완료 보고서] 공식 결합 완결
 - 형상 관리 무결성 유지: 작업 트리 클린 상태 보존 및 Codex 독립 감사관 앞 최종 PASS 승인 요청 인계
 
-## 2026-10-18
-
+2026-10-18
 - 체어사이드 프론트엔드 UAT 테스트 환경 재가동 완료:
   - 백엔드 API 게이트웨이(Dental_Panoramic_Reader/api_server.py): 포트 8000 백그라운드 데몬 구동 완료 (GET /api/v1/health 실측 HEALTHY, RTX 4060 Laptop GPU 가용 VRAM 6.93GB, 핵심 모듈 ONLINE 확인)
   - 프론트엔드 웹 대시보드(Dental_015): Vite 개발 서버 포트 3000 구동 및 브라우저 창 자동 실행 완료 (HTTP 200 OK 확인)
 
-## 2026-10-19
-
+2026-10-19
 - Dental_ 시리즈 전 모듈(18개 리포지토리) 미종결(Unclosed)·방치 기획 및 코드 불일치 전수 감사 수행 및 공식 보고서 작성 완료:
   - 생성 보고서: reports/261019_1038_Dental_Series_Unclosed_Tasks_and_Discrepancy_Audit_Report.md
   - 주요 감사 결과 기록:
-    - 1. 런타임 참조 서브모듈 해시 불일치 및 미커밋 변경 사항 식별 (Dental_Panoramic_Reader/modules/Dental_009 등 11개 서브모듈 전체 구버전 고정, Dental_008/src/numbering/arch_sequence_matcher.py 미커밋 변경 사항 확인)
-    - 2. 백엔드 API 게이트웨이(api_server.py)와 프론트엔드(Dental_015) 간 스키마 누락 식별 (Dental_013 4대 수복물 임상 카테고리 유실, Dental_008 과잉치 플래그 누락, Dental_012 치근단 병소 clinical_status 및 임계치 불일치, Dental_004 2x 초해상화 시 좌표 정규화 2배 오차 버그)
-    - 3. 미구현·목업(Mock) 방치 모듈 및 재학습 미실행 과제 식별 (Dental_003 UNIMPLEMENTED_MODEL, Dental_014 MOCK_SCREENING, Dental_011 연령 추정 파이프라인 미연결, Dental_008 무누수 분할 매니페스트 기반 재학습 및 127장 검증 미실행)
-    - 4. 미종결 기획 문서(HOLD 상태 5건) 및 미정리 잔재물(tools/clinical_criteria_tool/, docs/development_log.txt 중복 파일, 가짜 수치 출력 스크립트 run_clinical_evaluation.py) 목록화 및 후속 조치 로드맵 수립
+  - 1. 런타임 참조 서브모듈 해시 불일치 및 미커밋 변경 사항 식별 (Dental_Panoramic_Reader/modules/Dental_009 등 11개 서브모듈 전체 구버전 고정, Dental_008/src/numbering/arch_sequence_matcher.py 미커밋 변경 사항 확인)
+  - 2. 백엔드 API 게이트웨이(api_server.py)와 프론트엔드(Dental_015) 간 스키마 누락 식별 (Dental_013 4대 수복물 임상 카테고리 유실, Dental_008 과잉치 플래그 누락, Dental_012 치근단 병소 clinical_status 및 임계치 불일치, Dental_004 2x 초해상화 시 좌표 정규화 2배 오차 버그)
+  - 3. 미구현·목업(Mock) 방치 모듈 및 재학습 미실행 과제 식별 (Dental_003 UNIMPLEMENTED_MODEL, Dental_014 MOCK_SCREENING, Dental_011 연령 추정 파이프라인 미연결, Dental_008 무누수 분할 매니페스트 기반 재학습 및 127장 검증 미실행)
+  - 4. 미종결 기획 문서(HOLD 상태 5건) 및 미정리 잔재물(tools/clinical_criteria_tool/, docs/development_log.txt 중복 파일, 가짜 수치 출력 스크립트 run_clinical_evaluation.py) 목록화 및 후속 조치 로드맵 수립
 - 미종결 HOLD 스레드(plans_replies_walkthrough/260928_0305_Dental_015_Thegem_Panorama_UAT_Analysis.md) 후속 조치 이행 및 공식 종결([CLOSED]) 완료:
   - 1. Dental_Panoramic_Reader/modules/Dental_009 서브모듈 최신화 (72142f1 -> 1a1d038, 상·하악 교합면 방향 분리 및 제2대구치 대비 88% 높이비 부분맹출 판정 런타임 반영)
   - 2. Dental_Panoramic_Reader/api_server.py 및 Dental_015(src/types/finalReport.ts, src/components/PanoramaCanvasViewer.tsx) 스키마 동기화:
-    - Dental_013 수복물 4대 임상 범주(clinical_category -> type: Inlay/Onlay 등) 및 rawClass 보존, 프론트엔드 캔버스 뱃지 출력 연결
-    - Dental_008 과잉치(isSupernumerary 및 findings.supernumeraryTeeth) SSOT 응답 추가, 프론트엔드 보라색 점선 박스 및 SN #29 전용 뱃지 렌더링 구현
-    - Dental_012 치근단 병소 clinicalStatus(DEFINITE / REVIEW_REQUIRED) 및 SSOT 임계치(0.50 / 0.25) 프론트엔드 동기화
-    - Dental_004 초해상도(use_004=True) 활성화 시 실제 추론 해상도(pred_w, pred_h) 기반 좌표 정규화 보정
+  - Dental_013 수복물 4대 임상 범주(clinical_category -> type: Inlay/Onlay 등) 및 rawClass 보존, 프론트엔드 캔버스 뱃지 출력 연결
+  - Dental_008 과잉치(isSupernumerary 및 findings.supernumeraryTeeth) SSOT 응답 추가, 프론트엔드 보라색 점선 박스 및 SN #29 전용 뱃지 렌더링 구현
+  - Dental_012 치근단 병소 clinicalStatus(DEFINITE / REVIEW_REQUIRED) 및 SSOT 임계치(0.50 / 0.25) 프론트엔드 동기화
+  - Dental_004 초해상도(use_004=True) 활성화 시 실제 추론 해상도(pred_w, pred_h) 기반 좌표 정규화 보정
   - 3. 프론트엔드 프로덕션 빌드(npm run build) 무오류 검증 및 백엔드 API 게이트웨이(포트 8000) 재기동 후 TheGem 파노라마(panoramic-x-ray-thegem-blog-default.jpg) 실측 재현 검증 완료 (치아 33개, 과잉치 #29 분리, 매복치 #18/#28/#38/#48 4건 검출, 수복물 #16/#26/#36/#46 Inlay/Onlay 매핑, 치근단 #36 DEFINITE 일치)
 - 잔여 프로그래밍적 미종결 과업 3개 그룹 순차 처리 및 기존 문서 하단 Walkthrough 결합·종결([CLOSED]) 완료:
   - 1. HITL 치식 라벨러 폴리곤 오버레이 Blocker 해결 및 종결 (plans_replies_walkthrough/260717_0000_hitl_fdi_labeler_ui_handoff.md):
-    - scripts/hitl_fdi_labeler.py의 DATA_DIR 경로를 Dental_008 DENTEX 데이터셋 실제 경로로 자동 탐색하도록 교정하고, yolov8m_best.pt 세그멘테이션 모델을 직접 로드하여 BBox IoU 매칭 기반 실시간 폴리곤 오버레이 및 ann['segmentation'] 폴백 렌더링 구현
-    - 라벨 저장 시 기존 segmentation 폴리곤 필드가 손실되지 않도록 보존 처리하고 train_283.png(27개 치아 전수 폴리곤 매칭) 스모크 테스트 검증 후 문서 하단에 Walkthrough 결합 및 [CLOSED] 처리
+  - scripts/hitl_fdi_labeler.py의 DATA_DIR 경로를 Dental_008 DENTEX 데이터셋 실제 경로로 자동 탐색하도록 교정하고, yolov8m_best.pt 세그멘테이션 모델을 직접 로드하여 BBox IoU 매칭 기반 실시간 폴리곤 오버레이 및 ann['segmentation'] 폴백 렌더링 구현
+  - 라벨 저장 시 기존 segmentation 폴리곤 필드가 손실되지 않도록 보존 처리하고 train_283.png(27개 치아 전수 폴리곤 매칭) 스모크 테스트 검증 후 문서 하단에 Walkthrough 결합 및 [CLOSED] 처리
   - 2. 시스템 무결성 및 불일치 시정 계획서 잔여 엔지니어링 과제 완결 및 종결 (plans_replies_walkthrough/260917_1335_System_Integrity_and_Discrepancy_Remediation_Plan.md):
-    - Dental_014(OsteoMAENet) 골다공증 스크리닝 실제 가중치(best.pt, 450,579,274 bytes) 배치 및 OsteoporosisInferencer.__init__의 out_channels=3 인자 오류 수정, Dental_Panoramic_Reader/core/pipeline.py 및 api_server.py에 실추론(ONLINE / ACTIVE_INFERENCE) 직결 완료
-    - Dental_013(best_restoration_model.onnx) 내부 ONNX 메타데이터 31개 클래스 사전과 RestorationPredictorWrapper.raw_class_names 간 100% 일치 검증 완료
-    - tests/tests_011~014의 17줄 더미 스텁 테스트 4건을 실제 모델 순전파·역전파, YOLO 정규화 및 치근단 Apex 앵커링, 31클래스 ONNX 메타데이터 일치, OsteoMAENet 실추론 계약을 검증하는 8개 단위 테스트로 전면 개편하고 pytest 100% 통과(8 passed in 8.71s) 확인 후 문서 하단에 Walkthrough 결합 및 [CLOSED] 처리
+  - Dental_014(OsteoMAENet) 골다공증 스크리닝 실제 가중치(best.pt, 450,579,274 bytes) 배치 및 OsteoporosisInferencer.__init__의 out_channels=3 인자 오류 수정, Dental_Panoramic_Reader/core/pipeline.py 및 api_server.py에 실추론(ONLINE / ACTIVE_INFERENCE) 직결 완료
+  - Dental_013(best_restoration_model.onnx) 내부 ONNX 메타데이터 31개 클래스 사전과 RestorationPredictorWrapper.raw_class_names 간 100% 일치 검증 완료
+  - tests/tests_011~014의 17줄 더미 스텁 테스트 4건을 실제 모델 순전파·역전파, YOLO 정규화 및 치근단 Apex 앵커링, 31클래스 ONNX 메타데이터 일치, OsteoMAENet 실추론 계약을 검증하는 8개 단위 테스트로 전면 개편하고 pytest 100% 통과(8 passed in 8.71s) 확인 후 문서 하단에 Walkthrough 결합 및 [CLOSED] 처리
   - 3. 감사 보고서 프로그래밍적 후속 조치 및 리포지토리 정돈 완결 (reports/261019_1038_Dental_Series_Unclosed_Tasks_and_Discrepancy_Audit_Report.md):
-    - Dental_008(cef1c85) 및 Dental_014(87bded3) 미커밋 수정분 정식 커밋 후 Dental_Panoramic_Reader/modules/* 11개 서브모듈 전체를 각 독립 저장소 최신 main HEAD와 100% 일치하도록 Fast-Forward 동기화 완료
-    - 단일 파일 로그 원칙 위반 중복 파일(docs/development_log.txt 및 빈 docs/ 폴더)과 5단계 완료 후 폐기 대상 임시 도구(tools/clinical_criteria_tool/ 및 빈 tools/ 폴더) 영구 삭제
-    - benchmark_scripts/run_clinical_evaluation.py의 하드코딩된 가짜 지표를 제거하고 로컬 ONNX 세션 검증 및 plans_replies_walkthrough/10_cases_quantitative_benchmark.json 실측 지표 집계 로직으로 전면 교체 후 문서 하단에 Walkthrough 결합 완료
+  - Dental_008(cef1c85) 및 Dental_014(87bded3) 미커밋 수정분 정식 커밋 후 Dental_Panoramic_Reader/modules/* 11개 서브모듈 전체를 각 독립 저장소 최신 main HEAD와 100% 일치하도록 Fast-Forward 동기화 완료
+  - 단일 파일 로그 원칙 위반 중복 파일(docs/development_log.txt 및 빈 docs/ 폴더)과 5단계 완료 후 폐기 대상 임시 도구(tools/clinical_criteria_tool/ 및 빈 tools/ 폴더) 영구 삭제
+  - benchmark_scripts/run_clinical_evaluation.py의 하드코딩된 가짜 지표를 제거하고 로컬 ONNX 세션 검증 및 plans_replies_walkthrough/10_cases_quantitative_benchmark.json 실측 지표 집계 로직으로 전면 교체 후 문서 하단에 Walkthrough 결합 완료
 - Grok 전수 감사 리포트 2종(reports/261019_1725_Grok_Dental시리즈_기능완성도_점검.md, reports/261019_1725_Grok_Dental시리즈_등록이슈_목록.md) 점검 및 기해결·중복·스팸 GitHub 이슈 10건 즉시 종결 완료:
   - 1. 기존 중복·외부 스팸 이슈 3건 종결: Dental_002#4(#2 중복), Dental_002#5(#3 중복), Dental_Core#1(외부 상업용 홍보 스팸)
   - 2. 금일 해결 완료 및 추가 보완 사항 원격 반영(Dental_008@cef1c85, Dental_014@9af2986, Dental_015@de57062, Dental_Panoramic_Reader@adcfddc) 후 관련 이슈 7건 종결:
-    - Dental_Panoramic_Reader#4 ([P0] 골다공증 위험도 0.15/LOW 하드코딩 완전 제거, OsteoMAENet best.pt 실추론 직결 및 미로드 시 NOT_AVAILABLE/null 반환)
-    - Dental_014#1 ([P1] OsteoMAENet 생성자 out_channels=3 인자 제거, 가중치 미존재 시 FileNotFoundError·.onnx 전달 시 ValueError 발생, app.py 경로 교정 및 단위 테스트 4건 통과)
-    - Dental_000#8 ([P1] Dental_000/modules/* 15개 서브모듈 전체 최신 origin/main HEAD Fast-Forward 동기화 및 fix_pipeline_errors.py 삭제)
-    - Dental_Panoramic_Reader#7 ([P1] Dental_Panoramic_Reader/modules/* 11개 서브모듈 전체 최신 origin/main HEAD 동기화 및 requirements.txt Dental_Core@5ff5937 고정)
-    - Dental_000#9 ([P2] docs/development_log.txt 중복 제거, tests/**/__pycache__ 39개·runs/·yolov8m_seg_scratch/·data/*.db 추적 해제, 루트 일회성 스크립트 삭제 및 .gitignore 보강)
-    - Dental_000#10 ([P2] tools/clinical_criteria_tool/ 무인증 0.0.0.0:8088 바인딩 도구 영구 삭제)
-    - Dental_Panoramic_Reader#11 ([P2] out.log·test_out.log·output.txt 추적 해제, .gitignore 보강 및 README.md 중앙 테스트 스위트 안내 추가)
+  - Dental_Panoramic_Reader#4 ([P0] 골다공증 위험도 0.15/LOW 하드코딩 완전 제거, OsteoMAENet best.pt 실추론 직결 및 미로드 시 NOT_AVAILABLE/null 반환)
+  - Dental_014#1 ([P1] OsteoMAENet 생성자 out_channels=3 인자 제거, 가중치 미존재 시 FileNotFoundError·.onnx 전달 시 ValueError 발생, app.py 경로 교정 및 단위 테스트 4건 통과)
+  - Dental_000#8 ([P1] Dental_000/modules/* 15개 서브모듈 전체 최신 origin/main HEAD Fast-Forward 동기화 및 fix_pipeline_errors.py 삭제)
+  - Dental_Panoramic_Reader#7 ([P1] Dental_Panoramic_Reader/modules/* 11개 서브모듈 전체 최신 origin/main HEAD 동기화 및 requirements.txt Dental_Core@5ff5937 고정)
+  - Dental_000#9 ([P2] docs/development_log.txt 중복 제거, tests/*/__pycache__ 39개·runs/·yolov8m_seg_scratch/·data/*.db 추적 해제, 루트 일회성 스크립트 삭제 및 .gitignore 보강)
+  - Dental_000#10 ([P2] tools/clinical_criteria_tool/ 무인증 0.0.0.0:8088 바인딩 도구 영구 삭제)
+  - Dental_Panoramic_Reader#11 ([P2] out.log·test_out.log·output.txt 추적 해제, .gitignore 보강 및 README.md 중앙 테스트 스위트 안내 추가)
   - 3. 두 리포트 하단에 [ 261019 1955 랩탑 개발팀 ] 점검·종결 Walkthrough 결합 및 총괄 트래킹 이슈(Dental_000#12) 체크리스트 동기화 완료
 - Dental_ 시리즈 18개 저장소 전체 미종결(Unclosed) 태스크 및 우선순위 마스터 보고서 작성 완료:
   - 생성 보고서: reports/261019_2130_Dental_Series_Remaining_Unclosed_Tasks_and_Priority_Master_Report.md
   - 수록 내용: GitHub 원격 오픈 이슈 49건(+총괄 #12), 로컬 미종결 기획·감사 스레드 3건(260917_1635, 260928_0036, 260928_0312), 서브모듈 내부 미체크(- [ ]) 백로그 14건 등 총 66개 미종결 과업을 우선순위(P0 6건, P1 23건, P2 25건, P3 12건) 및 수행 주체(랩탑 개발팀 / 메인 워크스테이션 / 안현찬 총괄)별로 분류하여 정리 완료
 - 랩탑 개발팀 즉시 수행 가능 P0·P1 핵심 과업 6건(5건 완전 종결 + 1건 문서 정정) 이행 및 원격 반영 완료:
   - 1. Dental_Panoramic_Reader#5 ([P0] 가중치 셋업 경로 붕괴 복구, [CLOSED], 커밋 a55b5d5):
-    - 공개 HuggingFace 저장소 실재 파일 전수 대조 기반 weights_manifest.yaml(13개 가중치 엔트리) 신설 및 setup_env.py(ensure_weight_file), app.py, core/interfaces 연동 완료
+  - 공개 HuggingFace 저장소 실재 파일 전수 대조 기반 weights_manifest.yaml(13개 가중치 엔트리) 신설 및 setup_env.py(ensure_weight_file), app.py, core/interfaces 연동 완료
   - 2. Dental_Panoramic_Reader#6 ([P1] 형제 폴더 import 및 FDI=0 침묵 폴백 제거, [CLOSED], 커밋 a55b5d5, 6990f66):
-    - core/interfaces/dental_002.py, 003.py, 004.py, 008.py 및 core/pipeline.py에서 ../../../Dental_00X 참조 전수 제거(잔여 0건), ImportError 침묵 제거, 시퀀스 매칭 실패 시 FDI_UNAVAILABLE 상태 전파 및 서브모듈 Git SHA(imageMetadata.moduleVersions) 기록 구현
+  - core/interfaces/dental_002.py, 003.py, 004.py, 008.py 및 core/pipeline.py에서 ../../../Dental_00X 참조 전수 제거(잔여 0건), ImportError 침묵 제거, 시퀀스 매칭 실패 시 FDI_UNAVAILABLE 상태 전파 및 서브모듈 Git SHA(imageMetadata.moduleVersions) 기록 구현
   - 3. Dental_Panoramic_Reader#9 ([P1] API 게이트웨이 하드닝, [CLOSED], 커밋 a55b5d5):
-    - api_server.py 기본 127.0.0.1 바인딩(ALLOW_EXTERNAL_ACCESS=true 옵션화), ALLOWED_ORIGINS 화이트리스트(allow_credentials=False), 30MB·50M 픽셀 제한(HTTP 413), DPR_API_TOKEN 인증 및 request_id 일반화 에러 응답 적용
+  - api_server.py 기본 127.0.0.1 바인딩(ALLOW_EXTERNAL_ACCESS=true 옵션화), ALLOWED_ORIGINS 화이트리스트(allow_credentials=False), 30MB·50M 픽셀 제한(HTTP 413), DPR_API_TOKEN 인증 및 request_id 일반화 에러 응답 적용
   - 4. Dental_000#2 ([P0] 중앙 테스트 스위트 예외 삼킴 제거 및 CI 서브모듈 체크아웃, [CLOSED]):
-    - .github/workflows/reusable-ci.yml에 submodules: recursive 추가 및 tests/ 내 37개 파일의 try/except Exception: pass 래퍼 전수 제거, 전체 14개 테스트 디렉토리(92개 테스트) 100% 통과(rc=0) 실측 검증
+  - .github/workflows/reusable-ci.yml에 submodules: recursive 추가 및 tests/ 내 37개 파일의 try/except Exception: pass 래퍼 전수 제거, 전체 14개 테스트 디렉토리(92개 테스트) 100% 통과(rc=0) 실측 검증
   - 5. Dental_000#3 ([P1] README 성능표 정합화, [CLOSED]) 및 Dental_000#1 ([P0] 데이터 누수 공시 완료, RTX 5080 재학습 대기, 커밋 Dental_008@cbe529f):
-    - Dental_000/README.md 및 Dental_008/README.md에서 data/yolo_fdi 38장 중복 검증셋 기반 99.2%/98.4% 지표를 공식 폐기하고 무누수 매니페스트(dental_008_dentex_manifest.csv, 507/127) 및 10례 임상 벤치마크(10_cases_quantitative_benchmark.json) 근거로 정합화 완료
+  - Dental_000/README.md 및 Dental_008/README.md에서 data/yolo_fdi 38장 중복 검증셋 기반 99.2%/98.4% 지표를 공식 폐기하고 무누수 매니페스트(dental_008_dentex_manifest.csv, 507/127) 및 10례 임상 벤치마크(10_cases_quantitative_benchmark.json) 근거로 정합화 완료
 - 메인 워크스테이션(RTX5080Desktop-HC, RTX 5080 16GB) 이관 작업 요청서 작성 및 전 리포트 하단 기록 완료:
   - 대상 리포트: reports/261019_2130_Dental_Series_Remaining_Unclosed_Tasks_and_Priority_Master_Report.md, reports/261019_2233_Grok_Dental시리즈_등록이슈_목록_새로.md, reports/261019_1725_Grok_Dental시리즈_기능완성도_점검.md, reports/261019_1725_Grok_Dental시리즈_등록이슈_목록.md
   - 이관 내용: [ 261019 2250 랩탑 개발팀 ] 헤더로 Dental_000#1(Dental_008 무누수 분할 Train 507 / Val 127 YOLOv8m-seg 재학습 및 mAP 재측정) 및 Dental_008#1(무치악 Hard Negative 독립 홀드아웃 분리 평가) 수행 절차·가중치 반영·이슈 종결 요청 명시
 
-## 2026-10-20
-
+2026-10-20
 - 메인 워크스테이션(RTX5080Desktop-HC, Ryzen 9 9900X / RTX 5080 16GB / 64GB RAM) 이관 과업(Dental_000#1 [P0] 및 Dental_008#1 [P1]) 전 과정 수행 및 최종 종결 완료:
   - 1. 무누수 데이터셋 재생성 및 무치악 홀드아웃 분리:
-    - DENTEX 634장 매니페스트(reports/dental_008_dentex_manifest.csv, reports_archive/dental_008_dentex_manifest.csv)의 파일명 중복 0건 및 원본 이미지 SHA-256 바이트 해시 중복 0건(Train 507장 / Val 127장) 교차 검증 및 교정 완료
-    - data/yolo_fdi/ 학습셋 내 검증셋(38장) 중복 파일 38장(이미지·라벨) 물리적 제거(Train 462장 / Val 38장, 교집합 0건), dataset.yaml 상대 경로화(path: .) 및 tests/tests_008/test_evaluate.py에 무누수 검증 단위 테스트(test_leak_free_manifest_and_dataset_disjointness) 추가 완료
-    - Dental_008/prepare_yolo_data.py 및 scripts/prepare_v3_dataset.py를 통해 무치악 Hard Negative 75장(edentulous_images/)을 seed=42 기준 학습용 Train 60장(최종 학습셋 567장)과 독립 검증용 Holdout Val 15장(images/edentulous_val, 교집합 0건)으로 엄격 분리 완료
+  - DENTEX 634장 매니페스트(reports/dental_008_dentex_manifest.csv, reports_archive/dental_008_dentex_manifest.csv)의 파일명 중복 0건 및 원본 이미지 SHA-256 바이트 해시 중복 0건(Train 507장 / Val 127장) 교차 검증 및 교정 완료
+  - data/yolo_fdi/ 학습셋 내 검증셋(38장) 중복 파일 38장(이미지·라벨) 물리적 제거(Train 462장 / Val 38장, 교집합 0건), dataset.yaml 상대 경로화(path: .) 및 tests/tests_008/test_evaluate.py에 무누수 검증 단위 테스트(test_leak_free_manifest_and_dataset_disjointness) 추가 완료
+  - Dental_008/prepare_yolo_data.py 및 scripts/prepare_v3_dataset.py를 통해 무치악 Hard Negative 75장(edentulous_images/)을 seed=42 기준 학습용 Train 60장(최종 학습셋 567장)과 독립 검증용 Holdout Val 15장(images/edentulous_val, 교집합 0건)으로 엄격 분리 완료
   - 2. RTX 5080 기반 YOLOv8m-seg 100 에포크 무누수 재학습 및 정량 평가(reports_archive/dental_008_leak_free_val_metrics.json):
-    - 무누수 검증셋(Val 127장, 치아 인스턴스 3,598개) 실측 지표:
-      - Box: Precision 99.06% (0.9906), Recall 99.06% (0.9906), mAP@0.5 99.15% (0.9915), mAP@0.5:0.95 60.37% (0.6037)
-      - Mask: Precision 97.75% (0.9775), Recall 97.75% (0.9775), mAP@0.5 98.55% (0.9855), mAP@0.5:0.95 55.64% (0.5564)
-      - 추론 속도: 7.1 ms/image (140.8 FPS, RTX 5080 기준)
-    - 독립 무치악 홀드아웃(15장, 미학습 이미지) False Positive 억제 평가(scripts/test_on_edentulous.py):
-      - conf=0.25 및 프로덕션 conf=0.20 모두에서 총 오탐지(FP) 3건(edentulous_0072.jpg 1건, edentulous_0078.jpg 2건), 이미지당 평균 0.20 FP/img, 무오탐 이미지 비율 86.67% (13/15장 완전 억제) 달성
+  - 무누수 검증셋(Val 127장, 치아 인스턴스 3,598개) 실측 지표:
+    - Box: Precision 99.06% (0.9906), Recall 99.06% (0.9906), mAP@0.5 99.15% (0.9915), mAP@0.5:0.95 60.37% (0.6037)
+    - Mask: Precision 97.75% (0.9775), Recall 97.75% (0.9775), mAP@0.5 98.55% (0.9855), mAP@0.5:0.95 55.64% (0.5564)
+    - 추론 속도: 7.1 ms/image (140.8 FPS, RTX 5080 기준)
+  - 독립 무치악 홀드아웃(15장, 미학습 이미지) False Positive 억제 평가(scripts/test_on_edentulous.py):
+    - conf=0.25 및 프로덕션 conf=0.20 모두에서 총 오탐지(FP) 3건(edentulous_0072.jpg 1건, edentulous_0078.jpg 2건), 이미지당 평균 0.20 FP/img, 무오탐 이미지 비율 86.67% (13/15장 완전 억제) 달성
   - 3. 가중치 배포, 매니페스트·README 갱신 및 GitHub 이슈 종결:
-    - 재학습 가중치(Dental_008/weights/best.pt, SHA-256: 88db875aa9ec209731dfce6fa630b4ee4169e3a57b084d585d5aa150263fe9b7)를 로컬 서브모듈 및 Hugging Face Hub(chemahc94/Dental-AI-Models 내 Dental_008_weights_best.pt, Dental_008/yolov8m_best.pt)에 업로드하고 Dental_Panoramic_Reader/weights_manifest.yaml 해시 갱신 완료
-    - Dental_000/README.md 및 Dental_008/README.md의 재학습 대기 문구를 실측 무누수 검증셋 지표 및 독립 무치악 홀드아웃 결과로 교체 완료
-    - GitHub 이슈 Dental_000#1([P0]) 및 Dental_008#1([P1])에 실측 지표를 코멘트로 남긴 후 CLOSED 처리하고 총괄 이슈(Dental_000#12) 체크리스트 갱신 및 이관 리포트 하단 [ 261020 0120 메인 워크스테이션 ] 완료 Walkthrough 기록 완료
+  - 재학습 가중치(Dental_008/weights/best.pt, SHA-256: 88db875aa9ec209731dfce6fa630b4ee4169e3a57b084d585d5aa150263fe9b7)를 로컬 서브모듈 및 Hugging Face Hub(chemahc94/Dental-AI-Models 내 Dental_008_weights_best.pt, Dental_008/yolov8m_best.pt)에 업로드하고 Dental_Panoramic_Reader/weights_manifest.yaml 해시 갱신 완료
+  - Dental_000/README.md 및 Dental_008/README.md의 재학습 대기 문구를 실측 무누수 검증셋 지표 및 독립 무치악 홀드아웃 결과로 교체 완료
+  - GitHub 이슈 Dental_000#1([P0]) 및 Dental_008#1([P1])에 실측 지표를 코멘트로 남긴 후 CLOSED 처리하고 총괄 이슈(Dental_000#12) 체크리스트 갱신 및 이관 리포트 하단 [ 261020 0120 메인 워크스테이션 ] 완료 Walkthrough 기록 완료
 - 랩탑 개발팀(RTX4060Laptop-HC) 원격 가중치 동기화 검증 및 잔여 [P1] 과업 13건(+불확실 치아 수동 보정 UI) 일괄 해결·종결 완료:
   - 1. 원격 동기화 및 신규 Dental_008 가중치 무결성 검증:
-    - Dental_008(7a7d59e), Dental_Panoramic_Reader(6bbda80), Dental_000(da5ed96) 동기화 및 setup_env.ensure_weight_file('dental_008_seg') SHA-256(88db875aa9ec209731dfce6fa630b4ee4169e3a57b084d585d5aa150263fe9b7) 일치 확인, pytest tests_008 및 tests_panoramic_reader 통과 확인
+  - Dental_008(7a7d59e), Dental_Panoramic_Reader(6bbda80), Dental_000(da5ed96) 동기화 및 setup_env.ensure_weight_file('dental_008_seg') SHA-256(88db875aa9ec209731dfce6fa630b4ee4169e3a57b084d585d5aa150263fe9b7) 일치 확인, pytest tests_008 및 tests_panoramic_reader 통과 확인
   - 2. 레포 위생·보안·데이터 정리 [P1] 5건 해결 및 CLOSED:
-    - Dental_000#4 ([P1] Windows 절대경로·UNC 하드코딩 제거): config/paths.py 신설 및 scripts/ 내 7개 스크립트·args.yaml 상대경로/환경변수화, reusable-ci.yml에 check_repo_hygiene.py 경로 검사 단계 추가
-    - Dental_000#5 ([P1] 위험 자동화 스크립트 정리 및 대용량 파일 차단): 무검토 git add . 일괄 푸시 및 구형 마이그레이션 스크립트 8종 삭제, .pre-commit-config.yaml 및 scripts/check_repo_hygiene.py(1024KB 초과 파일 차단) 도입 및 단위 테스트 검증
-    - Dental_006#51 ([P1] Sci-Hub·Chrome 프로필·EZproxy 폴백 제거, 커밋 a487084): scihub_fallback.py 삭제, downloader.py에서 Sci-Hub·실제 Chrome 프로필 연결·EZproxy 도메인 재작성 제거 및 합법 OA API(Unpaywall, PMC OA, Europe PMC) + tempfile.mkdtemp() 격리 프로필로 일원화
-    - Dental_006#52 ([P1] 출판사 학술 논문 PDF 4편 커밋 제거, 커밋 a487084): reference_materials/ 내 출판사 PDF 4편 git rm 제거 및 reference_materials/README.md 공식 서지·DOI 링크로 대체
-    - Dental_007#1 ([P1] Miniforge 85.8MB×2 설치 바이너리 제거, 커밋 e956c47): Miniforge3-Linux-x86_64.sh 2개 및 __pycache__ 추적 해제, .gitignore 보강, LICENSE 및 README 공식 설치 안내 반영
+  - Dental_000#4 ([P1] Windows 절대경로·UNC 하드코딩 제거): config/paths.py 신설 및 scripts/ 내 7개 스크립트·args.yaml 상대경로/환경변수화, reusable-ci.yml에 check_repo_hygiene.py 경로 검사 단계 추가
+  - Dental_000#5 ([P1] 위험 자동화 스크립트 정리 및 대용량 파일 차단): 무검토 git add . 일괄 푸시 및 구형 마이그레이션 스크립트 8종 삭제, .pre-commit-config.yaml 및 scripts/check_repo_hygiene.py(1024KB 초과 파일 차단) 도입 및 단위 테스트 검증
+  - Dental_006#51 ([P1] Sci-Hub·Chrome 프로필·EZproxy 폴백 제거, 커밋 a487084): scihub_fallback.py 삭제, downloader.py에서 Sci-Hub·실제 Chrome 프로필 연결·EZproxy 도메인 재작성 제거 및 합법 OA API(Unpaywall, PMC OA, Europe PMC) + tempfile.mkdtemp() 격리 프로필로 일원화
+  - Dental_006#52 ([P1] 출판사 학술 논문 PDF 4편 커밋 제거, 커밋 a487084): reference_materials/ 내 출판사 PDF 4편 git rm 제거 및 reference_materials/README.md 공식 서지·DOI 링크로 대체
+  - Dental_007#1 ([P1] Miniforge 85.8MB×2 설치 바이너리 제거, 커밋 e956c47): Miniforge3-Linux-x86_64.sh 2개 및 __pycache__ 추적 해제, .gitignore 보강, LICENSE 및 README 공식 설치 안내 반영
   - 3. 라이선스·데이터 출처·문서 정합성 [P1] 5건 해결 및 CLOSED:
-    - Dental_000#6 ([P1] DENTEX CC BY-NC-SA 4.0 라이선스 고지): data/yolo_fdi/README.md 신설(원 출처 Hamamci et al., 2023, CC BY-NC-SA 4.0 비영리·동일조건, 무누수 정제 내역 명시) 및 Dental_000/README.md 라이선스 섹션 추가
-    - Dental_000#7 ([P1] 18개 전 레포 LICENSE 완비 및 HF 모델 카드 정비): 18개 전 저장소 루트 LICENSE 파일 100% 배치(Dental_001~015, Dental_Core, Dental_000, Reader), 시리즈 라이선스 SSOT 매트릭스(reports/261020_0205_Dental_Series_License_and_Data_Provenance_Matrix.md) 신설, Hugging Face 공개 모델 11개(chemahc94/*) 모델 카드 license 메타데이터 및 비영리 연구 조건 일괄 반영
-    - Dental_011#1 ([P1] 연령 추정 독립 Test 분할 및 기준선·연령대별 평가, 커밋 e402262): src/dataset.py 결정론적 3분할(Train 206 / Val 44 / Test 45, seed=42) 및 SHA-256 중복 감사 구현, 독립 Test MAE 0.7755년(95% CI [0.5762, 1.0055]년) vs 중앙값 기준선(1.9333년) 및 연령대별 MAE 산출·문서화
-    - Dental_013#1 ([P1] 수복물 분류·분할 이중 아키텍처 문서화 및 테스트 추가, 커밋 5771031): README.md에 단독 치아 ROI 분류기(EfficientNet-B0)와 통합 리더 31클래스 YOLOv8-seg ONNX(4대 임상 범주 매핑, 10례 검출률 100%) 명세 및 tests/test_predict.py 추가
-    - Dental_014#2 ([P1] BRAR 1,104명 데이터셋 출처·접근 제한 및 환자 단위 분할, 커밋 4026730): scripts/prepare_brar_dataset.py에 환자 그룹 인식(extract_patient_group_key) 80/20 분할 및 교차 누수 단언 구현, README.md에 비공개 접근 제한 및 비영리 연구 조건 명시
+  - Dental_000#6 ([P1] DENTEX CC BY-NC-SA 4.0 라이선스 고지): data/yolo_fdi/README.md 신설(원 출처 Hamamci et al., 2023, CC BY-NC-SA 4.0 비영리·동일조건, 무누수 정제 내역 명시) 및 Dental_000/README.md 라이선스 섹션 추가
+  - Dental_000#7 ([P1] 18개 전 레포 LICENSE 완비 및 HF 모델 카드 정비): 18개 전 저장소 루트 LICENSE 파일 100% 배치(Dental_001~015, Dental_Core, Dental_000, Reader), 시리즈 라이선스 SSOT 매트릭스(reports/261020_0205_Dental_Series_License_and_Data_Provenance_Matrix.md) 신설, Hugging Face 공개 모델 11개(chemahc94/*) 모델 카드 license 메타데이터 및 비영리 연구 조건 일괄 반영
+  - Dental_011#1 ([P1] 연령 추정 독립 Test 분할 및 기준선·연령대별 평가, 커밋 e402262): src/dataset.py 결정론적 3분할(Train 206 / Val 44 / Test 45, seed=42) 및 SHA-256 중복 감사 구현, 독립 Test MAE 0.7755년(95% CI [0.5762, 1.0055]년) vs 중앙값 기준선(1.9333년) 및 연령대별 MAE 산출·문서화
+  - Dental_013#1 ([P1] 수복물 분류·분할 이중 아키텍처 문서화 및 테스트 추가, 커밋 5771031): README.md에 단독 치아 ROI 분류기(EfficientNet-B0)와 통합 리더 31클래스 YOLOv8-seg ONNX(4대 임상 범주 매핑, 10례 검출률 100%) 명세 및 tests/test_predict.py 추가
+  - Dental_014#2 ([P1] BRAR 1,104명 데이터셋 출처·접근 제한 및 환자 단위 분할, 커밋 4026730): scripts/prepare_brar_dataset.py에 환자 그룹 인식(extract_patient_group_key) 80/20 분할 및 교차 누수 단언 구현, README.md에 비공개 접근 제한 및 비영리 연구 조건 명시
   - 4. 코드·UI 정비 [P1] 3건(+UI 보정 1건) 해결 및 CLOSED:
-    - Dental_Core#2 ([P1] DICOM I/O·로깅·디바이스 유틸 구현 및 v0.1.0 태그, 커밋 c2684c3): dental_core/io/dicom.py(apply_windowing, strip_phi_tags, load_medical_image), utils/logging.py, utils/device.py 구현, 단위 테스트 10건 및 CI 추가, v0.1.0 태그 발행
-    - Dental_003#5 ([P1] FastAPI 서버 dummy_yolo.pt 제거 및 생성자 복구, 커밋 b508973): api/main.py 실가중치 지연 로드(미존재 시 HTTP 503), PerioLandmarkPredictor 초기화 시그니처 교정 및 measurement_method: geometric_heuristic_30_40_rule 응답 명시
-    - Dental_015#1 ([P1] 초기 목업 분리, 상시 DEMO 배너, SHA-256 해시 게이트 및 불확실 치아 수동 보정 UI, 커밋 5d44a5f): 초기 빈 리포트 시작, 데모 로드 시 상시 DEMO DATA 경고 배너, 업로드 파일 SHA-256 불일치 시 오버레이 차단 게이트, uncertain 치아 클릭 시 FDI 번호(11~48) 수동 보정(clinicianCorrected) 인터랙션 구현 및 빌드 검증
+  - Dental_Core#2 ([P1] DICOM I/O·로깅·디바이스 유틸 구현 및 v0.1.0 태그, 커밋 c2684c3): dental_core/io/dicom.py(apply_windowing, strip_phi_tags, load_medical_image), utils/logging.py, utils/device.py 구현, 단위 테스트 10건 및 CI 추가, v0.1.0 태그 발행
+  - Dental_003#5 ([P1] FastAPI 서버 dummy_yolo.pt 제거 및 생성자 복구, 커밋 b508973): api/main.py 실가중치 지연 로드(미존재 시 HTTP 503), PerioLandmarkPredictor 초기화 시그니처 교정 및 measurement_method: geometric_heuristic_30_40_rule 응답 명시
+  - Dental_015#1 ([P1] 초기 목업 분리, 상시 DEMO 배너, SHA-256 해시 게이트 및 불확실 치아 수동 보정 UI, 커밋 5d44a5f): 초기 빈 리포트 시작, 데모 로드 시 상시 DEMO DATA 경고 배너, 업로드 파일 SHA-256 불일치 시 오버레이 차단 게이트, uncertain 치아 클릭 시 FDI 번호(11~48) 수동 보정(clinicianCorrected) 인터랙션 구현 및 빌드 검증
   - 5. Dental_Panoramic_Reader(a203b3e) 및 Dental_000 내 전 서브모듈 최신 커밋 동기화 완료 (시리즈 전체 [P0] 오픈 이슈 0건, [P1] 오픈 이슈 0건 달성)
 
-## 2026-10-21
-
+2026-10-21
 - Dental_ 시리즈 18개 전 저장소 잔여 [P2] 오픈 이슈 24건 및 총괄 트래킹 이슈(Dental_000#12) 전수 해결·검증·원격 푸시 및 GitHub 이슈 종결(100% CLOSED) 완결:
   - 1. Dental_001 ~ Dental_005 [P2] 9건 해결 및 CLOSED:
-    - Dental_001#8, #9, #10 (커밋 eeb9258): LICENSE 원저작자(Muhammad Anwaar Khalid) 및 확장 기여자(Hyunchan An) 병기, Aariz_CVM_Clean 637장 CC BY 4.0 귀속·변경 고지, tools/inference.py 포함 전 진입점 디바이스 선택(DEVICE 환경변수 -> cuda -> mps -> cpu) 통일, MRE 3.8612 px(512x512 기준) 환산 근거 및 CVM 45.05% 보조 연구 지표 성격 명시
-    - Dental_002#6, #7 (커밋 8dd49ca, 986593a): data.yaml·data_refined.yaml 상대경로(path: data/refined) 치환, CUDA/CPU 자동 폴백, 폰트 폴백 보강, .coverage·logs/test_results.txt(비 UTF-8)·archive/scripts 제거 및 pytest 수집 정상화
-    - Dental_003#6, #7 (커밋 d380709): pano_boneloss.egg-info 제거, 학습·추론 스크립트 CUDA/CPU 동적 감지, README.md 내 Zenodo 4457648(CC BY 4.0)·Roboflow·UFBA-UESC 데이터셋 출처 구분 및 Prototype(STANDBY) 배지 반영
-    - Dental_004#10, #11 (커밋 ab2aad9): 스톡 워터마크 샘플(samples/ex_pano04.jpeg) 제거 및 samples/README.md 신설, Tufts·Kaggle·DENTEX 이용 조건 명시, SSIM 0.8413(문헌 0.85~0.95 소폭 하회) 객관적 기술 및 development_log.txt 미체크 2건 완료([x]) 반영
-    - Dental_005#4 (커밋 a60cf69): src/alphadent.egg-info·predictions.json(4.5MB)·Kaggle 대회 파생 라벨 211개 추적 해제, CUDA/CPU 자동 폴백, AlphaDent 대회 규정 안내 추가
+  - Dental_001#8, #9, #10 (커밋 eeb9258): LICENSE 원저작자(Muhammad Anwaar Khalid) 및 확장 기여자(Hyunchan An) 병기, Aariz_CVM_Clean 637장 CC BY 4.0 귀속·변경 고지, tools/inference.py 포함 전 진입점 디바이스 선택(DEVICE 환경변수 -> cuda -> mps -> cpu) 통일, MRE 3.8612 px(512x512 기준) 환산 근거 및 CVM 45.05% 보조 연구 지표 성격 명시
+  - Dental_002#6, #7 (커밋 8dd49ca, 986593a): data.yaml·data_refined.yaml 상대경로(path: data/refined) 치환, CUDA/CPU 자동 폴백, 폰트 폴백 보강, .coverage·logs/test_results.txt(비 UTF-8)·archive/scripts 제거 및 pytest 수집 정상화
+  - Dental_003#6, #7 (커밋 d380709): pano_boneloss.egg-info 제거, 학습·추론 스크립트 CUDA/CPU 동적 감지, README.md 내 Zenodo 4457648(CC BY 4.0)·Roboflow·UFBA-UESC 데이터셋 출처 구분 및 Prototype(STANDBY) 배지 반영
+  - Dental_004#10, #11 (커밋 ab2aad9): 스톡 워터마크 샘플(samples/ex_pano04.jpeg) 제거 및 samples/README.md 신설, Tufts·Kaggle·DENTEX 이용 조건 명시, SSIM 0.8413(문헌 0.85~0.95 소폭 하회) 객관적 기술 및 development_log.txt 미체크 2건 완료([x]) 반영
+  - Dental_005#4 (커밋 a60cf69): src/alphadent.egg-info·predictions.json(4.5MB)·Kaggle 대회 파생 라벨 211개 추적 해제, CUDA/CPU 자동 폴백, AlphaDent 대회 규정 안내 추가
   - 2. Dental_006 ~ Dental_015 [P2] 10건 해결 및 CLOSED:
-    - Dental_006#54, #55 (커밋 700b9af): data/*.db·asreview tmp·로그·pyc·export_onnx.py·egg-info 제거, README 배지를 Backend-Ollama / GROBID로 정정, Development_log 미체크 4건을 기종결 이슈(#11, #12, #21, #22, #27)와 정합화([x])
-    - Dental_007#3 (커밋 30813e5): gemini.md·memo.txt·export_onnx.py 제거, 상아질(18.6 GPa)/법랑질(84.1 GPa)/티타늄(110 GPa) 단축 압축 및 Euler-Bernoulli 캔틸레버 닫힌 해 검증 모듈(src/analytical_validation.py) 및 단위 테스트(12 passed, 오차 < 1%) 신설, README 개요·STL·물성 출처 문서화
-    - Dental_008#2, #3 (커밋 d4fcaf7): 루트 임시 가중치 삭제, edentulous_images/Thumbs.db 및 egg-info 제거, edentulous_images/README.md 신설, generate_vis.py·train_yolo_finetune.py·clean_images*.py·args.yaml 내 C:/Users 및 UNC 하드코딩 경로 전수 제거, CUDA/CPU 자동 폴백 적용
-    - Dental_009#1 (커밋 fd9279d): pyc·export_onnx.py 제거, 루트 test_visualization.py를 scripts/run_visualization_demo.py로 이동하여 pytest 오수집 차단, Pell & Gregory Level A/B/C 및 TheGem 골드 4개 사랑니(#18, #28, #38, #48) 검증 단위 테스트(tests/test_analyzer.py) 추가
-    - Dental_010#1 (커밋 5824b39): export_onnx.py·pyc 제거, src/detector.py에 최소 8치 가드·동적 정중선·인접치 갭 비율 휴리스틱(verify_missing_teeth) 통합, 단위 테스트(tests/test_detector.py, 4 passed) 추가 및 Rule-Based Heuristic 배지 정정
-    - Dental_011#2 (커밋 d1563f6): 중복 아카이브(data/dental_xray_dataset.zip.zip 14.8MB)·중복 폴더(data/dataset ++/ 296장)·pyc 제거 및 README 데이터 추적 정책 정합화
-    - Dental_012#1 (커밋 67e297a): data.yaml 상대경로화(path: data/yolo_dataset_augmented), train.py CUDA/CPU 폴백, 단독 추론 및 다근치 치근단 Apex 매칭 모듈(src/inference.py)과 단위 테스트(tests/test_inference.py, 3 passed) 신설
-    - Dental_015#2 (커밋 90c64da): Node 내장 테스트 러너 기반 리포트 스키마·FDI 범위·SHA-256 해시 검증 테스트(tests/reportValidation.test.mjs, npm test 2 passed) 및 CI 연동, README·저장소 설명·라이선스 완비
+  - Dental_006#54, #55 (커밋 700b9af): data/*.db·asreview tmp·로그·pyc·export_onnx.py·egg-info 제거, README 배지를 Backend-Ollama / GROBID로 정정, Development_log 미체크 4건을 기종결 이슈(#11, #12, #21, #22, #27)와 정합화([x])
+  - Dental_007#3 (커밋 30813e5): gemini.md·memo.txt·export_onnx.py 제거, 상아질(18.6 GPa)/법랑질(84.1 GPa)/티타늄(110 GPa) 단축 압축 및 Euler-Bernoulli 캔틸레버 닫힌 해 검증 모듈(src/analytical_validation.py) 및 단위 테스트(12 passed, 오차 < 1%) 신설, README 개요·STL·물성 출처 문서화
+  - Dental_008#2, #3 (커밋 d4fcaf7): 루트 임시 가중치 삭제, edentulous_images/Thumbs.db 및 egg-info 제거, edentulous_images/README.md 신설, generate_vis.py·train_yolo_finetune.py·clean_images*.py·args.yaml 내 C:/Users 및 UNC 하드코딩 경로 전수 제거, CUDA/CPU 자동 폴백 적용
+  - Dental_009#1 (커밋 fd9279d): pyc·export_onnx.py 제거, 루트 test_visualization.py를 scripts/run_visualization_demo.py로 이동하여 pytest 오수집 차단, Pell & Gregory Level A/B/C 및 TheGem 골드 4개 사랑니(#18, #28, #38, #48) 검증 단위 테스트(tests/test_analyzer.py) 추가
+  - Dental_010#1 (커밋 5824b39): export_onnx.py·pyc 제거, src/detector.py에 최소 8치 가드·동적 정중선·인접치 갭 비율 휴리스틱(verify_missing_teeth) 통합, 단위 테스트(tests/test_detector.py, 4 passed) 추가 및 Rule-Based Heuristic 배지 정정
+  - Dental_011#2 (커밋 d1563f6): 중복 아카이브(data/dental_xray_dataset.zip.zip 14.8MB)·중복 폴더(data/dataset ++/ 296장)·pyc 제거 및 README 데이터 추적 정책 정합화
+  - Dental_012#1 (커밋 67e297a): data.yaml 상대경로화(path: data/yolo_dataset_augmented), train.py CUDA/CPU 폴백, 단독 추론 및 다근치 치근단 Apex 매칭 모듈(src/inference.py)과 단위 테스트(tests/test_inference.py, 3 passed) 신설
+  - Dental_015#2 (커밋 90c64da): Node 내장 테스트 러너 기반 리포트 스키마·FDI 범위·SHA-256 해시 검증 테스트(tests/reportValidation.test.mjs, npm test 2 passed) 및 CI 연동, README·저장소 설명·라이선스 완비
   - 3. Dental_Core, Dental_Panoramic_Reader, Dental_000 [P2] 5건 및 총괄 트래킹 이슈(#12) 해결·종결:
-    - Dental_Core#3 (커밋 0202d4b): scripts/tools/gitleaks.exe(7.7MB)·egg-info·__pycache__·구형 일괄 패치 스크립트(scripts/01~03) 전수 제거 및 pytest 10건 통과 확인
-    - Dental_Panoramic_Reader#8, #10 (커밋 bdd196e): app.py BoneLossPredictorWrapper 'cuda' 하드코딩을 Dental_Core get_device()로 교체, core/interfaces/dental_002.py의 중복 apply_clahe를 Dental_Core 호출로 일원화, 전용 Streamlit 포트 8500(.streamlit/config.toml) 설정 및 진입점 아키텍처 문서화
-    - Dental_000#11 및 #12: README.md 거버넌스·릴리스 판정 섹션(v1.0 QA Verified / UAT Ready) 신설 및 미종결 기획·감사 문서 3건(260917_1635, 260928_0036, 260928_0312) 공식 종결([CLOSED]) 선언, 18개 전 저장소 서브모듈 최신화 후 잔여 오픈 이슈 0건 달성
+  - Dental_Core#3 (커밋 0202d4b): scripts/tools/gitleaks.exe(7.7MB)·egg-info·__pycache__·구형 일괄 패치 스크립트(scripts/01~03) 전수 제거 및 pytest 10건 통과 확인
+  - Dental_Panoramic_Reader#8, #10 (커밋 bdd196e): app.py BoneLossPredictorWrapper 'cuda' 하드코딩을 Dental_Core get_device()로 교체, core/interfaces/dental_002.py의 중복 apply_clahe를 Dental_Core 호출로 일원화, 전용 Streamlit 포트 8500(.streamlit/config.toml) 설정 및 진입점 아키텍처 문서화
+  - Dental_000#11 및 #12: README.md 거버넌스·릴리스 판정 섹션(v1.0 QA Verified / UAT Ready) 신설 및 미종결 기획·감사 문서 3건(260917_1635, 260928_0036, 260928_0312) 공식 종결([CLOSED]) 선언, 18개 전 저장소 서브모듈 최신화 후 잔여 오픈 이슈 0건 달성
 - 랩탑 개발팀 자율 고도화 과업 4건 완수 및 18개 전 저장소 방치 기획서·작업지시서 전수 점검·종결([CLOSED]) 완료:
   - 1. Dental_014 하악 피질골 형태학적 특징 융합(Morphological Fusion) 및 XAI 히트맵 오버레이 실구현 완료:
-    - src/dental_014/inference.py에 MorphologyAnalyzer 실연동(_extract_cortical_mask), ViT 확률 + 기하학적 선험 확률 앙상블(_fuse_morphology_and_logits), Spatial Attention + 입력 그라디언트 Saliency 결합 히트맵(_compute_xai_heatmap) 구현 및 app.py 4-튜플 언패킹 버그 수정, 단위 테스트(tests/test_inference_and_xai.py) 추가 완료
+  - src/dental_014/inference.py에 MorphologyAnalyzer 실연동(_extract_cortical_mask), ViT 확률 + 기하학적 선험 확률 앙상블(_fuse_morphology_and_logits), Spatial Attention + 입력 그라디언트 Saliency 결합 히트맵(_compute_xai_heatmap) 구현 및 app.py 4-튜플 언패킹 버그 수정, 단위 테스트(tests/test_inference_and_xai.py) 추가 완료
   - 2. Grok 감사 리포트 상단 요약표 상태 일괄 갱신:
-    - reports/261019_2233_Grok_Dental시리즈_등록이슈_목록_새로.md 상단 집계(열린 이슈 0건) 및 1장 우선순위 표 전 항목을 해결(닫힘)으로 갱신하고, reports/261019_1725_Grok_Dental시리즈_기능완성도_점검.md 상단에 전수 종결([CLOSED]) 안내 반영
+  - reports/261019_2233_Grok_Dental시리즈_등록이슈_목록_새로.md 상단 집계(열린 이슈 0건) 및 1장 우선순위 표 전 항목을 해결(닫힘)으로 갱신하고, reports/261019_1725_Grok_Dental시리즈_기능완성도_점검.md 상단에 전수 종결([CLOSED]) 안내 반영
   - 3. Dental_Panoramic_Reader 내 Dental_Core 심화 통합:
-    - core/model_manager.py(get_onnx_providers), core/pipeline.py(get_logger), modules/osteoporosis_predictor.py(morphology_features 전파) 연동 및 pytest 검증 완료
+  - core/model_manager.py(get_onnx_providers), core/pipeline.py(get_logger), modules/osteoporosis_predictor.py(morphology_features 전파) 연동 및 pytest 검증 완료
   - 4. Dental_012 2-Stage 치근단(Apex) 고해상도 패치 크롭 및 전역 역투영 파이프라인 선제 구축:
-    - src/inference.py에 extract_apex_roi_patches, project_patch_bbox_to_global, PeriapicalPredictor.predict_two_stage_apex_patches 및 단위 테스트(tests/test_inference.py) 추가 완료
+  - src/inference.py에 extract_apex_roi_patches, project_patch_bbox_to_global, PeriapicalPredictor.predict_two_stage_apex_patches 및 단위 테스트(tests/test_inference.py) 추가 완료
   - 5. 18개 전 저장소 방치 기획서·작업서 전수 스캔 및 기구현 문서 10건 공식 종결([CLOSED]) 처리:
-    - Dental_000/plans_replies_walkthrough/(260721_0353, 260825_1006, 260903_1656, 260903_2310, 260904_0145), Dental_000/reports/260903_1645_Code reviews.md, Dental_001/docs/(implementation_plan.md, 250928_2336_memo.txt), Dental_006/(docs/PROJECT_PLAN.md Phase 2, reference_materials/memo_251013_1044_planning.txt) 하단에 공식 종결([CLOSED]) 선언 추가 완료
+  - Dental_000/plans_replies_walkthrough/(260721_0353, 260825_1006, 260903_1656, 260903_2310, 260904_0145), Dental_000/reports/260903_1645_Code reviews.md, Dental_001/docs/(implementation_plan.md, 250928_2336_memo.txt), Dental_006/(docs/PROJECT_PLAN.md Phase 2, reference_materials/memo_251013_1044_planning.txt) 하단에 공식 종결([CLOSED]) 선언 추가 완료
 
+2026-10-25
+- 18개 전 저장소 완결 기획서·리포트·아카이브 문서(`[CLOSED]` / `[PASS]` 완결) 전수 점검 및 공식 종결 명시 완료.
+- 18개 전 저장소 `development_log.txt` 단일 표준 양식(`YYYY-MM-DD` 날짜 헤더 및 하이픈 불릿, 내용 무생략 100% 보존, 클린 UTF-8) 통일 완료.
