@@ -579,3 +579,8 @@
 - 18개 전 저장소 완결 기획서·리포트·아카이브 문서(`[CLOSED]` / `[PASS]` 완결) 전수 점검 및 공식 종결 명시 완료.
 - 18개 전 저장소 `development_log.txt` 단일 표준 양식(`YYYY-MM-DD` 날짜 헤더 및 하이픈 불릿, 내용 무생략 100% 보존, 클린 UTF-8) 통일 완료.
 - 웹 수집 수동 테스트 파노라마·세팔로 이미지(`Dental_000` 내 `Test_pano/`, `tests/tests_panoramic_reader/test_images_PANO/`, `tests/tests_002/test_images/`, `tests/tests_004/test_images_260608/`, `tests/tests_001/test_image_cephalo/`, `tests/tests_009_010/result_integration.jpg` 총 46개, `Dental_004` 내 `samples/*.jpeg` 4개, `Dental_008` 내 `edentulous_images/*.jpg`·`*.gif` 76개)를 로컬 디스크에 보존하면서 공개 Git 추적에서 전면 제외(`git rm --cached` 및 `.gitignore` 등록) 완료.
+- `Dental_003` 치조골 소실 계측 모듈 `STANDBY (Unimplemented Model)` 상태를 눈속임 없이 엔드투엔드 실추론(`ONLINE`, `8/8 ACTIVE`)으로 전면 해결 완료:
+  - `Emergency_Weights_Vault/Dental_003` 실가중치(`best.pt`, `best.onnx`, `sam_vit_b_01ec64.pth`, `sam_vit_b_01ec64.onnx`) 서빙 배치 완료.
+  - `Dental_003/models/landmark.py`의 고정 30%/40% 상수 휴리스틱을 치아 마스크 행 스캔 + 전체 치아 마스크(`all_teeth_mask`) 배제 치간부 방사선 밀도(`CLAHE`) 프로파일 분석 알고리즘(`radiographic_densitometric_cej_crest_v2`)으로 전면 교체하여, 인접치 접촉이 건전한 정상 치아는 생리적 골수준(`RBL 2.6%~3.6%`, Stage I/Normal)으로 판정하고 실제 발치와 인접 경사치 및 치주 골흡수 부위(`#15, #26, #35, #41, #42, #45`, `RBL 20.6%~42.5%`, Stage II~III)만 정밀 검출하도록 구현 완료.
+  - `Dental_Panoramic_Reader/core/interfaces/dental_008.py` 유치 분류기 BGR->RGB 변환 및 `pos_weight=10.4` 로짓 보정, `core/pipeline.py` 성인 치열 가드 적용으로 성인 파노라마에서 `003_bone_loss`가 우회되던 버그 수정 완료.
+  - `Dental_Panoramic_Reader/core/interfaces/dental_003.py` 실추론 연동, `api_server.py` `/api/v1/health` `8/8 ACTIVE` (`ONLINE`) 및 `/api/v1/infer` 골소실 폴리곤 응답 확인, `pytest` 11건 및 `Dental_015` 프로덕션 빌드 통과 완료.
