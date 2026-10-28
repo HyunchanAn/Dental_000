@@ -64,6 +64,8 @@ jobs:
         fi
 
     - name: Run Tests
+      env:
+        PYTEST_ADDOPTS: "--import-mode=importlib"
       run: |
         ${{ inputs.test_command }}
 

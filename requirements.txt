@@ -21,4 +21,11 @@ tqdm
 streamlit
 Pillow
 ruff
+meshio
+gmsh
+trimesh
+scipy
+huggingface_hub
+uvicorn
+python-multipart
 git+https://github.com/HyunchanAn/Dental_Core.git@main
