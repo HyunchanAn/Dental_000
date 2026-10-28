@@ -10,6 +10,10 @@ httpx
 torch
 torchvision
 scikit-learn
+scikit-image
+onnxruntime
+pydicom
+openai
 aiohttp
 requests
 matplotlib
@@ -17,3 +21,4 @@ tqdm
 streamlit
 Pillow
 ruff
+git+https://github.com/HyunchanAn/Dental_Core.git@main

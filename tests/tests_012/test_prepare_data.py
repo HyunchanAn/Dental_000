@@ -3,12 +3,17 @@ import sys
 import pytest
 
 CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
-DENTAL_012_SRC = os.path.abspath(os.path.join(CURRENT_DIR, "../../../Dental_012/src"))
-READER_ROOT = os.path.abspath(os.path.join(CURRENT_DIR, "../../../Dental_Panoramic_Reader"))
+ROOT_DIR = os.path.abspath(os.path.join(CURRENT_DIR, "..", ".."))
 
-for p in (DENTAL_012_SRC, READER_ROOT):
-    if p not in sys.path:
-        sys.path.insert(0, p)
+for cand in (
+    os.path.join(ROOT_DIR, "modules", "Dental_012", "src"),
+    os.path.abspath(os.path.join(ROOT_DIR, "..", "Dental_012", "src")),
+    os.path.abspath(os.path.join(ROOT_DIR, "..", "src")),
+    os.path.join(ROOT_DIR, "modules", "Dental_Panoramic_Reader"),
+    os.path.abspath(os.path.join(ROOT_DIR, "..", "Dental_Panoramic_Reader")),
+):
+    if os.path.isdir(cand) and cand not in sys.path:
+        sys.path.insert(0, cand)
 
 from prepare_data import convert_to_yolo
 from modules.periapical_predictor import PeriapicalPredictorWrapper
@@ -52,4 +57,3 @@ def test_periapical_apex_anchoring_and_anatomical_guard():
     assert lesions[0]["isolated_anatomical_suspicion"] is False
     assert lesions[1]["fdi"] is None
     assert lesions[1]["isolated_anatomical_suspicion"] is True
-

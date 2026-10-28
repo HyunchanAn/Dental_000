@@ -5,12 +5,22 @@ import torch
 import pytest
 
 CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
-DENTAL_014_SRC = os.path.abspath(os.path.join(CURRENT_DIR, "../../../Dental_014/src"))
-READER_ROOT = os.path.abspath(os.path.join(CURRENT_DIR, "../../../Dental_Panoramic_Reader"))
+ROOT_DIR = os.path.abspath(os.path.join(CURRENT_DIR, "..", ".."))
 
-for p in (DENTAL_014_SRC, READER_ROOT):
-    if p not in sys.path:
-        sys.path.insert(0, p)
+READER_CANDIDATES = [
+    os.path.join(ROOT_DIR, "modules", "Dental_Panoramic_Reader"),
+    os.path.abspath(os.path.join(ROOT_DIR, "..", "Dental_Panoramic_Reader")),
+]
+READER_ROOT = next((c for c in READER_CANDIDATES if os.path.isdir(c)), READER_CANDIDATES[0])
+
+for cand in (
+    os.path.join(ROOT_DIR, "modules", "Dental_014", "src"),
+    os.path.abspath(os.path.join(ROOT_DIR, "..", "Dental_014", "src")),
+    os.path.abspath(os.path.join(ROOT_DIR, "..", "src")),
+    READER_ROOT,
+):
+    if os.path.isdir(cand) and cand not in sys.path:
+        sys.path.insert(0, cand)
 
 from dental_014.multitask_model import OsteoMAENet
 from dental_014.inference import OsteoporosisInferencer
@@ -41,8 +51,13 @@ def test_osteoporosis_inferencer_validation(tmp_path):
         OsteoporosisInferencer(weight_path=str(dummy_onnx), device="cpu")
 
 
-def test_osteoporosis_predictor_wrapper_contract():
+def test_osteoporosis_predictor_wrapper_contract(tmp_path):
     model_path = os.path.join(READER_ROOT, "modules", "Dental_014", "models", "best.pt")
+    if not os.path.exists(model_path):
+        tmp_weight = tmp_path / "best.pt"
+        torch.save(OsteoMAENet(in_channels=3, num_classes=3).state_dict(), tmp_weight)
+        model_path = str(tmp_weight)
+
     wrapper = OsteoporosisPredictorWrapper(weight_path=model_path, device="cpu")
     dummy_pano = np.full((600, 1200, 3), 128, dtype=np.uint8)
     result = wrapper.predict(dummy_pano)
@@ -62,5 +77,3 @@ def test_osteoporosis_wrapper_not_available_when_missing():
     assert result["status"] == "NOT_AVAILABLE"
     assert result["score"] is None
     assert result["category"] is None
-
-
