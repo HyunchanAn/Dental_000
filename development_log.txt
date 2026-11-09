@@ -618,3 +618,10 @@
   - `Dental_000#16`: `10_cases_quantitative_benchmark.json` 경로를 `reports_archive/`(및 `reports/`)로 정렬하고 `Dental_000/README.md` 및 `Dental_013/README.md`에 `수복물 보유 4례 기준 증례 단위(Any-hit) 검출률 4/4 (100.0%), 개별 객체 단위 Recall 34.4% ~ 48.1%` 및 `Dental_Core` 간접 서브모듈 구조를 명시.
 - 사용자 확인 및 외부 설정이 필요한 3건(`Dental_000#15`, `Dental_Panoramic_Reader#15`, `Dental_000#13`)은 코드 측 선행 조치(`app.py` 및 `Dental_015/src/App.tsx` 비상업 연구용 고지 배너 추가 등) 완료 후 `plans_replies_walkthrough/261025_1810_Codex_Review_and_Series_Remediation_Plan.md`에 이관 내역을 기록하고 보류 처리.
 - 18개 전 저장소(`Dental_000` ~ `Dental_015`, `Dental_Core`, `Dental_Panoramic_Reader`)에 `reports`, `plans_replies_walkthrough`, `reports_archive`, `plans_replies_walkthrough_archive` 4폴더 체계를 구축하고, 문서 성격 재분류 및 `[CLOSED]` 명시 후 2주 이상 경과(`<= 2026-10-25`)한 문서들의 아카이브 이관 완료.
+
+
+2026-11-10
+- Google Drive (`내 드라이브 > Github`, `ID: 12D7jNyLaX1mgWEqf31RI-wncXRC9tbxc`) 전수 조사 및 Hugging Face Hub 단일 가중치 SSOT 기준 정리 완료:
+  - `Dental_001/README.md` 및 `Dental_005/README.md` 내 레거시 Google Drive 가중치 링크를 Hugging Face Hub (`chemahc94/Dental_001_Model`, `chemahc94/Dental_005_Model`)로 일원화.
+  - Google Drive 내 `Dental_001`, `Dental_002`, `Dental_004` 폴더에 설정되어 있던 외부 공개(`anyoneWithLink`) 권한을 전면 해제하여 소유자 전용(비공개)으로 전환.
+  - Hugging Face Hub에 이미 100% 중복 업로드된 가중치 폴더·파일(`Dental_001`, `Dental_002/models`, `Dental_003/models`, `Dental_004`, `Aariz` 내 에포크 체크포인트 및 중간 실험 `.pth` 파일들) 및 `Dental_003/.env`, `Dental_006` 빈 폴더를 휴지통(`trash`)으로 이동하고, `.gitignore` 대상인 원천 학습 데이터셋(`Dental_002/data`, `Dental_003/data`, `3DFaceNorm/training_folder_Extraoral`, `Aariz` 원천 데이터셋 및 실험 로그)만 Google Drive에 보존.
