@@ -73,7 +73,12 @@ def run_evaluation(data_dir=None):
         else:
             verified_models[mod_id] = {"status": "MISSING", "path": onnx_path}
 
-    benchmark_json_path = os.path.join(root_dir, "plans_replies_walkthrough", "10_cases_quantitative_benchmark.json")
+    candidate_paths = [
+        os.path.join(root_dir, "reports_archive", "10_cases_quantitative_benchmark.json"),
+        os.path.join(root_dir, "reports", "10_cases_quantitative_benchmark.json"),
+        os.path.join(root_dir, "plans_replies_walkthrough", "10_cases_quantitative_benchmark.json"),
+    ]
+    benchmark_json_path = next((p for p in candidate_paths if os.path.exists(p)), candidate_paths[0])
     if not os.path.exists(benchmark_json_path):
         raise FileNotFoundError(f"Empirical benchmark source not found: {benchmark_json_path}")
 
@@ -105,4 +110,3 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     run_evaluation(args.data_dir)
-

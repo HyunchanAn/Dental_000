@@ -589,9 +589,32 @@
 - 전체 열린 GitHub 이슈 24건(총괄 1건 + 세부 23건)의 우선순위(Track 1~6) 및 통합 해결 실행 계획서를 `plans_replies_walkthrough/261025_1810_Codex_Review_and_Series_Remediation_Plan.md`로 작성 완료.
 
 2026-10-28
-- 18개 전 저장소 GitHub Actions `failure` 워크플로우 11건 전수 감사(`gh run list` / `gh run view --log-failed`) 및 원격 CI 복구:
-  - `Dental_Core#5` 해결: `dental_core/core/onnx_exporter.py` 최상단 `import torch` 제거 후 원격 CI(`Run ID: 40640099917`) 통과 및 이슈 CLOSED.
-  - `Dental_001#11` 해결: `.github/workflows/publish-ghcr.yml` YAML 들여쓰기 구문 오류 교정 및 `Dockerfile` 최적화 후 원격 GHCR 빌드·배포 워크플로우(`Run ID: 40640379764`) 통과 및 이슈 CLOSED.
-  - `Dental_Panoramic_Reader#12` 해결: `modules/registry.py` 들여쓰기 오류(`IndentationError`) 교정 및 `requirements.txt` `Dental_Core.git@main` 정렬 후 원격 CI(`Run ID: 40640607461`) 통과 및 이슈 CLOSED.
-  - `Dental_000#14` 및 중앙 재사용 파이프라인(`reusable-ci.yml`, `test.yml`) 복구: 시스템 라이브러리(`libglu1-mesa` 및 X11 공유 라이브러리), `requirements.txt`(`onnxruntime`, `scikit-image`, `pydicom`, `openai`, `Dental_Core`) 보완, `tests_006`, `tests_009_010`, `tests_011`, `tests_012`, `tests_013`, `tests_014` 다중 레이아웃 경로 해석 및 가중치 독립 테스트 보강 완료.
-  - `Dental_007#4`, `Dental_009#2`, `Dental_010#2`, `Dental_011#3`, `Dental_012#2`, `Dental_013#2`, `Dental_014#4` 의존성(`requirements.txt`) 및 CI 워크플로우(`.github/workflows/ci.yml`) 일괄 복구 및 원격 Actions 검증 진행.
+- 18개 전 저장소 GitHub Actions `failure` 워크플로우 11건 전수 감사(`gh run list` / `gh run view --log-failed`) 및 원격 CI 복구·이슈 11건 전수 CLOSED 완료:
+  - `Dental_Core#5` (커밋 `b68897a`): `dental_core/core/onnx_exporter.py` 최상단 `import torch` 제거 후 원격 CI(`Run ID: 40640099917`, `completed / success`) 통과 및 이슈 CLOSED.
+  - `Dental_001#11` (커밋 `e040f2b`): `.github/workflows/publish-ghcr.yml` YAML 들여쓰기 구문 오류 교정 및 `Dockerfile` CPU wheel 인덱스 적용 후 원격 GHCR 배포(`Run ID: 40640379764`) 및 중앙 CI(`Run ID: 40640378982`) 통과 및 이슈 CLOSED.
+  - `Dental_Panoramic_Reader#12` (커밋 `69cb508`, `2f21abf`): `modules/registry.py` 들여쓰기 오류(`IndentationError`) 교정 및 `requirements.txt` `Dental_Core.git@main` 정렬 후 원격 CI(`Run ID: 40640607461`, `40642324311`, `completed / success`) 통과 및 이슈 CLOSED.
+  - `Dental_006` (커밋 `4ccda2c`): `src/llm/client.py` 최상단 `import openai`를 선택적 로드 구조로 전환하여 원격 CI(`Run ID: 40640388081`, `completed / success`) 통과 확인.
+  - `Dental_007#4` (커밋 `be5d30f`): Ubuntu 러너용 OpenGL GLU 및 X11 공유 라이브러리(`libglu1-mesa`, `libxrender1`, `libxcursor1`, `libxft2`, `libxinerama1`) 추가 후 원격 CI(`Run ID: 40641357614`, `completed / success`) 통과 및 이슈 CLOSED.
+  - `Dental_009#2` (커밋 `63a17f0`): `tests_009_010` 최상단 `ultralytics` 모듈 스킵(`exit code 5`) 제거 및 기하학 분석기 테스트 상시 실행 적용 후 원격 CI(`Run ID: 40641364074`, `completed / success`) 통과 및 이슈 CLOSED.
+  - `Dental_010#2` (커밋 `e2a4657`): `requirements.txt`(`numpy`, `opencv-python-headless`) 보완 및 결손치 휴리스틱 통합 테스트 구성 후 원격 CI(`Run ID: 40641370063`, `completed / success`) 통과 및 이슈 CLOSED.
+  - `Dental_011#3` (커밋 `33512da`): `requirements.txt`(`torch`, `torchvision`, `numpy`, `Pillow`, `scikit-learn`) 보완 및 다중 레이아웃 경로 탐색 적용 후 원격 CI(`Run ID: 40641374874`, `completed / success`) 통과 및 이슈 CLOSED.
+  - `Dental_012#2` (커밋 `058854e`): `requirements.txt` 런타임 패키지 추가 및 `tests_012/test_prepare_data.py` 경로 탐색 수정 후 원격 CI(`Run ID: 40641384868`, `completed / success`) 통과 및 이슈 CLOSED.
+  - `Dental_013#2` (커밋 `54ce9e4`, `e6faf36`): `requirements.txt`(`onnxruntime`, `torch`, `torchvision`) 추가, 가중치 독립 테스트 보강 및 `pytest --import-mode=importlib` 적용 후 원격 CI(`Run ID: 40642167226`, `completed / success`) 통과 및 이슈 CLOSED.
+  - `Dental_014#4` (커밋 `3ed22ca`): `requirements.txt`에 `scikit-image`·`tqdm` 추가 및 CI용 임시 체크포인트 폴백 구성 후 원격 CI(`Run ID: 40641399342`, `completed / success`) 통과 및 이슈 CLOSED.
+  - `Dental_000#14` (커밋 `c4ef561`, `7ca67b9`): 중앙 재사용 워크플로우(`reusable-ci.yml`), 루트 테스트 워크플로우(`test.yml`), 루트 `requirements.txt` 정비 및 전 서브모듈 포인터 동기화 후 원격 `Central QA Pipeline`(`Run ID: 40642357018`, `completed / success`) 통과 및 이슈 CLOSED.
+
+
+2026-11-09
+- 코드적으로 해결 가능한 잔여 GitHub 이슈 10건(`Dental_002#8`, `Dental_003#8`, `Dental_011#4`, `Dental_Panoramic_Reader#13`, `#14`, `#16`, `#17`, `#18`, `#19`, `Dental_000#16`) 전수 해결, 단위·통합 테스트 검증, 원격 CI 확인 및 이슈 CLOSED 완료:
+  - `Dental_002#8`: `src/dentex_caries/explain.py` 인메모리 `np.ndarray` 입력 지원 추가, `tests/test_caries_smoke.py` 신설 및 `.github/workflows/ci.yml` 연동 (`13 passed`).
+  - `Dental_003#8`: `tests/test_boneloss_smoke.py` 신설(기하 계측, 병기 판정, 치간 방사선 밀도 랜드마크, FastAPI `/predict/pano` 스모크 검증) 및 `.github/workflows/ci.yml` 연동 (`9 passed`).
+  - `Dental_011#4`: `tests/test_age_smoke.py` 신설(`AgeRegressionModel` 순전파, 부트스트랩 CI, SHA-256 중복 검사 및 3-Way 분할 검증) 및 `.github/workflows/ci.yml` 연동 (`5 passed`).
+  - `Dental_Panoramic_Reader#14`: `api_server.py` `_verify_api_token`을 Fail-Closed(`DPR_API_TOKEN` 미설정 또는 토큰 누락·불일치 시 `HTTP 401`)로 전환하고 `DPR_CORS_ORIGINS`/`ALLOWED_ORIGINS`에서 와일드카드(`*`)를 배제.
+  - `Dental_Panoramic_Reader#16`: `api_server.py` 및 `app.py`에서 임시 디스크 파일 저장을 전면 제거하고 `io.BytesIO` 기반 인메모리 이미지/DICOM 디코딩(`decode_uploaded_radiograph_in_memory`) 및 픽셀 추출 전 DICOM PHI 태그 인메모리 익명화(`strip_phi_tags_in_memory`) 강제 적용.
+  - `Dental_Panoramic_Reader#17`: `/api/v1/health`에서 9개 모듈(`008, 002, 012, 010, 003, 009, 013, 014, 011`)의 `configured`, `loaded`, `ready` 불리언 상태를 분리하고 최상위 상태를 `HEALTHY` / `DEGRADED` / `UNHEALTHY`로 동적 산출하도록 개선.
+  - `Dental_Panoramic_Reader#18`: `format_to_ssot_report`에서 고정 `"PATIENT-DEMO"`를 `ANON-<sha256[:12]>`로 교체하고 `moduleExecutionStatus`(`executed`/`skipped`/`unavailable` 및 `reason`)를 리포트에 기록하며 일부 모듈 미실행 시 정상 판정 오인 방지 문구 적용.
+  - `Dental_Panoramic_Reader#19`: `core/pipeline.py`, `api_server.py`, `Dental_015`(`finalReport.ts`, `mockFinalReport.ts`, `App.tsx`) 전반에 `Dental_011` 치아 연령 추정(`ageEstimation`) 연동 완료.
+  - `Dental_Panoramic_Reader#13`: `tests/test_api_and_pipeline.py` 신설 및 `.github/workflows/ci.yml` `pytest` 실행 단계 연동 완료 (`10 passed`).
+  - `Dental_000#16`: `10_cases_quantitative_benchmark.json` 경로를 `reports_archive/`(및 `reports/`)로 정렬하고 `Dental_000/README.md` 및 `Dental_013/README.md`에 `수복물 보유 4례 기준 증례 단위(Any-hit) 검출률 4/4 (100.0%), 개별 객체 단위 Recall 34.4% ~ 48.1%` 및 `Dental_Core` 간접 서브모듈 구조를 명시.
+- 사용자 확인 및 외부 설정이 필요한 3건(`Dental_000#15`, `Dental_Panoramic_Reader#15`, `Dental_000#13`)은 코드 측 선행 조치(`app.py` 및 `Dental_015/src/App.tsx` 비상업 연구용 고지 배너 추가 등) 완료 후 `plans_replies_walkthrough/261025_1810_Codex_Review_and_Series_Remediation_Plan.md`에 이관 내역을 기록하고 보류 처리.
+- 18개 전 저장소(`Dental_000` ~ `Dental_015`, `Dental_Core`, `Dental_Panoramic_Reader`)에 `reports`, `plans_replies_walkthrough`, `reports_archive`, `plans_replies_walkthrough_archive` 4폴더 체계를 구축하고, 문서 성격 재분류 및 `[CLOSED]` 명시 후 2주 이상 경과(`<= 2026-10-25`)한 문서들의 아카이브 이관 완료.
