@@ -659,3 +659,7 @@
 2026-11-24
 - `Dental_000#15` (`비상업 연구용 고지 및 공개 화면 샘플 정리`) 사용자 최종 검토 승인에 따라 종결(`CLOSED`) 완료 (전체 18개 저장소 잔여 오픈 이슈 3건: `Dental_000#17`, `Dental_000#13`, `Dental_Panoramic_Reader#15`).
 - 추후 `Dental_Panoramic_Reader#15` 비공개 Hugging Face Space 실배포 재개 시 수행할 `Write` 토큰 신규 발급 주의사항, 로컬 보안 주입 방식 및 4단계 자동 배포 체크리스트를 `plans_replies_walkthrough/261025_1810_Codex_Review_and_Series_Remediation_Plan.md` 및 `Dental_Panoramic_Reader/plans_replies_walkthrough/261124_1624_HF_Private_Space_Token_and_Deploy_Runbook.md`에 기록 완료.
+- Git LFS 저장소 용량(10 GB 도달) 대응 및 재발 방지 조치 완료:
+  - `Dental_001` (`580.7 MB`), `Dental_005` (`432.0 MB`), `Dental_004` (`65.1 MB`)의 과거 커밋 히스토리에 잔존하던 폐기 체크포인트·로그 이미지 LFS 오브젝트(총 `1,077.8 MB`) 및 `.gitattributes`를 `git-filter-repo`로 완전 소거하고 `force-push` 완료 (`Dental_004` 미리보기 PNG 2종은 일반 Git blob으로 전환, 실사용 3D 메쉬가 있는 `Dental_007` `95.0 MB`는 유지).
+  - `Dental_002`, `Dental_003`, `Dental_012`, `Dental_014`의 `.gitattributes` 내 `filter=lfs` 규칙을 전면 제거하여 실수로 LFS 바이너리가 재적재되지 않도록 차단.
+  - `scripts/check_repo_hygiene.py`에 `.gitattributes` 내 신규 `filter=lfs` 규칙(실사용 3D 메쉬 `*.h5`/`*.glb`/`*.stl` 제외) 자동 차단 검사 추가 및 `Dental_000`·`Dental_Panoramic_Reader` 전 서브모듈 포인터 동기화 완료.

@@ -32,6 +32,14 @@ def check_tracked_paths(repo_root: pathlib.Path) -> List[str]:
     for rel_path in tracked_files:
         if rel_path.startswith("modules/") or rel_path == "scripts/check_repo_hygiene.py":
             continue
+        if rel_path == ".gitattributes" or rel_path.endswith("/.gitattributes"):
+            full_attr = repo_root / rel_path
+            if full_attr.is_file():
+                for idx, line in enumerate(full_attr.read_text(encoding="utf-8-sig", errors="ignore").splitlines(), start=1):
+                    s = line.strip()
+                    if "filter=lfs" in s and not any(allowed in s for allowed in ("*.h5 ", "*.glb ", "*.stl ")):
+                        violations.append(f"{rel_path}:{idx}: Disallowed Git LFS rule (use Hugging Face Hub / .gitignore instead): {s}")
+            continue
         if not rel_path.endswith((".py", ".yaml", ".yml")):
             continue
         full_path = repo_root / rel_path
