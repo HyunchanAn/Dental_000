@@ -167,3 +167,46 @@ Codex 검토 의견(`261025 2309`) 및 오너 지침(`/goal 해결할 수 있는
 | [Dental_000#15](https://github.com/HyunchanAn/Dental_000/issues/15) | 사용자 확인 | `Dental_Panoramic_Reader/app.py` 및 `Dental_015/src/App.tsx` 비상업 연구용(`CC BY-NC 4.0`) 상시 배너 탑재 완료 | 웹 UI 공개 화면에 노출할 샘플 이미지 최종 육안 확인 및 승인 |
 | [Dental_Panoramic_Reader#15](https://github.com/HyunchanAn/Dental_Panoramic_Reader/issues/15) | 외부 설정 (맨 마지막) | `Dockerfile`, `requirements.txt`, 인메모리 추론, Fail-Closed 토큰 인증 및 단위 테스트 완비 | Hugging Face Private Space 생성 및 외부 Secret(`HF_TOKEN`, `DPR_API_TOKEN`) 설정 |
 | [Dental_000#13](https://github.com/HyunchanAn/Dental_000/issues/13) | 총괄 트래킹 | 산하 23개 세부 이슈 중 코드 해결 가능 21건(CI 11건 + 기능/테스트/문서 10건) `CLOSED` 완료 | 위 2건(`Dental_000#15`, `Dental_Panoramic_Reader#15`) 마감 시 최종 종결 |
+
+
+---
+
+# [ 261124 1624 랩탑 개발팀 ] (P0~P2 이슈 완결 반영 및 Dental_Panoramic_Reader#15 Hugging Face 토큰·비공개 Space 배포 런북)
+
+## 1. 최신 이슈 정리 현황 업데이트 (`2026-11-23` ~ `2026-11-24`)
+
+- [추가 종결 완료]:
+  - `Dental_000#15` (`CLOSED`): 웹 UI(`Dental_015`, `Dental_Panoramic_Reader`) 비상업 연구용 고지 배너, 18개 전 저장소 `README.md` 데이터 출처 명시, 저작권 우려 이미지(`Test_pano/`, `Dental_004/samples/*.jpeg`) 공개 Git 추적 제외(`0건`) 최종 검토 완료 및 종결.
+  - 파노라마 신규 로드맵 및 독립 문헌고찰 실행 이슈 `11건` 전원 구현·원격 CI 통과 및 `CLOSED`: `Dental_Core#6`, `Dental_008#4`, `Dental_015#3`, `Dental_013#3`, `Dental_002#9`, `Dental_010#3`, `Dental_012#3`, `Dental_003#9`, `Dental_Panoramic_Reader#20`, `Dental_006#57`, `Dental_006#58`.
+  - 하위 저장소 중복 `[FREEZE]` 마커 `7건`(`Dental_001#12`, `004#12`, `005#5`, `007#5`, `009#3`, `011#5`, `014#5`)은 중앙 트래커 `Dental_000#17`로 통폐합 후 종결.
+- [현재 시리즈 전체 잔여 오픈 이슈 (`3건`)]:
+  1. `Dental_000#17`: `[FREEZE/총괄] Dental 시리즈 로드맵 완료 현황 및 동결 스코프 중앙 트래커`
+  2. `Dental_000#13`: `[P2][총괄] Dental 시리즈 CI 복구·테스트·Reader 웹 공개 준비` (`Dental_Panoramic_Reader#15` 완료 시 자동 종결 대상)
+  3. `Dental_Panoramic_Reader#15`: `[FREEZE/승인대기][배포] 웹 조회용 배포 준비 (의존성·Dockerfile·비공개 Space)`
+
+---
+
+## 2. `Dental_Panoramic_Reader#15` 재개 시 Hugging Face 토큰 준비 및 배포 절차
+
+코드 측 배포 자산(`requirements-cpu.txt`, 서브모듈 자동 초기화 `Dockerfile`, 시작 시 가중치 자동 다운로드 `docker_entrypoint.sh`, 배포 워크플로우 `.github/workflows/deploy-hf-space.yml`)은 모두 구현 및 원격 Docker 빌드 검증까지 완료된 상태이다. 추후 외부 비공개 웹 배포를 실행할 때 아래 순서만 수행한다.
+
+### 2.1 Hugging Face Access Token 신규 발급 주의사항
+1. Hugging Face 토큰 설정 페이지(https://huggingface.co/settings/tokens)에 접속한다.
+2. [기존 토큰 Refresh 금지]: 이미 생성되어 다른 모듈(예: `Pano_BoneLoss_Measurement` 등)에서 사용 중인 기존 `WRITE` 토큰은 원문 재조회가 불가능하며, `Invalidate and refresh`를 누르면 기존 연동 환경이 끊어진다.
+3. 반드시 우측 상단 `[+ Create new token]`을 클릭하여 `Write` 권한을 가진 전용 신규 토큰(예: `Dental_Panoramic_Reader_Space`)을 새로 생성하고 원문을 복사한다.
+
+### 2.2 로컬 보안 주입 방법 (로그 노출 차단 원칙)
+- 토큰 원문을 채팅창이나 버전 관리 파일에 직접 입력하지 않는다.
+- 배포 진행 시 아래 두 가지 방식 중 하나로 로컬(`C:\Users\chema\.env` 및 로컬 HF 인증 캐시)에만 안전하게 등록한다:
+  1. [로컬 일회성 웹 입력 폼 방식 (권장)]: `127.0.0.1:8765` 로컬 전용 임시 입력 페이지를 띄워 비밀번호 필드에 토큰을 붙여넣고 검증(`whoami` `write` 권한 확인) 후 저장 즉시 서버 자동 종료.
+  2. [터미널 마스킹 입력 방식 (대체)]:
+     ```powershell
+     $sec = Read-Host "Enter HF_TOKEN (typing hidden)" -AsSecureString; $plain = [Runtime.InteropServices.Marshal]::PtrToStringAuto([Runtime.InteropServices.Marshal]::SecureStringToBSTR($sec)); Add-Content -Path "$HOME\.env" -Value "HF_TOKEN=$plain"; Write-Output "Saved."
+     ```
+
+### 2.3 토큰 등록 직후 일괄 수행할 자동 배포 체크리스트 (4단계)
+로컬에 `HF_TOKEN`이 준비되면 아래 4단계를 순차 실행하여 배포를 마감한다:
+- [ ] 1단계 — [비공개 Docker Space 생성]: `huggingface_hub.HfApi.create_repo(repo_id="<hf_username>/dental-panoramic-reader", repo_type="space", space_sdk="docker", private=True, exist_ok=True)` 호출로 비공개 Space 생성.
+- [ ] 2단계 — [HF Space 런타임 시크릿 설정]: 생성된 Space의 Variables/Secrets에 게이트웨이 Fail-Closed 인증용 난수 토큰 `DPR_API_TOKEN` 및 허용 프론트엔드 출처 `DPR_CORS_ORIGINS` 등록 (`add_space_secret`).
+- [ ] 3단계 — [GitHub Actions 시크릿 등록]: `HyunchanAn/Dental_Panoramic_Reader` 저장소 GitHub Secrets에 `HF_TOKEN` 및 `HF_SPACE_REPO`(`<hf_username>/dental-panoramic-reader`) 등록 (`gh secret set`).
+- [ ] 4단계 — [원격 배포 실행 및 이슈 종결]: `.github/workflows/deploy-hf-space.yml` 워크플로우(`gh workflow run`)를 실행하여 비공개 Space 컨테이너 기동 및 `/api/v1/health` 응답을 확인한 뒤 `Dental_Panoramic_Reader#15`와 상위 총괄 `Dental_000#13`을 일괄 `CLOSED` 처리한다.
