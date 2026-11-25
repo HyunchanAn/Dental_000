@@ -58,7 +58,7 @@ jobs:
     - name: Check Repository Hygiene & Portable Paths
       run: |
         if [ -f Dental_000/scripts/check_repo_hygiene.py ]; then
-          python Dental_000/scripts/check_repo_hygiene.py --root Dental_000
+          python Dental_000/scripts/check_repo_hygiene.py --root .
         elif [ -f scripts/check_repo_hygiene.py ]; then
           python scripts/check_repo_hygiene.py --root .
         fi

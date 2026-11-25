@@ -663,3 +663,20 @@
   - `Dental_001` (`580.7 MB`), `Dental_005` (`432.0 MB`), `Dental_004` (`65.1 MB`)의 과거 커밋 히스토리에 잔존하던 폐기 체크포인트·로그 이미지 LFS 오브젝트(총 `1,077.8 MB`) 및 `.gitattributes`를 `git-filter-repo`로 완전 소거하고 `force-push` 완료 (`Dental_004` 미리보기 PNG 2종은 일반 Git blob으로 전환, 실사용 3D 메쉬가 있는 `Dental_007` `95.0 MB`는 유지).
   - `Dental_002`, `Dental_003`, `Dental_012`, `Dental_014`의 `.gitattributes` 내 `filter=lfs` 규칙을 전면 제거하여 실수로 LFS 바이너리가 재적재되지 않도록 차단.
   - `scripts/check_repo_hygiene.py`에 `.gitattributes` 내 신규 `filter=lfs` 규칙(실사용 3D 메쉬 `*.h5`/`*.glb`/`*.stl` 제외) 자동 차단 검사 추가 및 `Dental_000`·`Dental_Panoramic_Reader` 전 서브모듈 포인터 동기화 완료.
+
+
+2026-11-25
+- 18개 저장소(`Dental_000`~`Dental_015`, `Dental_Core`, `Dental_Panoramic_Reader`) GitHub Open 이슈 14건 전수 정리, 하드코딩·휴리스틱 전수조사, 치과의사·오너 10대 의사결정 확정 및 계획서 9건(`Dental_000` Umbrella 계획서 + 8개 개별 모듈 계획서) 리뉴얼 완료 (`Dental_000#13`은 `#18`/`Reader#15`로 이관 후 종결).
+- Track 1~4 전 트랙 코드 수정 및 로컬 단위 테스트·빌드 검증 완료:
+  - `Dental_Core#7`: `PanoramaHiTLDocument` 라운드트립 확장 필드(`impacted_teeth`, `lesionSubtype`, `isolatedAnatomicalSuspicion`, `rawClass`, `rct_associated`) 보존, `geometry.py` `map_lesions_to_fdi` `"confidence"` 키 및 빈 입력 방어, `README.md` (`v0.2.0`) 현행화 (`16 passed`).
+  - `Dental_006#59`: `Dental_000/reports_archive/generator.py`를 `Dental_006/src/report/`로 복구, `GROBID_URL`(8070)/`OLLAMA_BASE_URL` 환경변수 통일, 배치 스크립트 경로 및 `README.md` 현행화 (`3 passed`).
+  - `Dental_009#4`: `src/analyzer.py` Winter's Classification 좌우 사분면 부호 분리(Q1/Q3 vs Q2/Q4) 및 맹출 깊이 `0.10 * adj_h` 비율 정규화, 대칭/해상도 불변 테스트 추가 (`4 passed`).
+  - `Dental_010#4`: `src/detector.py` 중심간 거리 비율 기준 `r_gap_threshold=1.55` 통일(교정 공간 폐쇄 오탐 방지), 중복 FDI 덮어쓰기 방어, `README.md` 정합화 (`5 passed`).
+  - `Dental_012#4`: `src/inference.py` 상·하악 판별(`quadrant in (1,2,5,6)`), BGR/LAB 컬러 스페이스 통일, 유치·과잉치 `REVIEW_REQUIRED` 분류, `clinician_corrected` 중복 적재 방지, `export_onnx.py`/`README.md` 정비 (`4 passed`).
+  - `Dental_013#4`: `src/tooth_crop_bridge.py` 중복 적재 및 복수 과잉치 덮어쓰기 방지, 상대 임포트 안전화, `export_onnx.py` EfficientNet-B0 7-class 정합화, `README.md` 현행화 (`4 passed`).
+  - `Dental_Panoramic_Reader#21`/`#22`: 9개 모듈 인터페이스·`weights_manifest.yaml` 단절 수정(`002/003/004/008/009/010/011/013/014`), 유틸리티 스크립트 3종 수정, `api_server.py` 응답 스키마(`details`, `clinicalStatus`, `toothNumber` `int`, `Dental_004` 실행 상태, CORS `3000`/`7860`, DICOM PHI 제거 후 `previewImageDataUrl` PNG/base64 반환) 및 `README.md` 전면 현행화 (`8 passed`).
+  - `Dental_015#4`: `hitlLogic.mjs` `overrideSha256` 무결성 우회 제거, `toggleToothRestorationTag` 동기화, `App.tsx` 초기 `ONLINE` 하드코딩 제거·DICOM 서버 프리뷰 렌더링·매복치(`Impacted`) 오돈토그램·`hba1cPercent` 입력 추가, `PanoramaCanvasViewer.tsx` `0.45`/`0.25` 컷오프 통일 및 `< 0.25` 저신뢰도 숨김, `client.ts` `GET /api/v1/hitl/{document_id}` 추가, `README.md` 현행화 (`3 passed`, `tsc && vite build` 통과).
+  - `Dental_000#19`: `reusable-ci.yml` 검사 루트(`.`) 수정, `run_e2e_tests.py`/`run_e2e_inference.py`/`hitl_fdi_labeler.py` 경로·`None` 방어, `reports_archive/generator.py` 정리, `Dental_005/dataset.yaml` 및 `Dental_014/scripts/prepare_brar_dataset.py` Windows 절대경로 제거, `export_onnx.py` 네임스페이스(`chemahc94/...`) 및 잔여 `README.md` 배지 일괄 정합화 (`check_repo_hygiene.py` 0 violations).
+- 다음 인계 사항:
+  - 변경된 저장소별 Git 커밋·원격 푸시 및 `Dental_Core v0.2.0` 태그 발행, 원격 GitHub Actions CI 통과 확인 후 해당 GitHub 이슈(`Core#7`, `006#59`, `009#4`, `010#4`, `012#4`, `013#4`, `Reader#21/#22`, `015#4`, `000#19/#18`) 종결 처리.
+  - `Dental_Panoramic_Reader#15` 비공개 Hugging Face Space 실배포는 원격 CI 및 최종 확인 이후 `261124_1624` 런북 절차에 따라 진행.

@@ -104,7 +104,7 @@ def load_yolo_model():
     candidate_paths = [
         os.path.abspath(os.path.join(BASE_DIR, "..", "Dental_008", "weights", "yolov8m_best.pt")),
         os.path.abspath(os.path.join(BASE_DIR, "..", "Dental_Panoramic_Reader", "modules", "Dental_008", "models", "yolov8m_best.pt")),
-        os.path.abspath(os.path.join(BASE_DIR, "submodules", "Dental_008", "weights", "yolov8m_best.pt")),
+        os.path.abspath(os.path.join(BASE_DIR, "modules", "Dental_008", "weights", "yolov8m_best.pt")),
     ]
     for model_path in candidate_paths:
         if os.path.exists(model_path):
