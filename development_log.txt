@@ -680,3 +680,4 @@
 - 다음 인계 사항:
   - 변경된 저장소별 Git 커밋·원격 푸시 및 `Dental_Core v0.2.0` 태그 발행, 원격 GitHub Actions CI 통과 확인 후 해당 GitHub 이슈(`Core#7`, `006#59`, `009#4`, `010#4`, `012#4`, `013#4`, `Reader#21/#22`, `015#4`, `000#19/#18`) 종결 처리.
   - `Dental_Panoramic_Reader#15` 비공개 Hugging Face Space 실배포는 원격 CI 및 최종 확인 이후 `261124_1624` 런북 절차에 따라 진행.
+- 2026-11-26(목) 20:00 예정 체어사이드 UAT·좌표계 검증 및 `Dental_Panoramic_Reader#15` 배포 결정 계획서 작성 완료 (`Dental_015/plans_replies_walkthrough/261125_1709_Chairside_UAT_and_Coordinate_Verification_Plan.md`).
